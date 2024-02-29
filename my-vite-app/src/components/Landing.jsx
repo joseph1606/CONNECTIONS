@@ -11,44 +11,31 @@ import { defineTheme } from "../lib/defineTheme";
 import useKeyPress from "../hooks/useKeyPress";
 import Footer from "./Footer";
 import OutputWindow from "./OutputWindow";
-import CustomInput from "./CustomInput";
+//import CustomInput from "./CustomInput";
 import OutputDetails from "./OutputDetails";
 import ThemeDropdown from "./ThemeDropdown";
 import LanguagesDropdown from "./LanguagesDropdown";
 
-const javascriptDefault = `/**
-* Problem: Binary Search: Search a sorted array for a target value.
-*/
+const javascriptDefault = `
+#Welcome to New_Connections!
+#Example code is provided below
 
-// Time: O(log n)
-const binarySearch = (arr, target) => {
- return binarySearchHelper(arr, target, 0, arr.length - 1);
-};
+#Create a new graph with "Purtilo" as the central Node, with a edge depth of 3
+new_graph = Graph("Purtilo", depth=3)
 
-const binarySearchHelper = (arr, target, start, end) => {
- if (start > end) {
-   return false;
- }
- let mid = Math.floor((start + end) / 2);
- if (arr[mid] === target) {
-   return mid;
- }
- if (arr[mid] < target) {
-   return binarySearchHelper(arr, target, mid + 1, end);
- }
- if (arr[mid] > target) {
-   return binarySearchHelper(arr, target, start, mid - 1);
- }
-};
+#Add a Node connection with "Larry Herman"
+new_graph.addNode("Larry Herman")
 
-const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const target = 5;
-console.log(binarySearch(arr, target));
+#Visualize your graph
+new_graph.vis()
+
+#Don't forget to save your connections!
+save(new_graph)
 `;
 
 const Landing = () => {
   const [code, setCode] = useState(javascriptDefault);
-  const [customInput, setCustomInput] = useState("");
+  //const [customInput, setCustomInput] = useState("");
   const [outputDetails, setOutputDetails] = useState(null);
   const [processing, setProcessing] = useState(null);
   const [theme, setTheme] = useState("cobalt");
@@ -86,7 +73,7 @@ const Landing = () => {
       language_id: language.id,
       // encode source code in base64
       source_code: btoa(code),
-      stdin: btoa(customInput),
+      //stdin: btoa(customInput),
     };
     const options = {
       method: "POST",
@@ -265,10 +252,10 @@ const Landing = () => {
         <div className="right-container flex flex-shrink-0 w-[30%] flex-col">
           <OutputWindow outputDetails={outputDetails} />
           <div className="flex flex-col items-end">
-            <CustomInput
+          {/*  <CustomInput
               customInput={customInput}
               setCustomInput={setCustomInput}
-            />
+  /> */}
             <button
               onClick={handleCompile}
               disabled={!code}
