@@ -1,4 +1,5 @@
-import React from "react";
+//We are not currently including this component in our implementation 
+/*import React from "react";
 import { classnames } from "../utils/general";
 
 const CustomInput = ({ customInput, setCustomInput }) => {
@@ -19,3 +20,4 @@ const CustomInput = ({ customInput, setCustomInput }) => {
 };
 
 export default CustomInput;
+*/
