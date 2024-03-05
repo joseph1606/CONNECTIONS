@@ -1,3 +1,4 @@
+#test
 class Info:
     """Class for a graph"""
 
