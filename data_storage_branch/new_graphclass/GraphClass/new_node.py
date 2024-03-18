@@ -8,6 +8,7 @@ class Node:
         relationships: dict = None,
     ):
 
+        self.id = id(self)
         self.name = name
         # relationships will be a dictionary of relationship: relationship value pairings
         self.relationships = relationships

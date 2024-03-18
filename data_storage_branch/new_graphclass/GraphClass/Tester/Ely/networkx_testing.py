@@ -1,18 +1,30 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
+
+class Person:
+    def __init__(self, name):
+        self.name = name
+        self.id = id(self)
+
+
+class Edge:
+    def __init__(self, type):
+        self.type = type
+        self.id = id(self)
+
+
+p = Person("ely")
+d = Person("Mom")
+e = Edge("parent/child")
 G = nx.MultiGraph()
-G.add_node(1)
 
-G.add_edge(1, 2)
-e = (2, 3)
-G.add_edge(*e)
+G.add_node(p.id, name=p.name)
+G.add_node(d.id, name=d.name)
+G.add_edge(p.id, d.id, label=e.type)
 
-G.add_edge(1, 2)
-G.add_node("spam")  # adds node "spam"
 G.add_nodes_from("spam")  # adds 4 nodes: 's', 'p', 'a', 'm'
-G.add_edge(3, "m")
-G.add_edge("spam", "s")
 
-nx.draw(G, with_labels=True, font_weight="bold")
+
+nx.draw(G, with_labels=True, labels={p.id: p.name}, font_weight="bold")
 plt.show()
