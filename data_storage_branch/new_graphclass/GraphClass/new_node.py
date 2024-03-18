@@ -2,54 +2,21 @@ import json
 
 
 class Node:
-    def __init__(self, IDs, name: str):
-        """Constructor that sets an author's information. The ID is a tuple of all database ids
-        (when one is added, the programmer should add another id to the tuple in the data collection.
-        If a database is not used, like when searching just patents, a -1 should be entered. For example,
-        (semantic scholar ID, patent ID, -1) if you have 3 databases and are only using the first two).
-        """
-        if len(IDs) != IDConstants.NUM_DATABASES:
-            raise Exception("Need a placeholder ID for each database not used!")
+    def __init__(
+        self,
+        name: str,
+        relationships: dict = None,
+    ):
 
-        self.IDs = IDs  # Note that the ID is tuple of ids from each database
         self.name = name
-        # confidence interval that an id for a database is accurate
-        self.confidenceInterval = (100, 50)
+        # relationships will be a dictionary of relationship: relationship value pairings
+        self.relationships = relationships
 
+    def getName(self):
+        return self.name
 
-class Author(Node):
-    def __init__(self, IDs, name: str, works: list):
-        super().__init__(IDs, name)
+    def rel_exist(self, relation):
+        return True if relation in self.relationships else False
 
-        # ordered works by date
-        self.works = works
-        self.works = sorted(works, key=lambda x: x.date)
-
-
-class Mentor(Node):
-    def __init__(self, IDs, name: str, students: list, mentors: list = [], institutions: str):
-        # mentor can have a mentor/mentors, if this is the case we make a list of the mentors
-        super().__init_(IDs, name)
-
-        self.students = students
-        self.students = sorted(students, lambda x: x.name)
-
-        self.mentors = sorted(mentors, lambda x: x.name)
-        self.institutions = institutions.split(",")
-
-
-class Student(Node):
-    def __init__(self, IDs, name: str, mentor: str, institutions: str):
-        super().__init__(IDs, name)
-
-        self.mentor = [mentor]
-        self.institutions = institutions.split(",")
-
-
-class Misc(Node):
-    def __init__(self, IDs, name: str, connections: str):
-        super().__init__(IDs, name)
-
-        # whatever relationship is created with whoever
-        # assumes string of name(s) with comma delimeter
-        self.connections = connections.split(",")
+    def getRel(self, relation):
+        return self.relationships[relation] if self.rel_exist(relation) else None
