@@ -1,8 +1,8 @@
 import "./App.css";
-import Landing from "./components/Landing";
+import REPL from "./components/REPL.js";
 
 function App() {
-  return <Landing />;
+  return <REPL />;
 }
 
 export default App;

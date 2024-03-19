@@ -1,0 +1,18 @@
+p {
+    display: inline;
+    /* Display the header inline */
+}
+
+/* Style the form */
+form {
+    display: inline-block;
+    /* Display the form as a block element, allowing it to appear inline with the header */
+    vertical-align: top;
+    /* Align the form with the top of the header */
+}
+
+input {
+    margin-left: 2vw;
+    width: 50vw;
+    border: 0;
+}
