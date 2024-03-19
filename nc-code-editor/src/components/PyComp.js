@@ -6,7 +6,7 @@ const MyComponent = () => {
     const [htmlContent, setHtmlContent] = useState('');
     useEffect(() => {
         // Fetch HTML content from API
-        fetch('/api/your_endpoint')
+        fetch('http://127.0.0.1:5000/compile')
             .then(response = response.json())
             .then(data => {
                 // Sanitize HTML content
