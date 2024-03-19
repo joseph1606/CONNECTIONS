@@ -19,7 +19,7 @@ d = Person("Mom")
 e = Edge("parent/child")
 G = nx.MultiGraph()
 
-G.add_node(p.id, name=p.name)
+# G.add_node(p.id, name=p.name)
 G.add_node(d.id, name=d.name)
 G.add_edge(p.id, d.id, label=e.type)
 

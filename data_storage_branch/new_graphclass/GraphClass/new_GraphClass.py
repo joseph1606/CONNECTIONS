@@ -15,17 +15,10 @@ import json
 from libdatasources.SemanticScholar import SemanticScholar
 from libdatasources.PatentView import PatentView
 import random
-from GraphClass import new_ID_Constants
 from libdatasources.find_in_other_databases import bulk_lookup
 from networkx.readwrite import json_graph
 from lookup_forms import lookup_classes
 """
-
-
-def compare_dates(date1, date2):
-    if date2 is None or date1 is None:
-        return False
-    return date2 > date1
 
 
 class Graph:
