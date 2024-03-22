@@ -13,6 +13,10 @@ function read() {
         document.getElementById('header').textContent = lines[0];
         document.getElementById('output').textContent = lines[1];
     }
+    /*
+    payload['code'] = "graphwithcsv1(csv)"
+    payload['code'] = "graphwithcsv2(csv)"
+    */
     fr.readAsText(document.getElementById('csvreader').files[0]);
 }
 
