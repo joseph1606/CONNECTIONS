@@ -1,6 +1,11 @@
 import dask.dataframe as dd
 import pandas
 
+# 3/22/24
+# added support for multiple relationship data per relationship
+# added save to csv feature
+# added support for single data and relationship data in the same graph
+
 def parseData(csv):
     df = dd.read_csv(csv)
     df = df.where(df.notnull(), None).compute()
