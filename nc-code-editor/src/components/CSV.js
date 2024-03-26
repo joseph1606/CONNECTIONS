@@ -10,8 +10,20 @@ function read() {
             lines[index] = lines[index].split(',')
         }
         console.log(lines)
-        document.getElementById('header').textContent = lines[0];
-        document.getElementById('output').textContent = lines[1];
+        if (lines[0].length == 3) {
+            document.getElementById('format').textContent = 'Format 2 Selected: Person1(string),Relationship(s),(comma delimited strings),Relationship Value(s) (comma separated strings)';
+            document.getElementById('header').textContent = lines[0];
+            document.getElementById('output').textContent = lines[1];
+        } else if (lines[0].length == 4) {
+            document.getElementById('format').textContent = 'Format 1 Selected: Person1(string),Person2(string),Relationship(s),(comma delimited strings),Relationship Value(s) (comma separated strings) ';
+            document.getElementById('header').textContent = lines[0];
+            document.getElementById('output').textContent = lines[1];
+        } else {
+            document.getElementById('format').textContent = 'Incorrect Format';
+            document.getElementById('header').textContent = '';
+            document.getElementById('output').textContent = '';
+        }
+
     }
     /*
     payload['code'] = "graphwithcsv1(csv)"
@@ -25,10 +37,12 @@ const CSV = () => {
     return (
         <div>
             <input id='csvreader' type="file" accept=".csv" onChange={read} />
-            <h2 id='header'>Header</h2>
+            <h4 id='format'></h4>
+            <h6 id='header'>Header</h6>
             <p id='output'>Output</p>
         </div>
     )
 }
 
-export default CSV  
+export default CSV
+
