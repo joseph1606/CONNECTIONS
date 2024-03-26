@@ -7,6 +7,7 @@ const REPL = () => {
     const [err, setErr] = useState([]);
     const [input, setInput] = useState('');
     const [output, setOutput] = useState([]);
+    const [prevInputs, setPrevInputs] = useState([]);
     const [countArrowKey, setCountArrowKey] = useState(0);
     const [compiledOutput, setCompiledOutput] = useState([]);
     const [skipConditions, setSkipConditions] = useState([]);
@@ -15,13 +16,15 @@ const REPL = () => {
 
     useEffect(() => {
         function handleKeyDown(event) {
-            if ((event.key === 'ArrowUp') && (countArrowKey <= output.length - 1)) {
-                setInput(String(output[output.length - 1 - countArrowKey]));
+            if ((event.key === 'ArrowUp') && (countArrowKey < prevInputs.length - 1)) {
+                setInput(prevInputs[prevInputs.length - countArrowKey - 1]);
                 setCountArrowKey(countArrowKey + 1);
+            } else if ((event.key === 'ArrowUp') && (countArrowKey === prevInputs.length - 1)) {
+                setInput(prevInputs[0]);
             } else if ((event.key === 'ArrowDown') && (countArrowKey === 0)) {
                 setInput('');
             } else if (event.key === 'ArrowDown') {
-                setInput(output[output.length - countArrowKey]);
+                setInput(prevInputs[prevInputs.length - countArrowKey]);
                 setCountArrowKey(countArrowKey - 1);
             }
         }
@@ -31,7 +34,7 @@ const REPL = () => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [output, countArrowKey]);
+    }, [prevInputs, countArrowKey]);
 
     /**/
 
@@ -42,6 +45,9 @@ const REPL = () => {
     const handleInputSubmit = async (e) => {
         e.preventDefault();
         setOutput([...output, `${input}`]);
+        if (input) {
+            setPrevInputs([...prevInputs, `${input}`])
+        }
         const payload = {};
         if (skipConditions) {
             const updatedOutput = output.map((line) => {
@@ -53,37 +59,25 @@ const REPL = () => {
         } else {
             payload['code'] = output.join('\n') + '\n' + input;
         }
-        console.log(payload);
         /* contacting API for code compilation */
         try {
             const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
             const compiledError = resp.data.error;
             const compiledResult = resp.data.output;
-            if (input === "displayGraph(g)") {
-                setIframeUrl('http://127.0.0.1:5000/get_graph');
-                setSkipConditions([...skipConditions, input]);
-                /*const graphResp = await axios.get('http://127.0.0.1:5000/get_graph');
-                const graphHtmlContent = graphResp.data.htmlContent;
-                setHtmlContent(graphHtmlContent);
-                const sanitizedHtml = DOMPurify.sanitize(compiledResult);
-                setHtmlContent(sanitizedHtml);*/
-            }/* else if (error) {
-                setOutput([...output, input, err]);
-                setSkipConditions([...skipConditions, input]);
-                setErr([...err, error]);
-            }*/ else {
-                /* factor in returning errors in the output instead of just output */
-                /*
-                if (compiledResult && !error) {
-                    setOutput([...output, input, compiledResult]);
-                    setCompiledOutput([...compiledOutput, compiledResult]);
-                    setSkipConditions([...skipConditions, input]);
+            const functionNameStart = input.indexOf("(");
+            const functionName = input.substring(0, functionNameStart);
+            if (functionName === "displayGraph") {
+                const varName = input.substring(functionNameStart + 1, input.length - 1);
+                const respGET = await axios.get('http://127.0.0.1:5000/get_graph?varName=' + varName);
+                if (respGET.data.error) {
+                    setErr([...err, compiledError]);
+                    setOutput([...output, input, compiledError]);
+                    setSkipConditions([...skipConditions, input, compiledError]);
                 } else {
-                    setOutput([...output, input, error]);
-                    setErr([...err, error]);
-                    setSkipConditions([...skipConditions, input, error]);
+                    setIframeUrl('http://127.0.0.1:5000/get_graph?varName=' + varName);
+                    setSkipConditions([...skipConditions, input]);
                 }
-                */
+            } else {
                 if (compiledError) {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
@@ -102,29 +96,37 @@ const REPL = () => {
 
     return (
         <div>
-            <div>
-                {output.map((line, index) => (
-                    compiledOutput.includes(line) ? (
-                        <div key={index}><p className='cursor'>{line}</p></div>
-                    ) : (
-                        err.includes(line) ? (
-                            <div key={index}><p className='cursor' style={{ color: 'red' }}>{line}</p></div>
-                        ) : (
-                            <div key={index}><p className='cursor'>&gt;&gt;&gt; {line}</p></div>
-                        )
-                    )
-                ))}
-            </div>
-            <div id='repl'>
-                <p className='cursor'>&gt;&gt;&gt;</p>
-                <form onSubmit={handleInputSubmit}>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={handleInputChange}
-                        placeholder="Enter Python code here..."
-                    />
-                </form>
+            <div id="flexbox">
+                <div className="terminal-loader">
+                    <div className="terminal-header">
+                        <div className="terminal-title">Connections REPL</div>
+                    </div>
+                    <div>
+                        {output.map((line, index) => (
+                            compiledOutput.includes(line) ? (
+                                <div key={index}><p className='cursor'>{line}</p></div>
+                            ) : (
+                                err.includes(line) ? (
+                                    <div key={index}><p className='cursor' style={{ color: 'red' }}>{line}</p></div>
+                                ) : (
+                                    <div key={index}><p className='cursor'>&gt;&gt;&gt; {line}</p></div>
+                                )
+                            )
+                        ))}
+                    </div>
+                    <div>
+                        <p className='cursor'>&gt;&gt;&gt;</p>
+                        <form onSubmit={handleInputSubmit}>
+                            &nbsp;<input
+                                type="text"
+                                value={input}
+                                onChange={handleInputChange}
+                                width="80"
+                                placeholder="Enter Python code here..."
+                            />
+                        </form>
+                    </div>
+                </div>
             </div>
             {iframeUrl && (<iframe src={iframeUrl} title="HTML Content" width="100%" height="500px" />)}
         </div>
