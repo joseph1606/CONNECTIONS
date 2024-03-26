@@ -3,7 +3,6 @@ import axios from 'axios';
 import './REPL.css'
 
 const REPL = () => {
-    const [iframeUrl, setIframeUrl] = useState('');
     const [err, setErr] = useState([]);
     const [input, setInput] = useState('');
     const [output, setOutput] = useState([]);
@@ -11,6 +10,26 @@ const REPL = () => {
     const [countArrowKey, setCountArrowKey] = useState(0);
     const [compiledOutput, setCompiledOutput] = useState([]);
     const [skipConditions, setSkipConditions] = useState([]);
+    
+
+    /* for popup graph display window */
+
+    const openPopup = (htmlData) => {
+        const newWindow = window.open('', '_blank', 'width=600,height=520');
+        if (newWindow) {
+            const htmlContent = `
+            <!DOCTYPE html>
+            ${htmlData}
+        `;
+        newWindow.document.open();
+        newWindow.document.write(htmlContent);
+        newWindow.document.close();
+        } else {
+            alert('Popup blocked by the browser. Please enable popups for this site.');
+        }
+    };
+
+    /**/
 
     /* for up arrow key functionality */
 
@@ -74,8 +93,8 @@ const REPL = () => {
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input, compiledError]);
                 } else {
-                    setIframeUrl('http://127.0.0.1:5000/get_graph?varName=' + varName);
                     setSkipConditions([...skipConditions, input]);
+                    openPopup(respGET.data);
                 }
             } else {
                 if (compiledError) {
@@ -96,8 +115,8 @@ const REPL = () => {
 
     return (
         <div>
-            <div id="flexbox">
-                <div className="terminal-loader">
+            <div id="flexbox" style={{ height: "100%", overflowY: "scroll" }}>
+                <div className="terminal-loader" style={{ maxHeight: "200px", overflowY: "auto", scrollbarWidth: "thin" }}>
                     <div className="terminal-header">
                         <div className="terminal-title">Connections REPL</div>
                     </div>
@@ -128,7 +147,6 @@ const REPL = () => {
                     </div>
                 </div>
             </div>
-            {iframeUrl && (<iframe src={iframeUrl} title="HTML Content" width="100%" height="500px" />)}
         </div>
     );
 };
