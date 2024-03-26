@@ -1,8 +1,11 @@
 import "./App.css";
-import Landing from "./components/Landing";
+import REPL from "./components/REPL.js";
+import CSVLoader from "./components/CSV.js";
 
 function App() {
-  return <Landing />;
+  return <div><REPL />
+    <CSVLoader />
+  </div>;
 }
 
 export default App;

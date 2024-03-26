@@ -1,0 +1,62 @@
+.cursor {
+    display: inline;
+    /* Display the header inline */
+}
+
+/* Style the form */
+form {
+    display: inline-block;
+    /* Display the form as a block element, allowing it to appear inline with the header */
+    vertical-align: top;
+    /* Align the form with the top of the header */
+    width: 96%;
+}
+
+input {
+    all: unset;
+    width: 98.5%;
+}
+
+#flexbox {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.terminal-loader {
+    border: 0.1em solid #333;
+    background-color: #1a1a1a;
+    color: #0f0;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1em;
+    padding: 1.5em 0.5em;
+    margin: 40px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    position: relative;
+    overflow: auto;
+    box-sizing: border-box;
+    flex-grow: 1;
+    max-width: 95%;
+    height: 300px;
+    align-self: flex-start;
+}
+
+.terminal-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1.5em;
+    background-color: #333;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding: 0 0.4em;
+    box-sizing: border-box;
+}
+
+.terminal-title {
+    float: left;
+    line-height: 1.5em;
+    color: #eee;
+}
