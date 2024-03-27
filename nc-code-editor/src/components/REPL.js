@@ -16,6 +16,7 @@ const REPL = () => {
 
     const openPopup = (htmlData) => {
         const newWindow = window.open('', '_blank', 'width=600,height=520');
+        console.log(htmlData);
         if (newWindow) {
             const htmlContent = `
             <!DOCTYPE html>
@@ -115,8 +116,8 @@ const REPL = () => {
 
     return (
         <div>
-            <div id="flexbox" style={{ height: "100%", overflowY: "scroll" }}>
-                <div className="terminal-loader" style={{ maxHeight: "200px", overflowY: "auto", scrollbarWidth: "thin" }}>
+            <div id="flexbox">
+                <div className="terminal-loader">
                     <div className="terminal-header">
                         <div className="terminal-title">Connections REPL</div>
                     </div>
