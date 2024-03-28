@@ -1,2 +1,4 @@
 nc-code-editor/node_modules/.cache/
 nc-code-editor/node_modules/.cache/.eslintcache
+pythonAPI/venv/
+pythonAPI/*.html

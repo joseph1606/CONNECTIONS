@@ -3,7 +3,6 @@ import axios from 'axios';
 import './REPL.css'
 
 const REPL = () => {
-    const [iframeUrl, setIframeUrl] = useState('');
     const [err, setErr] = useState([]);
     const [input, setInput] = useState('');
     const [output, setOutput] = useState([]);
@@ -11,6 +10,29 @@ const REPL = () => {
     const [countArrowKey, setCountArrowKey] = useState(0);
     const [compiledOutput, setCompiledOutput] = useState([]);
     const [skipConditions, setSkipConditions] = useState([]);
+    
+
+    /* for popup graph display window */
+
+    const openPopup = (htmlData, graphName) => {
+        const newWindow = window.open('', '_blank', 'width=600,height=520');
+        const i = htmlData.indexOf("<head>");
+        htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
+        
+        if (newWindow) {
+            const htmlContent = `
+            <!DOCTYPE html>
+            ${htmlData}
+        `;
+        newWindow.document.open();
+        newWindow.document.write(htmlContent);
+        newWindow.document.close();
+        } else {
+            alert('Popup blocked by the browser. Please enable popups for this site.');
+        }
+    };
+
+    /**/
 
     /* for up arrow key functionality */
 
@@ -74,8 +96,8 @@ const REPL = () => {
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input, compiledError]);
                 } else {
-                    setIframeUrl('http://127.0.0.1:5000/get_graph?varName=' + varName);
                     setSkipConditions([...skipConditions, input]);
+                    openPopup(respGET.data, varName);
                 }
             } else {
                 if (compiledError) {
@@ -128,7 +150,6 @@ const REPL = () => {
                     </div>
                 </div>
             </div>
-            {iframeUrl && (<iframe src={iframeUrl} title="HTML Content" width="100%" height="500px" />)}
         </div>
     );
 };

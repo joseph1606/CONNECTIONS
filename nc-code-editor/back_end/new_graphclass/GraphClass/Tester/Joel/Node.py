@@ -1,16 +1,13 @@
-import json
-import copy
-
 class Node:
     def __init__(self, name: str, attributes: dict = None):
 
         self.id = id(self)
         self.name = name
-        # relationships will be a dictionary of relationships: relationship value pairings
         #self.attributes = attributes  # {'institution': ['umd', 'yale', 'columbida']}
         # Create a deep copy of the original dictionary if attributes are provided
-        self.attributes = copy.deepcopy(attributes) if attributes else {}
-        self.attributes_id = id(attributes)
+        #self.attributes = copy.deepcopy(attributes) if attributes else {}
+        self.attributes = attributes
+        #self.attributes_id = id(attributes)
 
         # shallow copy
         #self.attributes = dict(attributes) if attributes else {}
@@ -28,11 +25,11 @@ class Node:
     def getAttributes(self):
         return self.attributes
 
-    def getAttributesLocation(self):
-        return self.attributes_id
+    #def getAttributesLocation(self):
+        #return self.attributes_id
     
     # attributes = {str:list[str]}
-    # {'institution': ['umd', 'yale', 'columbida']}
+    # {'institution': ['umd', 'yale', 'columbia']}
     def updateAttributes(self, attributes: dict):
         for key, value in attributes.items():
             # checks if key is present

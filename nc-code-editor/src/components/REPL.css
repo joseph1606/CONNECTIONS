@@ -20,7 +20,9 @@ input {
 #flexbox {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: flex-end;
+    height: 100%;
+    overflow-y: scroll;
 }
 
 .terminal-loader {
@@ -34,7 +36,9 @@ input {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 4px;
     position: relative;
-    overflow: auto;
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
     box-sizing: border-box;
     flex-grow: 1;
     max-width: 95%;
