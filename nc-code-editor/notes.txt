@@ -1,4 +1,4 @@
-n one terminal, cd into nc-code-editor and run npm start
+In one terminal, cd into nc-code-editor and run npm start
 
 in the other terminal cd into pythonAPI then run “python3 -m venv venv” then run “. venv/bin/activate” and then you’ll be in the venv and from there, you need to run “pip install -r requirements.txt” and then run “python3 app.py”
 
