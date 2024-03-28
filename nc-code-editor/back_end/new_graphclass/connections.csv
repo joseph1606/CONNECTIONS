@@ -1,4 +1,5 @@
-Person 1, Person 2, Relationship, Relationship Value
-name1,name2,relationship1,value1
-name2,name4,age,40
-name1,name4,sex,male
+Person 1, Person2, Relationship, Relationship Value 
+joel,rev,college,umd
+joel,ely,College,umbc
+
+
