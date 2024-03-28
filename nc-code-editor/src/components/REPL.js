@@ -14,9 +14,11 @@ const REPL = () => {
 
     /* for popup graph display window */
 
-    const openPopup = (htmlData) => {
+    const openPopup = (htmlData, graphName) => {
         const newWindow = window.open('', '_blank', 'width=600,height=520');
-        console.log(htmlData);
+        const i = htmlData.indexOf("<head>");
+        htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
+        
         if (newWindow) {
             const htmlContent = `
             <!DOCTYPE html>
@@ -95,7 +97,7 @@ const REPL = () => {
                     setSkipConditions([...skipConditions, input, compiledError]);
                 } else {
                     setSkipConditions([...skipConditions, input]);
-                    openPopup(respGET.data);
+                    openPopup(respGET.data, varName);
                 }
             } else {
                 if (compiledError) {
