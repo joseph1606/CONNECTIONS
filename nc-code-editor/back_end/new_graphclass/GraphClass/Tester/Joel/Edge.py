@@ -1,6 +1,5 @@
 from Node import Node
 
-
 class Edge:
     def __init__(self, node1: Node, node2: Node, attributes: dict = None):
         self.id = id(self)
