@@ -1,8 +1,6 @@
 #from APITesting import print_semscholar as sem_print
 
-from Joel.Node import Node
-
-author_list = []
+from Nodecopy import Node
 
 class AuthorNode(Node):
     def __init__(self, name, attributes, aliases, authorId, url, papers=None):
@@ -12,16 +10,9 @@ class AuthorNode(Node):
         self.url = url
         self.papers = papers if papers else []
 
-    def add_paper(self, paper):
-        self.papers.append(paper)
-
 class PaperNode:
-    def __init__(self, title, year, authors=None):
+    def __init__(self, title, year, authors=None, authorIds=None):
         self.title = title
         self.year = year
         self.authors = authors if authors else []
-
-    def add_author(self, author):
-        self.authors.append(author)
-
-#def makeAuthor(name):
+        self.authorIds = authorIds if authorIds else []
