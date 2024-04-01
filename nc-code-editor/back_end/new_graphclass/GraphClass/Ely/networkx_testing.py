@@ -24,6 +24,10 @@ G = nx.Graph()
 G.add_edge(ely, mom, object=edge)
 G.add_edge(ely, 1)
 
+# G.add_node(ely.id, name=ely.name, relationships=ely.relationships)
+# G.add_node(mom.id, name=mom.name, relationships=mom.relationships)
+# G.add_edge(ely.id, mom.id, edge=edge.id, comm_relationship=#dictionary with common relationships)
+
 
 # create labels for dictionary
 def generate_label(node):
