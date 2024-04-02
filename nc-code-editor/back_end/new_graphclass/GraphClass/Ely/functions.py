@@ -1,6 +1,6 @@
-from GraphClass import Graph
-from NodeClass import Node
-from EdgeClass import Edge
+from graphclass import Graph
+from nodeclass import Node
+from edgeclass import Edge
 from parse import parseData
 import copy
 

@@ -1,6 +1,6 @@
 import networkx as nx
-from NodeClass import Node
-from EdgeClass import Edge
+from nodeclass import Node
+from edgeclass import Edge
 
 # Now most of the functions return the id of the node/edge created/updated
 

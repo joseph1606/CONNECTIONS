@@ -6,11 +6,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
-import GraphClass.Joel.GraphClass as Graph
-import GraphClass.Joel.EdgeClass as Edge
-import GraphClass.Joel.NodeClass as Node
-import GraphClass.Revaant.AuthorNode as Author
-from GraphClass.Revaant.AuthorNode import AuthorNode
+import graphclass as Graph
+import edgeclass as Edge
+import nodeclass as Node
+import author as Author
+from author import AuthorNode
+from author import PaperNode
 
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
@@ -18,6 +19,7 @@ def Vis(ntx):
     nt = Network("500px", "500px")
     # fancy rendering here
     nt.from_nx(ntx)
+    nt.toggle_physics(True)
     nt.show(
         "ntx.html"
     )  # something between frontend/backend happens here for rendering, but this is the basics
@@ -26,10 +28,41 @@ def Vis(ntx):
 def Networkx(graph):
     ntx = nx.Graph()
 
+    # add nodes to networkx object
     for node_id, node in graph.nodes.items():
+
+        title = titelize(node.attributes)
+
         if type(node) is AuthorNode:
-            pass
-        else: 
-            ntx.add_node(node_id, ......)
-        
+            aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
+            papers = paper_string(node.papers)
+            title = aliases + papers + title
+
+        ntx.add_node(node_id, title=title, label=node.name)
+
+    # add edges to networkx object
+    for (node1_id, node2_id), edge_id in graph.connections.items():
+        title = titelize(graph.edges[edge_id].relationships)
+        ntx.add_node(node1_id, node2_id, title=title)
+
     return ntx
+
+
+# NEEDS TO TAKE CARE OF DIRECTED RELATIONSHIPS
+def titelize(attributes: dict) -> str:
+    title = ""
+
+    # k should be String, v should be List
+    for k, v in attributes.items():
+        title += k + ": " + ", ".join(v) + "\n"
+
+    return title
+
+
+def paper_string(papers) -> str:
+    title = ""
+
+    for paper in papers:
+        title += paper.title + ": " + paper.year + "\n"
+
+    return title
