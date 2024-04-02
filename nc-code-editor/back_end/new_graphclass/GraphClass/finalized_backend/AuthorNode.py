@@ -1,6 +1,6 @@
 # from APITesting import print_semscholar as sem_print
 
-from GraphClass.Joel.Node import Node
+from NodeClass import Node
 
 
 class AuthorNode(Node):

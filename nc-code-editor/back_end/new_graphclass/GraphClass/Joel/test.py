@@ -1,9 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from GraphClass import Graph
-from NodeClass import Node
-from EdgeClass import Edge
-from Functions import *
+from new_graphclass.GraphClass.finalized_backend.GraphClass import Graph
+from new_graphclass.GraphClass.finalized_backend.NodeClass import Node
+from new_graphclass.GraphClass.finalized_backend.EdgeClass import Edge
+from new_graphclass.GraphClass.finalized_backend.Functions import *
 
 from parse import parseData
 

@@ -2,11 +2,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
-import GraphClass.Joel.GraphClass as Graph
-import GraphClass.Joel.EdgeClass as Edge
-import GraphClass.Joel.NodeClass as Node
-import GraphClass.Revaant.AuthorNode as Author
-from GraphClass.Revaant.AuthorNode import AuthorNode
+import new_graphclass.GraphClass.finalized_backend.GraphClass as Graph
+import new_graphclass.GraphClass.finalized_backend.EdgeClass as Edge
+import new_graphclass.GraphClass.finalized_backend.NodeClass as Node
+import new_graphclass.GraphClass.finalized_backend.AuthorNode as Author
+from new_graphclass.GraphClass.finalized_backend.AuthorNode import AuthorNode
 
 
 def CreateGraph(csv) -> Graph.Graph:

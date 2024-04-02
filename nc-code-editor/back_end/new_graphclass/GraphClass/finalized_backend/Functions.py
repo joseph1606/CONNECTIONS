@@ -1,8 +1,11 @@
 from GraphClass import Graph
 from NodeClass import Node
 from EdgeClass import Edge
+from AuthorNode import AuthorNode
 from parse import parseData
 import copy
+import networkx as nx
+from pyvis.network import Network
 
 # for both Graph.py and Functions.py, some functions could return int's instead of node/edge/graph objects since changes are already made in the function inside
 # having int return (on the based of node/edge creation) could speed up shit
@@ -175,3 +178,55 @@ def SubGraph(graph: Graph, name: str):
     else:
         graph.update_edge(edge_objects[0], attribute)
     """
+
+
+# this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
+def Vis(ntx):
+    nt = Network("500px", "500px")
+    # fancy rendering here
+    nt.from_nx(ntx)
+    nt.toggle_physics(True)
+    nt.show("ntx.html", notebook=False)
+
+
+def Networkx(graph):
+    ntx = nx.Graph()
+
+    # add nodes to networkx object
+    for node_id, node in graph.nodes.items():
+
+        title = titelize(node.attributes)
+
+        if type(node) is AuthorNode:
+            aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
+            papers = paper_string(node.papers)
+            title = aliases + papers + title
+
+        ntx.add_node(node_id, title=title, label=node.name)
+
+    # add edges to networkx object
+    for (node1_id, node2_id), edge_id in graph.connections.items():
+        title = titelize(graph.edges[edge_id].relationships)
+        ntx.add_edge(node1_id, node2_id, title=title)
+
+    return ntx
+
+
+# NEEDS TO TAKE CARE OF DIRECTED RELATIONSHIPS
+def titelize(attributes: dict) -> str:
+    title = ""
+
+    # k should be String, v should be List
+    for k, v in attributes.items():
+        title += k + ": " + ", ".join(v) + "\n"
+
+    return title
+
+
+def paper_string(papers) -> str:
+    title = ""
+
+    for paper in papers:
+        title += paper.title + ": " + paper.year + "\n"
+
+    return title

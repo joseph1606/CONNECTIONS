@@ -6,11 +6,12 @@ import networkx as nx
 # from GraphClass.Joel.EdgeClass import Edge
 from functions import *
 from visualization import *
+import new_graphclass.GraphClass.finalized_backend.GraphClass
 
 # from parse import parseData
 
 G = CreateGraph(
-    "/Users/elycohen/Desktop/College/Computer Science Classes/CMSC435/team_work/git_connections/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Joel/connections.csv"
+    "/Users/elycohen/Desktop/College/Computer Science Classes/CMSC435/team_work/git_connections/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Joel/connections2.csv"
 )
 
 g_nx = Networkx(G)
