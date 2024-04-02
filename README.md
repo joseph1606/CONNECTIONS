@@ -3,19 +3,22 @@
 ## Setting Up Environment
 
 ### Step 1
-Open a terminal starting at the repository root (new_connections), cd into nc-code-editor and run npm start
+If you don't already have the dependency of npm, install it to your computer based on your system
 
 ### Step 2
+Open a terminal starting at the repository root (new_connections), cd into nc-code-editor and run npm start
+
+### Step 3
 Open another terminal, cd into pythonAPI then run 
 >>> python3 -m venv venv
 Then run 
->>> venv/bin/activate
+>>>. venv/bin/activate
 This will activate the virutal environment; you should notice a difference in your prompt. Then run:
 >>>pip install -r requirements.txt
 Then
 >>>python3 app.py
 
-### Step 3
+### Step 4
 Using the directory explorer, navigate to:
 /pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
 On line 537 (In the function definition of the show function), change the default parameter of notebook=True to notebook=False.
