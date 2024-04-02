@@ -6,33 +6,43 @@
 Open a terminal starting at the repository root (new_connections), cd into nc-code-editor and run npm start
 
 ### Step 2
-Open another terminal and change into the pythonAPI directory:\
+Open another terminal and change into the pythonAPI directory:
 ```console
 $ cd pythonAPI
 ```
-Create a virtual environment:\
+Create a virtual environment:
 ```console
 $ python3 -m venv venv
 ```
-Activate the environment (note the period at the begining):\
+Activate the environment (note the period at the begining):
 ```console
-. venv/bin/activate\
+$ . venv/bin/activate
 ```
-You should notice a difference in your prompt. Then install required packages with the python package installer:\
-pip install -r requirements.txt\
-Then run the backend app:\
-python3 app.py\
+You should notice a difference in your prompt. Then install required packages with the python package installer:
+```console
+$ pip install -r requirements.txt
+```
+Then run the backend app:
+```console
+$ python3 app.py
+```
 
 ### Step 3
 To ensure graphs can be rendered run the following:
 #### Windows
-(Get-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py) -replace 'self\.write_html(name, open_browser=False,notebook=True)','self\.write_html(name, open_browser=False,notebook=False)' | Set-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py
+```console
+$ (Get-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py) -replace 'self\.write_html(name, open_browser=False,notebook=True)','self\.write_html(name, open_browser=False,notebook=False)' | Set-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py
+```
 #### Linux
-sed -i 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
+```console
+$ sed -i 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
 ok=False)/g' pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
+```
 #### MacOS
-sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
+```console
+$ sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
 ok=False)/g' pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
+```
 
 
 
