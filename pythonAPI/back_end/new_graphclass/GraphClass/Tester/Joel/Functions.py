@@ -2,6 +2,7 @@ from Graph import Graph
 from Node import Node
 from Edge import Edge
 from parse import parseData
+from APITesting import generate_author_list
 import copy
 import os
 
@@ -12,12 +13,14 @@ import os
 # creates a new Graph object from scratch and add nodes to it
 # could change the return type
 def CreateGraph(csv:str):
+    from app import displayAuthor
     G = Graph()
     if csv != 'csv':
         #run semantic shole
-        print()
+        #generate_author_list(csv)
+        displayAuthor(csv)
     else:
-        file_path = '/Users/andrewtimmer/repo_connection/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv'
+        file_path = '/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv'
         AddNodes(G,file_path)
     # not needed
     return G
