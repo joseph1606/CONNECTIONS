@@ -1,15 +1,18 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from Graph import Graph
-from Node import Node
-from Edge import Edge
+from GraphClass import Graph
+from NodeClass import Node
+from EdgeClass import Edge
 from Functions import *
 
 from parse import parseData
 
-G = CreateGraph("data_storage_branch/new_graphclass/connections.csv")
+G = CreateGraph("connections2.csv")
 print("------------------------------------------------------------------------------------------------------")
-G.print_nodes()
+#G.print_nodes()
+print("Edges:- ")
+#G.print_relationships()
+G.print_edges()
 
 
 '''
