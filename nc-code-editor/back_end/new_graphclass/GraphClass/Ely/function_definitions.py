@@ -2,9 +2,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
-import GraphClass.Joel.Graph as Graph
-import GraphClass.Joel.Edge as Edge
-import GraphClass.Joel.Node as Node
+import GraphClass.Joel.GraphClass as Graph
+import GraphClass.Joel.EdgeClass as Edge
+import GraphClass.Joel.NodeClass as Node
 import GraphClass.Revaant.AuthorNode as Author
 from GraphClass.Revaant.AuthorNode import AuthorNode
 
@@ -26,7 +26,7 @@ def Vis(ntx: nx.Graph) -> Network:
     pass
 
 
-def Save(graph: Graph.Graph) -> "csv":
+def Save(graph: Graph.Graph) -> CSV:
     pass
 
 

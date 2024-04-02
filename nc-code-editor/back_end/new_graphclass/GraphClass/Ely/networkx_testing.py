@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from pyvis.network import Network
 
 
+# run this file, it will generate a "graph.html" file in the directory. To run it on
+# a mac, run "open graph.html" in terminal
 class Person:
     def __init__(self, name):
         self.name = name
@@ -15,11 +17,23 @@ class Edge:
         self.id = id(self)
 
 
+G = nx.Graph()
+
+G.add_node("ely", title="UMD: 2024\nSex: Male", label="Ely")
+G.add_node("mom", label="mom")
+G.add_edge("ely", "mom", title="Son/Mother")
+
+nt = Network("500px", "500px")
+# populates the nodes and edges data structures
+nt.from_nx(G)
+nt.toggle_physics(True)
+nt.show("graph.html", notebook=False)
+
+
+"""
 ely = Person("ely")
 mom = Person("Mom")
 edge = Edge("parent/child")
-G = nx.Graph()
-
 # G.add_node(p.id, name=p.name)
 G.add_edge(ely, mom, object=edge)
 G.add_edge(ely, 1)
@@ -53,8 +67,4 @@ for k, v in edge_objects.items():
 nx.draw_networkx_edge_labels(G, pos=nx.spring_layout(G), edge_labels=edge_labels)
 # plt.show()
 
-
-nt = Network("500px", "500px")
-# populates the nodes and edges data structures
-nt.from_nx(G)
-nt.show("nx.html")
+"""

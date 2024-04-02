@@ -6,37 +6,30 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
-import GraphClass.Joel.Graph as Graph
-import GraphClass.Joel.Edge as Edge
-import GraphClass.Joel.Node as Node
+import GraphClass.Joel.GraphClass as Graph
+import GraphClass.Joel.EdgeClass as Edge
+import GraphClass.Joel.NodeClass as Node
 import GraphClass.Revaant.AuthorNode as Author
-from GraphClass.Revaant.AuthorNode import AuthorNode 
+from GraphClass.Revaant.AuthorNode import AuthorNode
 
 
-#this takes the Graph Object with the associated ntx object, and just wraps it in pyvis 
-def vis(ntx): 
+# this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
+def Vis(ntx):
     nt = Network("500px", "500px")
-    #fancy rendering here
+    # fancy rendering here
     nt.from_nx(ntx)
-    return nt #something between frontend/backend happens here, but this is the basics 
-    
-    
-#this takes the Graph Object, goes through dictionaries    
-def filter(graph, relationships="all"):
+    nt.show(
+        "ntx.html"
+    )  # something between frontend/backend happens here for rendering, but this is the basics
+
+
+def Networkx(graph):
     ntx = nx.Graph()
-    
-    for n in graph.nodes:
-        #add them and parameters into ntx graph 
-        #we'll have node.id as the primary identifier, and then i'll 
-        #make according paramters for data, like name=node.name 
-        #going to need to have a type check for if the node is an AuthorNode 
-        if n is type AuthorNode: 
-        
+
+    for node_id, node in graph.nodes.items():
+        if type(node) is AuthorNode:
+            pass
         else: 
-            
+            ntx.add_node(node_id, ......)
         
-    for (node1, node2, edge) in self.connections: 
-        #add edges accordingly, using the edge primary identifer as edge.id 
-        
-        
-    return ntx #return networkx object 
+    return ntx
