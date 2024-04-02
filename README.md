@@ -6,19 +6,33 @@
 Open a terminal starting at the repository root (new_connections), cd into nc-code-editor and run npm start
 
 ### Step 2
-Open another terminal, cd into pythonAPI then run 
->>> python3 -m venv venv
-Then run 
->>> venv/bin/activate
-This will activate the virutal environment; you should notice a difference in your prompt. Then run:
->>>pip install -r requirements.txt
-Then
->>>python3 app.py
+Open another terminal and change into the pythonAPI directory:\
+```console
+$ cd pythonAPI
+```
+Create a virtual environment:\
+```console
+$ python3 -m venv venv
+```
+Activate the environment (note the period at the begining):\
+```console
+. venv/bin/activate\
+```
+You should notice a difference in your prompt. Then install required packages with the python package installer:\
+pip install -r requirements.txt\
+Then run the backend app:\
+python3 app.py\
 
 ### Step 3
-Using the directory explorer, navigate to:
-/pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
-On line 537 (In the function definition of the show function), change the default parameter of notebook=True to notebook=False.
+To ensure graphs can be rendered run the following:
+#### Windows
+(Get-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py) -replace 'self\.write_html(name, open_browser=False,notebook=True)','self\.write_html(name, open_browser=False,notebook=False)' | Set-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py
+#### Linux
+sed -i 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
+ok=False)/g' pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
+#### MacOS
+sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
+ok=False)/g' pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
 
 
 
