@@ -14,6 +14,7 @@ G = CreateGraph(
 )
 
 g_nx = Networkx(G)
+Vis(g_nx)
 
 
 """

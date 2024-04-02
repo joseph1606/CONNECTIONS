@@ -21,7 +21,7 @@ def Vis(ntx):
     nt.from_nx(ntx)
     nt.toggle_physics(True)
     nt.show(
-        "ntx.html"
+        "ntx.html", notebook=False
     )  # something between frontend/backend happens here for rendering, but this is the basics
 
 
@@ -43,7 +43,7 @@ def Networkx(graph):
     # add edges to networkx object
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
-        ntx.add_node(node1_id, node2_id, title=title)
+        ntx.add_edge(node1_id, node2_id, title=title)
 
     return ntx
 
