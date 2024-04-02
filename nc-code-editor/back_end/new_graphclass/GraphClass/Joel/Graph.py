@@ -4,14 +4,15 @@ from Edge import Edge
 
 # Now most of the functions return the id of the node/edge created/updated
 
+
 class Graph:
     def __init__(self):
-        self.nxGraph = nx.MultiGraph(selfloops=False, multiedges=True)
+        # self.nxGraph = nx.MultiGraph(selfloops=False, multiedges=True)
         self.nodes = {}  # {node.id: node object}
         self.edges = {}  # {edge.id:edge object}
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
-        
-        '''
+
+        """
         self.relationships = {
            "Institution": {
                "UMD": [...] #all nodes with “Institution” relationship, “UMD” value 
@@ -26,7 +27,7 @@ class Graph:
                "Paper Name2": [...]
            }
         }
-        '''
+        """
 
     def return_nxGraph(self):
         return self.nxGraph
@@ -46,7 +47,7 @@ class Graph:
         self.edges[edge.getID()] = edge
         self.connections[(node1.getID(), node2.getID())] = edge.getID()
         return edge
-        
+
     # updates a existing node
     def update_node(self, node: Node, attributes: dict):
         print("Updating node:", node.getName())
@@ -63,7 +64,7 @@ class Graph:
     # returns a list of nodes that have the inputted name
     def search_named_nodes(self, name: str):
         named_nodes = []
-        for node_id,node in self.nodes.items():
+        for node_id, node in self.nodes.items():
             if name == node.getName():
                 named_nodes.append(node)
         return named_nodes
@@ -80,7 +81,9 @@ class Graph:
         else:
             # If two nodes are provided, search for edges between those nodes
             for (n1_id, n2_id), edge_id in self.connections.items():
-                if (n1_id == node1.getID() and n2_id == node2.getID()) or (n1_id == node2.getID() and n2_id == node1.getID()):
+                if (n1_id == node1.getID() and n2_id == node2.getID()) or (
+                    n1_id == node2.getID() and n2_id == node1.getID()
+                ):
                     edge_objects.append(self.edges[edge_id])
 
         return edge_objects
@@ -94,18 +97,20 @@ class Graph:
             # If there are no nodes with the provided name, create a new node
             new_node = self.add_node(name, attributes)
             return new_node
-            
+
         print("+++++++++++++++++++++++++++++++++++++++++++")
         for i, node in enumerate(named_nodes, start=1):
             print(f"{i}. {name}")
             print(f"{node.getAttributes()}")
             print()
-            
+
         last_number = len(named_nodes)
-            
+
         # Ask the user to choose a node or create a new one
         while True:
-            choice = input(f"Enter the number of the node you want or 0 to create a new one: ")
+            choice = input(
+                f"Enter the number of the node you want or 0 to create a new one: "
+            )
             if choice.isdigit() and 0 <= int(choice) <= last_number:
                 choice = int(choice)
                 break
@@ -121,7 +126,7 @@ class Graph:
             # Get the chosen node
             chosen_node = named_nodes[choice - 1]
             chosen_node.updateAttributes(attributes)
-                            
+
             # Now you can use the chosen_node as needed
             print("You chose: ", chosen_node.getName())
             print("with attributes: ", chosen_node.getAttributes())
@@ -133,7 +138,7 @@ class Graph:
             return self.nodes[node_id]
         else:
             return None
-        
+
     def print_nodes(self):
         for node in self.nodes.values():
             print()

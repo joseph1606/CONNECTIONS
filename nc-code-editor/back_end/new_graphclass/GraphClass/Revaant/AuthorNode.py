@@ -1,6 +1,7 @@
-#from APITesting import print_semscholar as sem_print
+# from APITesting import print_semscholar as sem_print
 
-from Nodecopy import Node
+from GraphClass.Joel.Node import Node
+
 
 class AuthorNode(Node):
     def __init__(self, name, attributes, aliases, authorId, url, papers=None):
@@ -9,6 +10,7 @@ class AuthorNode(Node):
         self.authorId = authorId
         self.url = url
         self.papers = papers if papers else []
+
 
 class PaperNode:
     def __init__(self, title, year, authors=None, authorIds=None):
