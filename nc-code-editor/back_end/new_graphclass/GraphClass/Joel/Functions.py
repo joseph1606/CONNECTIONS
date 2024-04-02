@@ -1,6 +1,6 @@
-from Graph import Graph
-from Node import Node
-from Edge import Edge
+from GraphClass import Graph
+from NodeClass import Node
+from EdgeClass import Edge
 from parse import parseData
 import copy
 
@@ -22,41 +22,98 @@ def AddNodes(graph: Graph, csv):
     
     # needs to capitalize first letter and lowercase the rest for name
     # everything else can be lowercase?
+    # names1: list[str]
+    # names2: list[str]
+    # attributes: list[dict]
+    # eg []
     (names1, names2, attributes) = parseData(csv)
 
     if names2 is None:
+        # iterates through each row of inputs
         for name, attribute in zip(names1, attributes):
+            node = None
             named_nodes = graph.search_named_nodes(name)
-            graph.disambiguation(named_nodes, name, attribute)
             
-            # no need to create an edge
+            # if empty -> no node with the name was found
+            # there will also be no edges associated with that node
+            if not named_nodes:
+                node = graph.add_node(name,attribute)
+            
+            # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
+            else:
+                node = graph.update_node(named_nodes[0],attribute)
+
+            AddNodeHelper(graph,node,attribute)
+     
+                
+            
 
     else:
         for name1, name2, attribute in zip(names1, names2, attributes):
+            node1 = None
+            node2 = None
             named_nodes1 = graph.search_named_nodes(name1)
             named_nodes2 = graph.search_named_nodes(name2)
             
-            # to avoid interconnected nodes if a new node was created
-            # idk why but shallow copy works
-            # technically if a new node was created for named_nodes1, there wouldn't need to be a need to shallow copy
-            attribute_dup = copy.copy(attribute) if attribute else {}
+            if not named_nodes1:
+                node1 = graph.add_node(name1,attribute)
             
-            disambiguated_node1 = graph.disambiguation(named_nodes1, name1, attribute)
-            disambiguated_node2 = graph.disambiguation(named_nodes2, name2, attribute_dup)
-            
-            # technically if a new node was created in disambiguation there wouldn't be a need to check for an edge
-            # search_edge returns a list of edges; here since two nodes are inputted it returns either an empty list or a list with just one edge
-            edge_objects = graph.search_edge(disambiguated_node1, disambiguated_node2)
-            
-            # if there was no edge
-            if not edge_objects:
-                graph.add_edge(disambiguated_node1, disambiguated_node2, attribute)
-                    
-            # if there was an edge, search_edge returns [edge]
+            # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
             else:
-                graph.update_edge(edge_objects[0], attribute)
-                    
+                node1 = graph.update_node(named_nodes1[0],attribute)
+                
+                
+            AddNodeHelper(graph,node1,attribute)
+            
+            # to avoid interconnected nodes
+            attribute_dup = copy.copy(attribute)
+            
+            if not named_nodes2:
+                node2 = graph.add_node(name2,attribute_dup)
+            
+            # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
+            else:
+                node2 = graph.update_node(named_nodes2[0],attribute_dup)
+                
+                
+            AddNodeHelper(graph,node2,attribute)
+                
+                
+ 
     return graph
+
+# essentially takes cares of relationships dict and edges
+def AddNodeHelper(graph: Graph, node: Node, attribute: dict):
+    node_id = node.getID()
+    # iterates through one row of attributes
+    # eg {sex:[male], college:[umd]}
+    # it iterates twice in the above example
+    for attribute_type, attribute_value in attribute.items():
+        temp_dict = {}
+        temp_dict[attribute_type] = attribute_value
+        # returns list of nodes id with the same attribute type and value that isnt the inputted node
+        relationship_nodes = graph.relationship_nodes(node,attribute_type,attribute_value[0])
+        
+        # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
+        # if not empty then we need to create edges
+        if relationship_nodes:
+            
+            for relationship_node_id in relationship_nodes:
+                # checks to see if theres an exisitng edge between the two nodes
+                # makes sure it doesnt create an edge with itself
+                if relationship_node_id != node_id:
+                    relationship_node = graph.get_node(relationship_node_id)
+                    edge = graph.search_edge(node, relationship_node)
+                    
+                    # if there was no edge
+                    if not edge:
+                        graph.add_edge(node,relationship_node,temp_dict)
+                        
+                    # else update the edge
+                    else:
+                        graph.update_edge(edge[0], temp_dict)
+                        
+                        
 
 def SubGraph(graph: Graph, name: str):
     named_nodes = graph.search_named_nodes(name)
@@ -79,6 +136,9 @@ def SubGraph(graph: Graph, name: str):
             break
         print("Invalid input. Please enter a valid number.")
     
+    
+    # could also make a deep copy instead of running it through existing functions?
+    # might have to pass a shallow copy of attributes; need to check
     subgraph.add_node(chosen_node.getName(), chosen_node.getAttributes())
     
     # returns all edges connected to the chosen node
@@ -90,7 +150,33 @@ def SubGraph(graph: Graph, name: str):
             connected_node = edge.getNode1()
         else:
             connected_node = edge.getNode2()
-            
+        
+        # could also make a deep copy instead of running it through existing functions?
+        # might have to pass a shallow copy of attributes; need to check
         subgraph.add_node(connected_node.getName(), connected_node.getAttributes())
     
     return subgraph
+
+
+    '''
+    Old code that handled disambiguation
+    # to avoid interconnected nodes if a new node was created
+    # idk why but shallow copy works
+    # technically if a new node was created for named_nodes1, there wouldn't need to be a need to shallow copy
+    attribute_dup = copy.copy(attribute) if attribute else {}
+
+    disambiguated_node1 = graph.disambiguation(named_nodes1, name1, attribute)
+    disambiguated_node2 = graph.disambiguation(named_nodes2, name2, attribute_dup)
+
+    # technically if a new node was created in disambiguation there wouldn't be a need to check for an edge
+    # search_edge returns a list of edges; here since two nodes are inputted it returns either an empty list or a list with just one edge
+    edge_objects = graph.search_edge(disambiguated_node1, disambiguated_node2)
+
+    # if there was no edge
+    if not edge_objects:
+        graph.add_edge(disambiguated_node1, disambiguated_node2, attribute)
+            
+    # if there was an edge, search_edge returns [edge]
+    else:
+        graph.update_edge(edge_objects[0], attribute)
+    '''

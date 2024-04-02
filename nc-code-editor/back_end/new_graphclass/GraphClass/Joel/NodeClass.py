@@ -32,6 +32,18 @@ class Node:
     # {'institution': ['umd', 'yale', 'columbia']}
     def updateAttributes(self, attributes: dict):
         for key, value in attributes.items():
+            
+            # might change to below code tbh
+            
+            # checks if key is present
+            # if key in self.attributes:
+                # if value not in self.attributes[key]:
+                    # self.attributes[key].append(value)
+                    
+            # else:
+                # self.attributes[key] = value
+            
+            
             # checks if key is present
             if key in self.attributes:
                 # Convert both lists to sets to remove duplicates, then merge them and convert back to list
@@ -43,4 +55,3 @@ class Node:
 
                 
                 
-        # self.attributes[key] = self.attributes.get(key, []) + [values]

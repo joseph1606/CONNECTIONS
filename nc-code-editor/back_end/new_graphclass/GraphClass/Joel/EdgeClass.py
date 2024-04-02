@@ -1,4 +1,4 @@
-from Node import Node
+from NodeClass import Node
 
 class Edge:
     def __init__(self, node1: Node, node2: Node, attributes: dict = None):
@@ -22,6 +22,17 @@ class Edge:
         
     def updateRelationships(self, attributes: dict):    
         for key, value in attributes.items():
+            
+            # might change to below code tbh
+            
+            # checks if key is present
+            # if key in self.attributes:
+                # if value not in self.attributes[key]:
+                    # self.attributes[key].append(value)
+                    
+            # else:
+                # self.attributes[key] = value
+            
             if key in self.relationships:
                 # Convert both lists to sets to remove duplicates, then merge them and convert back to list
                 merged_values = list(set(self.relationships[key]).union(set(value)))
@@ -31,6 +42,4 @@ class Edge:
                 self.relationships[key] = value
 
                     
-        #self.relationship[key] = self.relationship.get(key, []) + [values]
-        
         

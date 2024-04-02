@@ -1,16 +1,17 @@
 import networkx as nx
-from Node import Node
-from Edge import Edge
+from NodeClass import Node
+from EdgeClass import Edge
 
 # Now most of the functions return the id of the node/edge created/updated
 
 
 class Graph:
     def __init__(self):
-        # self.nxGraph = nx.MultiGraph(selfloops=False, multiedges=True)
+        self.nxGraph = nx.MultiGraph(selfloops=False, multiedges=True)
         self.nodes = {}  # {node.id: node object}
         self.edges = {}  # {edge.id:edge object}
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
+        self.relationships = {}
 
         """
         self.relationships = {
@@ -41,13 +42,6 @@ class Graph:
         print("Node attributes:", node.getAttributes())
         return node
 
-    # adds a new edge
-    def add_edge(self, node1: Node, node2: Node, attributes: dict):
-        edge = Edge(node1, node2, attributes)
-        self.edges[edge.getID()] = edge
-        self.connections[(node1.getID(), node2.getID())] = edge.getID()
-        return edge
-
     # updates a existing node
     def update_node(self, node: Node, attributes: dict):
         print("Updating node:", node.getName())
@@ -55,6 +49,63 @@ class Graph:
         print("Node attributes:", node.getAttributes())
         node.updateAttributes(attributes)
         return node
+
+    # returns list of nodes ids that have the same attribute type and corresponding value
+    # which is use to create/update edges
+    # also update relationships dict
+    # potentially could also split into two functions, but would also have to change functions.py
+    def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
+        relationship_nodes = []
+        node_id = node.getID()
+        """
+        self.relationships = {
+           "Institution": {
+               "UMD": [...] #all nodes with “Institution” relationship, “UMD” value 
+               "Yale": [...]
+           }
+        }
+        """
+
+        # eg check to see if institution is present
+        if attribute_type in self.relationships:
+
+            # eg check to see if UMD is present
+            if attribute_value in self.relationships[attribute_type]:
+
+                # to avoid dups; could also switch to sets?
+                if node_id not in self.relationships[attribute_type][attribute_value]:
+
+                    # return list of other nodes with same attribute type and value; to be use to create/update edges
+                    relationship_nodes = self.relationships[attribute_type][
+                        attribute_value
+                    ]
+                    # update relationships
+                    self.relationships[attribute_type][attribute_value].append(node_id)
+
+                # dont need else cuz then the node associated with that particular attribute type and attribute value is already present in relationships
+                # and has the corresponding edges
+
+            # if UMD is not present, relationships needs to be updated
+            else:
+                self.relationships[attribute_type][attribute_value] = [node_id]
+
+        else:
+            print(type(attribute_value))
+            print(attribute_type)
+            temp_dict = {}
+            temp_dict[attribute_value] = [node_id]
+            self.relationships[attribute_type] = temp_dict
+
+        print("****************************************")
+        print(relationship_nodes)
+        return relationship_nodes
+
+    # adds a new edge
+    def add_edge(self, node1: Node, node2: Node, attributes: dict):
+        edge = Edge(node1, node2, attributes)
+        self.edges[edge.getID()] = edge
+        self.connections[(node1.getID(), node2.getID())] = edge.getID()
+        return edge
 
     # might change later; so keeping it here for now
     def update_edge(self, edge: Edge, attributes: dict):
@@ -91,7 +142,7 @@ class Graph:
     # first attempt for solving disambiguity
     # named_nodes is the list of nodes with the inputted name
     # returns the node object created/updated
-    # probably should be moved to functions.py
+    # NOT NEEDED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     def disambiguation(self, named_nodes: list, name: str, attributes: dict):
         if not named_nodes:
             # If there are no nodes with the provided name, create a new node
@@ -145,3 +196,21 @@ class Graph:
             print(node.getName())
             print(node.getID())
             print(node.getAttributes())
+
+    def print_edges(self):
+        print()
+        for edge in self.edges.values():
+            print("Edge info: ")
+            # print(edge.getNode1().getID())
+            print(edge.getNode1().getName())
+            # print(edge.getNode2().getID())
+            print(edge.getNode2().getName())
+
+            print(edge.getRelationships())
+            print()
+
+    def print_relationships(self):
+        for relationship, nodes in self.relationships.items():
+            print(f"{relationship}:")
+            for value, associated_nodes in nodes.items():
+                print(f"  {value}: {associated_nodes}")
