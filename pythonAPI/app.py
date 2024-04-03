@@ -13,7 +13,8 @@ import requests
 from AutherNode import AuthorNode, PaperNode
 
 sys.path.append('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel')
-from Functions import CreateGraph, AddNodes
+# from Functions import CreateGraph, AddNodes
+from my_func_definitions import CreateGraph, AddNodes
 from Graph import Graph
 '''
 from back_end.new_graphclass.GraphClass.Tester.Joel.Functions import CreateGraph, AddNodes
@@ -47,14 +48,9 @@ def display_author_options(aliases):
             
     return list_of_aliases
 
-def displayAuthor(name):
-    global disamb
-    global aliases_list
+def search(name):
     disamb = fetch_author(name)
     aliases_list = display_author_options(disamb)
-
-    # print statement here, end function
-    print("Enter the number corresponding to the desired author: ")
 
 def parse_author_data(author_data):
     author_nodes = []
@@ -84,7 +80,7 @@ def parse_author_data(author_data):
             author_nodes.append(author_node)
     return author_nodes
 
-def makeAuthor(number, name):
+def makeAuthor(name, number):
     disamb = fetch_author(name)
     list_of_aliases = display_author_options(disamb)
 
@@ -213,7 +209,7 @@ def compile_code():
        
         
     # checks if most recent code line is something like g = CreateGraph("James")
-    if len(parts) > 1 and parts[-2].find("CreateGraph") != -1 and parts[-2].find("csv") == -1:
+    '''if len(parts) > 1 and parts[-2].find("CreateGraph") != -1 and parts[-2].find("csv") == -1:
         # if most recent line is a number btwn 0 to 9 OR keyword 'next'
         name = parts[-2][parts[-2].index("(") + 2:len(parts[-2]) - 1]
         if is_number(parts[-1]):
@@ -221,7 +217,7 @@ def compile_code():
             makeAuthor(int(parts[-1]), name)
         else:
             return jsonify({'output': None, 'error': "Invalid input. Please enter a valid number."})
-        '''global global_graph_name
+        global global_graph_name
         global_graph_name = (parts[-1].split("=")[0]).strip()
         if not global_graph_name:
             return jsonify({'output': None, 'error': str(global_graph_name + ": Not a valid graph name")})'''
