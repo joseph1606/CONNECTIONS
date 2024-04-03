@@ -12,10 +12,10 @@ from flask_cors import CORS
 import requests
 from AutherNode import AuthorNode, PaperNode
 
-sys.path.append('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel')
+sys.path.append('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/finalized_backend')
 # from Functions import CreateGraph, AddNodes
-from my_func_definitions import CreateGraph, AddNodes
-from Graph import Graph
+from Functions import CreateGraph, AddNodes, Vis, Networkx
+from GraphClass import Graph
 '''
 from back_end.new_graphclass.GraphClass.Tester.Joel.Functions import CreateGraph, AddNodes
 from back_end.new_graphclass.GraphClass.Tester.Joel.Graph import input_received, Graph'''
@@ -50,7 +50,7 @@ def display_author_options(aliases):
 
 def search(name):
     disamb = fetch_author(name)
-    aliases_list = display_author_options(disamb)
+    display_author_options(disamb)
 
 def parse_author_data(author_data):
     author_nodes = []
@@ -257,6 +257,7 @@ def upload_file():
         return {'error': 'No file part'}, 400
     file = request.files['file']
     # Do something with the file, e.g., save it to disk
+    # errorChecking and check for errors before saving, change name of csv file
     file.save('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv')
     return {'message': 'File uploaded successfully'}, 200
 

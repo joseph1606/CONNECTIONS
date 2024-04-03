@@ -11,24 +11,6 @@ const REPL = () => {
     const [compiledOutput, setCompiledOutput] = useState([]);
     const [skipConditions, setSkipConditions] = useState([]);
 
-    /* 
-    we may need an alias import list
-
-    disambiguation function that outputs, no output, everything is distinct
-
-    what im thinking:
-    parse csv before it is sent so that we can prompt the user to disambiguate before code is sent to API
-    example:
-    *uploads file*
-    checks if there needs to be disambiguated nodes
-    *** only if relationship type is co-author ***
-    - if there isnt, send the file
-    - if there is, prompt the user with all the entries that would need to be disambiguated
-    the numbers would be sent as a list to the API, or they can be added to the csv file
-    the csv file is sent to the api with the disambiguated numbers in a list or within the csv
-    the disambiguate function can reference those numbers to make a new node or update the same
-    */
-
     /* for popup graph display window */
 
     const openPopup = (htmlData, graphName) => {
@@ -83,6 +65,44 @@ const REPL = () => {
         const file = event.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
+        console.log(formData);
+        /*
+        if (lines[0].length == 3) {
+                const table = []
+
+                for (let i = 1; i < lines.length; i++) {
+                    table.push({
+                        persona: lines[i][0],
+                        relat: lines[i][1],
+                        relatv: lines[i][2],
+                    });
+                }
+
+                setTableData([[], ...table])
+                setFormat(2)
+
+            } else if (lines[0].length == 4) {
+
+                const table = []
+
+                for (let i = 1; i < lines.length; i++) {
+                    table.push({
+                        persona: lines[i][0],
+                        personb: lines[i][1],
+                        relat: lines[i][2],
+                        relatv: lines[i][3],
+                    });
+                }
+
+                setTableData([[], ...table])
+                setFormat(1)
+            } else {
+                document.getElementById('format').textContent = 'Incorrect Format';
+                setTableData([[], []])
+                setFormat(0)
+            }
+        }
+        */
 
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
@@ -125,7 +145,7 @@ const REPL = () => {
             const compiledResult = resp.data.output;
             const functionNameStart = input.indexOf("(");
             const functionName = input.substring(0, functionNameStart);
-            if (functionName === "displayGraph") {
+            if (functionName === "Vis") {
                 const varName = input.substring(functionNameStart + 1, input.length - 1);
                 const respGET = await axios.get('http://127.0.0.1:5000/get_graph?varName=' + varName);
                 if (respGET.data.error) {

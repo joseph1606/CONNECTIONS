@@ -16,6 +16,11 @@ const CSV = () => {
                 lines[index] = lines[index].split(',')
             }
             // console.log(lines)
+            // checks if csv has 3 or 4 columns. if not, throw error
+            // find out how to figure out length of formData
+
+            /* relationship and relationship values are of different length */
+            /* empty cell */
             if (lines[0].length == 3) {
                 const table = []
 
