@@ -43,8 +43,11 @@ def Networkx(graph):
     # add edges to networkx object
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
-     #   if "" THOUGHT ABOUT PUTTING AN IF CHECKING IF DIRECTED but this wouldn't be in the title variable
-        ntx.add_edge(node1_id, node2_id, title=title)
+
+        if "DIRECTED" in graph.edges[edge_id].relationships:
+            ntx.add_edge(node1_id, node2_id, title=title, arrows="to")
+        else:
+            ntx.add_edge(node1_id, node2_id, title=title)
 
     return ntx
 
