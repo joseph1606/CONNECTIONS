@@ -1,21 +1,36 @@
 import networkx as nx
+from timeit import timeit
 
 # import matplotlib.pyplot as plt
-# from GraphClass.Joel.GraphClass import Graph
-# from GraphClass.Joel.NodeClass import Node
-# from GraphClass.Joel.EdgeClass import Edge
+from functions import CreateGraph
+from visualization import Networkx
+from visualization import Vis
 from functions import *
 from visualization import *
-import new_graphclass.GraphClass.finalized_backend.GraphClass
+
+# import new_graphclass.GraphClass.finalized_backend.GraphClass
 
 # from parse import parseData
 
+
 G = CreateGraph(
-    "/Users/elycohen/Desktop/College/Computer Science Classes/CMSC435/team_work/git_connections/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Joel/connections2.csv"
+    "/Users/elycohen/Desktop/College/Computer Science Classes/CMSC435/team_work/git_connections/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Joel/connections.csv"
 )
 
+
 g_nx = Networkx(G)
-Vis(g_nx)
+
+
+def vis(g_nx):
+    Vis(g_nx)
+
+
+time = timeit(
+    lambda: vis(g_nx),
+    number=1,
+)
+
+print(time)
 
 
 """
