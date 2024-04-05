@@ -14,10 +14,13 @@ const REPL = () => {
     /* for popup graph display window */
 
     const openPopup = (htmlData, graphName) => {
+        // opens a new window
         const newWindow = window.open('', '_blank', 'width=600,height=520');
+        // adds a title of the graph name on the window
         const i = htmlData.indexOf("<head>");
         htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
 
+        // writes html content to window
         if (newWindow) {
             const htmlContent = `
             <!DOCTYPE html>
@@ -65,48 +68,14 @@ const REPL = () => {
         const file = event.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
-        console.log(formData);
-        /*
-        if (lines[0].length == 3) {
-                const table = []
-
-                for (let i = 1; i < lines.length; i++) {
-                    table.push({
-                        persona: lines[i][0],
-                        relat: lines[i][1],
-                        relatv: lines[i][2],
-                    });
-                }
-
-                setTableData([[], ...table])
-                setFormat(2)
-
-            } else if (lines[0].length == 4) {
-
-                const table = []
-
-                for (let i = 1; i < lines.length; i++) {
-                    table.push({
-                        persona: lines[i][0],
-                        personb: lines[i][1],
-                        relat: lines[i][2],
-                        relatv: lines[i][3],
-                    });
-                }
-
-                setTableData([[], ...table])
-                setFormat(1)
-            } else {
-                document.getElementById('format').textContent = 'Incorrect Format';
-                setTableData([[], []])
-                setFormat(0)
-            }
-        }
-        */
 
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
-            console.log('File uploaded successfully:', response.data);
+            if (response.data.error) {
+                const compiledError = response.data.error;
+                window.alert(`Your csv has an error: ${compiledError}. You may reupload the csv after error has been addressed.`);
+            }
+            console.log('File sent successfully:', response.data);
         } catch (error) {
             console.error('Error uploading file:', error);
         }
@@ -120,6 +89,7 @@ const REPL = () => {
 
     const handleInputSubmit = async (e) => {
         e.preventDefault();
+        setCountArrowKey(0);
         setOutput([...output, `${input}`]);
         if (input) {
             setPrevInputs([...prevInputs, `${input}`])
@@ -166,6 +136,7 @@ const REPL = () => {
                 } else if (compiledResult) {
                     if (compiledResult.includes('\n')) {
                         const strs = compiledResult.split('\n');
+                        
                         setOutput([...output, input, ...strs]);
                         setCompiledOutput([...compiledOutput, ...strs]);
                         setSkipConditions([...skipConditions, input]);

@@ -15,6 +15,7 @@ from AutherNode import AuthorNode, PaperNode
 sys.path.append('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/finalized_backend')
 # from Functions import CreateGraph, AddNodes
 from Functions import CreateGraph, AddNodes, Vis, Networkx
+from parse import parseData
 from GraphClass import Graph
 '''
 from back_end.new_graphclass.GraphClass.Tester.Joel.Functions import CreateGraph, AddNodes
@@ -258,7 +259,12 @@ def upload_file():
     file = request.files['file']
     # Do something with the file, e.g., save it to disk
     # errorChecking and check for errors before saving, change name of csv file
-    file.save('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv')
+    csv = '/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv'
+    file.save(csv)
+    try:
+        parseData(csv)
+    except Exception as e:
+        return jsonify({'output': None, 'error': str(e)})
     return {'message': 'File uploaded successfully'}, 200
 
 if __name__ == '__main__':
