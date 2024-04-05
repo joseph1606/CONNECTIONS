@@ -48,7 +48,7 @@ def parse_author_data(author_data):
                 paper_count = 0
                 
                 for paper in author["papers"]:
-                    if paper_count >= 5 :
+                    if paper_count >= 1 :
                         break  # Exit loop if ten papers have been processed
                     title = paper.get("title")
                     year = paper.get("year")
@@ -91,8 +91,22 @@ def makeAuthor(name):
         print("No data found. Try again")
 
 def create_coauthor_nodes(author_node):
-    coauthor_nodes = []  # List to store coauthor nodes
-    coauthor_names = set()  # Set to store unique coauthor names
+    coauthor_nodes = {} #this is getting returned to Joel so he can iterate
+    #and add the info correctly to the Graph Object
+    '''
+    {
+    paper1Node: [5, coauthor nodes for paper1],
+    paper2Node: [5, coauthor nodes for paper2]
+    }'''
+     
+    coauthor_names = {} #stores all author nodes created FOR THIS SPECIFIC SEMANTIC SCHOLAR PULL
+    #up to this point, so you can see when going through each paper's coauthors if the coauthor already has 
+    #an existing AuthorNode for it 
+    '''
+    {
+    author_id1: authorNode1,
+    author_id2: authorNode2
+    }'''
     # Iterate through each paper of the author
     for paper in author_node.papers:
         r = requests.post('https://api.semanticscholar.org/graph/v1/author/batch',
@@ -121,6 +135,23 @@ def create_coauthor_nodes(author_node):
                         break
     return coauthor_nodes
 
+'''
+def create data_structute():
+    # returns dict
+    # dict format:
+
+    {
+    
+        papernode1  : list of authornodes,
+
+        papernode2 : list of authornodes2
+
+    }
+
+
+
+
+'''
 
 def generate_author_list(author_name):
     author_list = []
