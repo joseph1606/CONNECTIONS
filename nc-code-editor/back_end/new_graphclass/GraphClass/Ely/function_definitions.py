@@ -47,3 +47,7 @@ def Filter(graph: Graph.Graph, params: str) -> Graph.Graph:
 
 def Merge(graph1: Graph.Graph, graph2: Graph.Graph) -> Graph.Graph:
     pass
+
+
+def Collision(graph1: Graph.Graph, graph2: Graph.Graph) -> dict:
+    pass
