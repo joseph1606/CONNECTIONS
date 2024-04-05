@@ -6,11 +6,23 @@ def parseData(csv):
 
     offset = 0
 
+    # stores as a list all the names (strings) that were put first under the column of person1
     one = df.get(df.columns[0]).tolist()
+
+    #if names have whitespace before or after the actual string it removes this
+    one = [o.strip() for o in one]
+
     two = None
+
+    #checks if the CSV is of type 2 which has 4 columns 
     if len(df.columns) == 4:
+        # stores as a list all the names (strings) that were put first under the column of person2
         two = df.get(df.columns[1]).tolist()
+        
         offset = 1
+
+        #if names have whitespace before or after the actual string it removes this
+        two = [o.strip() for o in two]
     
     three = []
     keys = df.get(df.columns[1 + offset]).tolist()
