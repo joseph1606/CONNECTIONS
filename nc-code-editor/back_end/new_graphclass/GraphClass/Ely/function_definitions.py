@@ -13,6 +13,10 @@ def CreateGraph(csv) -> Graph.Graph:
     pass
 
 
+def SemanticSearch(author_name: str) -> None:
+    pass
+
+
 def Subgraph(graph: Graph.Graph, name: str) -> Graph.Graph:
     pass
 
