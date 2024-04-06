@@ -1,17 +1,2 @@
 Person1, Relationship, Relationship Value
-Joel, sex, male
-Rev, sex, male
-Paul, college, umd
-Joel, college, umd
-Andrew, age, 21
-Walter, age, 21
-Paul, major, cs
-Joel, major, cs
-Andrew, major, architecture
-Joel, major, architecture
-Ely, major, physics
-Paul, sex, male
-collin,sex,male
-collin,major,business
-collin,college,umd
-Ely, age, 21
+Joel, sex,, male

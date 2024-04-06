@@ -51,7 +51,7 @@ class Graph:
 
     # returns list of nodes ids that have the same attribute type and corresponding value
     # which is use to create/update edges
-    # also update relationships dict
+    # also updates relationships dict
     # potentially could also split into two functions, but would also have to change functions.py
     def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
         relationship_nodes = []

@@ -12,62 +12,13 @@ import networkx as nx
 # could also return tuple of (object,int)
 
 
-# if a csv was inputted, it will create nodes based off the csv 
-# else, it will just create and empty graph
-def CreateGraph(csv:str = None):
-    graph = Graph()
-    
-    # case when we need to create nodes from a csv file
-    if csv:
-        (names1, names2, attributes) = parseData(csv)
-
-        if names2 is None:
-            # iterates through each row of inputs
-            for name, attribute in zip(names1, attributes):
-                node = None
-                named_nodes = graph.search_named_nodes(name)
-
-                # if empty -> no node with the name was found
-                # there will also be no edges associated with that node
-                if not named_nodes:
-                    node = graph.add_node(name, attribute)
-
-                # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
-                else:
-                    node = graph.update_node(named_nodes[0], attribute)
-
-                AddNodeHelper(graph, node, attribute)
-
-        else:
-            for name1, name2, attribute in zip(names1, names2, attributes):
-                node1 = None
-                node2 = None
-                named_nodes1 = graph.search_named_nodes(name1)
-                named_nodes2 = graph.search_named_nodes(name2)
-
-                if not named_nodes1:
-                    node1 = graph.add_node(name1, attribute)
-
-                # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
-                else:
-                    node1 = graph.update_node(named_nodes1[0], attribute)
-
-                AddNodeHelper(graph, node1, attribute)
-
-                # to avoid interconnected nodes
-                attribute_dup = copy.copy(attribute)
-
-                if not named_nodes2:
-                    node2 = graph.add_node(name2, attribute_dup)
-
-                # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
-                else:
-                    node2 = graph.update_node(named_nodes2[0], attribute_dup)
-
-                AddNodeHelper(graph, node2, attribute)
-
+# creates a new Graph object from scratch and add nodes to it
+# could change the return type
+def CreateGraph(csv):
+    G = Graph()
+    AddNodes(G, csv)
     # not needed
-    return graph
+    return G
 
 
 # add nodes to a previously defined graph
@@ -80,7 +31,53 @@ def AddNodes(graph: Graph, csv):
     # names2: list[str]
     # attributes: list[dict]
     # eg []
-    
+    (names1, names2, attributes) = parseData(csv)
+
+    if names2 is None:
+        # iterates through each row of inputs
+        for name, attribute in zip(names1, attributes):
+            node = None
+            named_nodes = graph.search_named_nodes(name)
+
+            # if empty -> no node with the name was found
+            # there will also be no edges associated with that node
+            if not named_nodes:
+                node = graph.add_node(name, attribute)
+
+            # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
+            else:
+                node = graph.update_node(named_nodes[0], attribute)
+
+            AddNodeHelper(graph, node, attribute)
+
+    else:
+        for name1, name2, attribute in zip(names1, names2, attributes):
+            node1 = None
+            node2 = None
+            named_nodes1 = graph.search_named_nodes(name1)
+            named_nodes2 = graph.search_named_nodes(name2)
+
+            if not named_nodes1:
+                node1 = graph.add_node(name1, attribute)
+
+            # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
+            else:
+                node1 = graph.update_node(named_nodes1[0], attribute)
+
+            AddNodeHelper(graph, node1, attribute)
+
+            # to avoid interconnected nodes
+            attribute_dup = copy.copy(attribute)
+
+            if not named_nodes2:
+                node2 = graph.add_node(name2, attribute_dup)
+
+            # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
+            else:
+                node2 = graph.update_node(named_nodes2[0], attribute_dup)
+
+            AddNodeHelper(graph, node2, attribute)
+
     return graph
 
 
