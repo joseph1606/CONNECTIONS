@@ -2,6 +2,7 @@ from graphclass import Graph
 from nodeclass import Node
 from edgeclass import Edge
 from parse import parseData
+import networkx as ntx
 import copy
 
 # for both Graph.py and Functions.py, some functions could return int's instead of node/edge/graph objects since changes are already made in the function inside
@@ -153,6 +154,20 @@ def SubGraph(graph: Graph, name: str):
         subgraph.add_node(connected_node.getName(), connected_node.getAttributes())
 
     return subgraph
+
+
+def ShortestPath(graph: Graph, optional, net: nx, source: Node, target: Node) -> list:
+    # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    if not graph:
+        nx.shortest_path(net, source=source.id, target=target.id)
+
+    sp = nx.shortest_path(net, source=source.id, target=target.id)
+    node_sp = []
+
+    for id in sp:
+        node_sp.append(graph.nodes[id])
+
+    return sp
 
     """
     Old code that handled disambiguation

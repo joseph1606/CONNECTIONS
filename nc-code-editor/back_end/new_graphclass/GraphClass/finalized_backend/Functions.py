@@ -7,6 +7,7 @@ import copy
 import networkx as nx
 from pyvis.network import Network
 
+
 # for both Graph.py and Functions.py, some functions could return int's instead of node/edge/graph objects since changes are already made in the function inside
 # having int return (on the based of node/edge creation) could speed up shit
 # could also return tuple of (object,int)
@@ -210,6 +211,20 @@ def Networkx(graph):
         ntx.add_edge(node1_id, node2_id, title=title)
 
     return ntx
+
+
+def ShortestPath(graph: Graph, optional, net: nx, source: Node, target: Node) -> list:
+    # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    if not graph:
+        nx.shortest_path(net, source=source.id, target=target.id)
+
+    sp = nx.shortest_path(net, source=source.id, target=target.id)
+    node_sp = []
+
+    for id in sp:
+        node_sp.append(graph.nodes[id])
+
+    return sp
 
 
 # NEEDS TO TAKE CARE OF DIRECTED RELATIONSHIPS
