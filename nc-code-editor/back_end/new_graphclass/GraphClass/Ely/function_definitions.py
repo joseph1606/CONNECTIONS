@@ -12,7 +12,7 @@ from new_graphclass.GraphClass.finalized_backend.AuthorNode import AuthorNode
 def CreateGraph(csv) -> Graph.Graph:
     pass
 
-
+#INTRODUCING A NEW FUNCTION
 def SemanticSearch(author_name: str) -> None:
     pass
 
@@ -42,12 +42,13 @@ def Filter(graph: Graph.Graph, params: str) -> Graph.Graph:
     pass
 
 
-# skip shortestPath
+def ShortestPath(graph: Graph.Graph, node1: Node, node2: Node, filters: list) -> ?:
+    pass 
 
 
 def Merge(graph1: Graph.Graph, graph2: Graph.Graph) -> Graph.Graph:
     pass
 
-
+#INTRODUCING A NEW FUNCTION 
 def Collision(graph1: Graph.Graph, graph2: Graph.Graph) -> dict:
     pass

@@ -15,6 +15,7 @@ def CreateGraph(csv):
     G = Graph()
     AddNodes(G, csv)
     # not needed
+    G.generateColors()
     return G
 
 

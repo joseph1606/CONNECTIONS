@@ -43,18 +43,29 @@ def Networkx(graph):
     # add edges to networkx object
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
-        ntx.add_edge(node1_id, node2_id, title=title)
+        edge_relationships = list(graph.edges[edge_id].relationships.keys())
+        color = graph.colors[edge_relationships[0]]
 
+        if "DIRECTED" in graph.edges[edge_id].relationships:
+            ntx.add_edge(node1_id, node2_id, title=title, arrows="to")
+        else:
+            ntx.add_edge(node1_id, node2_id, title=title, color=color)
+
+        print(color)
     return ntx
 
 
-# NEEDS TO TAKE CARE OF DIRECTED RELATIONSHIPS
 def titelize(attributes: dict) -> str:
     title = ""
 
     # k should be String, v should be List
     for k, v in attributes.items():
-        title += k + ": " + ", ".join(v) + "\n"
+        if k == "DIRECTED":
+            for inner_key, inner_value in v.items():
+                title += inner_key + ": " + ", ".join(inner_value) + "\n"
+
+        else:
+            title += k + ": " + ", ".join(v) + "\n"
 
     return title
 
