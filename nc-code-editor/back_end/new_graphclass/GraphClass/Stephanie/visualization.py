@@ -6,12 +6,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
-import GraphClass.Ely.graphclass as Graph
-import GraphClass.Ely.edgeclass as Edge
-import GraphClass.Ely.nodeclass as Node
-import GraphClass.Ely.author as Author
-from GraphClass.Ely.author import AuthorNode
-from GraphClass.Ely.author import PaperNode
+import graphclass as Graph
+import edgeclass as Edge
+import nodeclass as Node
+import author as Author
+from author import AuthorNode
+from author import PaperNode
 
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
@@ -43,12 +43,17 @@ def Networkx(graph):
     # add edges to networkx object
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
+        edge_relationships = list(graph.edges[edge_id].relationships.keys())
+        color = graph.colors[edge_relationships[0]]
+
 
         if "DIRECTED" in graph.edges[edge_id].relationships:
             ntx.add_edge(node1_id, node2_id, title=title, arrows="to")
         else:
-            ntx.add_edge(node1_id, node2_id, title=title)
+            ntx.add_edge(node1_id, node2_id, title=title, color=color)
 
+        # print("COLOR: ")
+        # print(color)
     return ntx
 
 
@@ -74,3 +79,6 @@ def paper_string(papers) -> str:
         title += paper.title + ": " + paper.year + "\n"
 
     return title
+
+
+# error in CSV that if person1 is entered and then in another line it's entered as person2 it makes a seperate node
