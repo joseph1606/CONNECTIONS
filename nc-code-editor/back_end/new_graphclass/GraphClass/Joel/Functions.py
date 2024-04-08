@@ -58,12 +58,12 @@ def SubGraph(graph: Graph, chosen_node:Node):
     name = chosen_node.getName()
     attribute = chosen_node.getAttributes()
     
-    node = subgraph.add_node(name, attribute)
+    node = Node(name, attribute)
     
     # returns all edges connected to the chosen node
     connected_edges = graph.search_edge(chosen_node)
-    # used to store all nodes that have an edge with the chosen node
-    connected_nodes = []
+    # used to store all nodes in the new graph
+    connected_nodes = [node]
     # iterates to find other nodes in the edge
     for edge in connected_edges:
         
@@ -85,6 +85,7 @@ def SubGraph(graph: Graph, chosen_node:Node):
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
+# need to convert attributes dict to proper format
 def FilterGraph(graph:Graph,attributes:dict = None):
     
     filter_graph = CreateGraph()
@@ -113,10 +114,11 @@ def FilterGraph(graph:Graph,attributes:dict = None):
             if attribute_type in relationships:
                 # return all college types
                 if attribute_values == []:
+
                     for x in relationships[attribute_type]:
                         list = relationships[attribute_type][x]
                         helper_list.append(list)
-                        
+            
                 else:
                     
                     for attribute_value in attribute_values:
@@ -136,10 +138,15 @@ def FilterGraph(graph:Graph,attributes:dict = None):
                 counter = 0
 
         # filters to ids which have all attributes
+        print(helper_list)
         node_ids = common_ids(helper_list)
+        print(node_ids)
         # iterate through node ids that have all the filters
         for node_id in node_ids:
             filter_nodes.append(nodes_dict[node_id])
+            print(node_id)
+            #print(nodes_dict[node_id].getName())
+            #print(nodes_dict[node_id].getAttributes())
         
         AddNodes(filter_graph,filter_nodes)
         
@@ -172,7 +179,7 @@ def Collision(graph1:Graph, graph2:Graph):
             
     return collision_dict
     
-    
+
 def MergeGraph(graph1:Graph, graph2:Graph, merge_list:list = None):
     merge_graph = CreateGraph()
     nodes1 = graph1.get_nodes()
@@ -196,17 +203,16 @@ def MergeGraph(graph1:Graph, graph2:Graph, merge_list:list = None):
             # iterating through tuple
             name = None
             attribute = {}
-    
+            
             # for merged nodes
             for node in merge_nodes:
+                
                 name = node.getName()
                 attribute.update(node.getAttributes())
-    
                 merge.append(node.getID())
         
-            #merged_node = Node(name,attribute)
-            #nodes_list.append(merged_node)
-            merge_graph.add_node(name,attribute)
+            merged_node = Node(name,attribute)
+            nodes_list.append(merged_node)
         
         all_nodes = nodes1 + nodes2
         # for unmerged nodes

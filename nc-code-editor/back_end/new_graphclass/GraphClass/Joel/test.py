@@ -7,17 +7,30 @@ from Functions import *
 
 from parse import parseData
    
-x = CreateGraph("connections4.csv")
+x = CreateGraph("connections3.csv")
 print("---------------------------------------------------------------------------")
-y = CreateGraph("connections3.csv")
+y = CreateGraph("connections4.csv")
 
 a = GetNodes(x)
 b = GetNodes(y)
-print(a[4].getName())
-print(b[4].getName())
-z = MergeGraph(x,y,[(a[2],b[3]), (a[4],b[4])])
 
 
-z.print_nodes()
+z = MergeGraph(x,y,[(a[0],b[0]), (a[1],b[4]), (a[3],b[1])])
+
+#z = MergeGraph(x,y,[(a[0],b[0])])
+c = GetNodes(z)
+#z.print_nodes()
 #z.print_edges()
 #z.print_relationships()
+p = SubGraph(z,c[7])
+dic = {}
+dic["college"] = []
+#z.print_relationships()
+f = FilterGraph(z,dic)
+d = GetNodes(f)
+
+
+
+#f.print_nodes()
+#f.print_edges()
+#f.print_relationships()
