@@ -48,7 +48,7 @@ def parse_author_data(author_data):
                 paper_count = 0
                 
                 for paper in author["papers"]:
-                    if paper_count >= 1 :
+                    if paper_count >= 5 :
                         break  # Exit loop if ten papers have been processed
                     title = paper.get("title")
                     year = paper.get("year")
@@ -90,23 +90,10 @@ def makeAuthor(name):
     else:
         print("No data found. Try again")
 
-def create_coauthor_nodes(author_node):
-    coauthor_nodes = {} #this is getting returned to Joel so he can iterate
-    #and add the info correctly to the Graph Object
-    '''
-    {
-    paper1Node: [5, coauthor nodes for paper1],
-    paper2Node: [5, coauthor nodes for paper2]
-    }'''
-     
-    coauthor_names = {} #stores all author nodes created FOR THIS SPECIFIC SEMANTIC SCHOLAR PULL
-    #up to this point, so you can see when going through each paper's coauthors if the coauthor already has 
-    #an existing AuthorNode for it 
-    '''
-    {
-    author_id1: authorNode1,
-    author_id2: authorNode2
-    }'''
+
+def gen_coauthor_nodes_list(author_node):
+    coauthor_nodes = []  # List to store coauthor nodes
+    coauthor_names = set()  # Set to store unique coauthor names
     # Iterate through each paper of the author
     for paper in author_node.papers:
         r = requests.post('https://api.semanticscholar.org/graph/v1/author/batch',
@@ -153,17 +140,28 @@ def create data_structute():
 
 '''
 
+def print_coauthor_nodes(coauthor_nodes):
+    print(len(coauthor_nodes))
+    for paper, coauthors_list in coauthor_nodes.items():
+        print(f"Paper: {paper.title}")
+        print(f"Number of coauthors: {len(coauthors_list)}")
+        print("Coauthor nodes:")
+        for coauthor_node in coauthors_list:
+            print_author_details(coauthor_node)
+
+
 def generate_author_list(author_name):
     author_list = []
     author = makeAuthor(author_name)
     if author:
         author_list.append(author)
-        coauthors = create_coauthor_nodes(author)
+        coauthors = gen_coauthor_nodes_list(author)
         author_list.extend(coauthors)  # Extend the list with coauthors
         for each in author_list:
             print_author_details(each)
     else:
         print("Author not found.")
+
 
 def print_author_details(auth):
             print("Name:", auth.name)
@@ -181,10 +179,8 @@ def print_author_details(auth):
             else:
                 print("No papers found")
 
-
 user_input = "James Purtilo"
-# x=makeAuthor(user_input)
-# print_author_details(x)
-#author = makeAuthor(user_input)
-#create_coauthor_nodes(author)
-generate_author_list(user_input)
+author = makeAuthor(user_input)
+# print_author_details(author)
+# print("\n\n\n\n\n\n")
+# generate_author_list(user_input)
