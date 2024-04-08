@@ -4,13 +4,14 @@ from EdgeClass import Edge
 from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
+from pyvis.network import Network
 
 
-# if a csv was inputted, it will create nodes based off the csv 
+# if a csv was inputted, it will create nodes based off the csv
 # else (in the case of no input) it will just create an empty graph -> user can use AddNodes to add nodes to it
-def CreateGraph(csv:str = None):
+def CreateGraph(csv: str = None):
     graph = Graph()
-    
+
     # case when we need to create nodes from a csv file
     if csv:
         (names1, names2, attributes) = parseData(csv)
@@ -18,25 +19,25 @@ def CreateGraph(csv:str = None):
         if names2 is None:
             # iterates through each row of inputs from csv
             for name, attribute in zip(names1, attributes):
-                create_graph_helper(graph,name,attribute)
+                create_graph_helper(graph, name, attribute)
 
         else:
             for name1, name2, attribute in zip(names1, names2, attributes):
-                create_graph_helper(graph,name1,attribute)
-                
-                create_graph_helper(graph,name2,attribute)
-                
+                create_graph_helper(graph, name1, attribute)
+
+                create_graph_helper(graph, name2, attribute)
+
     return graph
 
-    
+
 # add nodes to a previously defined graph
 # takes in a graph object and a list of nodes to be added to that graph object
 # will automatically creates a new node even if a node with the same name already exists -> will not update any exisiting node in the graph
-# otherwise the user can use MergeGraph 
-def AddNodes(graph: Graph, nodes_list:list[Node]):
-    
+# otherwise the user can use MergeGraph
+def AddNodes(graph: Graph, nodes_list: list[Node]):
+
     for node in nodes_list:
-        
+
         name = node.getName()
         attribute = node.getAttributes()
         node = graph.add_node(name, attribute)
@@ -44,40 +45,41 @@ def AddNodes(graph: Graph, nodes_list:list[Node]):
 
     return graph
 
+
 # creates a new graph centered around chosen_node and other nodes connected to it from the inputted graph
-def SubGraph(graph: Graph, chosen_node:Node):
-    
+def SubGraph(graph: Graph, chosen_node: Node):
+
     # is the chosen node even in the graph?
     if chosen_node.getID() not in graph.get_nodes_dict():
-        #print("Node is not in the graph")
+        # print("Node is not in the graph")
         raise ValueError("Node is not in the graph")
-    
+
     subgraph = CreateGraph()
-    
+
     # to avoid interconnected nodes
     name = chosen_node.getName()
     attribute = chosen_node.getAttributes()
-    
+
     node = Node(name, attribute)
-    
+
     # returns all edges connected to the chosen node
     connected_edges = graph.search_edge(chosen_node)
     # used to store all nodes in the new graph
     connected_nodes = [node]
     # iterates to find other nodes in the edge
     for edge in connected_edges:
-        
+
         node1 = edge.getNode1()
         node2 = edge.getNode2()
-        
+
         # second node is the chosen node; first node is the other connected node in that edge
         if node1.getID() != chosen_node.getID():
             connected_nodes.append(node1)
         else:
             connected_nodes.append(node2)
-    
+
     # adding connected nodes to subgraph
-    AddNodes(subgraph,connected_nodes)
+    AddNodes(subgraph, connected_nodes)
 
     return subgraph
 
@@ -86,69 +88,34 @@ def SubGraph(graph: Graph, chosen_node:Node):
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
 # need to convert attributes dict to proper format
-def FilterGraph(graph:Graph,attributes:dict = None):
+
+def FilterGraph(graph: Graph, attributes: dict = None):
+    
+    if not dict:
+        return None 
     
     filter_graph = CreateGraph()
     attributes = format_dict(attributes)
     
-    filter_nodes = []
-    node_ids = []
-    # list of lists
-    helper_list = []
-    # used for filter
-    counter = 1 
+    future_nodes = []
     
-    # returns a copy of the graph
-    if attributes == None:
-        nodes_list = graph.get_nodes()
-        AddNodes(filter_graph,nodes_list)
+    for attr, attr_list in attributes.items():
+        relat_dict = graph.relationships[attr]
         
-    else:
-        # could prob develop a better algo honeslty but for now this will do
-        relationships = graph.get_relationships()
-        nodes_dict = graph.get_nodes_dict()
-        for attribute_type, attribute_values in attributes.items():
-            # breaks when its not possible to have nodes with inputted stuff
-            if (counter == 0) :
-                break
-            
-            # if college is present
-            if attribute_type in relationships:
-                # return all college types
-                if attribute_values == []:
-
-                    for x in relationships[attribute_type]:
-                        list = relationships[attribute_type][x]
-                        helper_list.append(list)
-            
-                else:
+        for value, value_list in relat_dict.items(): 
+            print("Values")
+            print(value,value_list)
+            if (attr_list and value in attr_list) or not attr_list:
+                future_nodes += value_list
                     
-                    for attribute_value in attribute_values:
-                        # is umd present?
-                        if attribute_value in relationships[attribute_type]:  
-                            list = relationships[attribute_type][attribute_value]
-                            helper_list.append(list)
-                            
-                        # if not
-                        else:
-                            helper_list  = []
-                            counter = 0
-            
-            # no college present -> no nodes present that has all filters
-            else:
-                helper_list  = []
-                counter = 0
-
-        # filters to ids which have all attributes
-        node_ids = common_ids(helper_list)
-        # iterate through node ids that have all the filters
-        for node_id in node_ids:
-            filter_nodes.append(nodes_dict[node_id])
+    for i in range(len(future_nodes)):
+        future_nodes[i] = graph.nodes[future_nodes[i]]
         
-        AddNodes(filter_graph,filter_nodes)
+    AddNodes(filter_graph,future_nodes)
         
-        return filter_graph
+    return filter_graph
 
+                 
 # helper function for FilterGraph
 def format_dict(attributes: dict):
     formatted = {}
@@ -162,50 +129,44 @@ def format_dict(attributes: dict):
 
     return formatted
 
-            
-        
-        
-        
-        
+
 # returns a dict
 # key is the name
 # value is a list of nodes with that name
-def Collision(graph1:Graph, graph2:Graph):
+def Collision(graph1: Graph, graph2: Graph):
     nodes1 = graph1.get_nodes()
     nodes2 = graph2.get_nodes()
     collision_dict = {}
-    
+
     for node in nodes1:
         node_name = node.getName()
         if node_name in collision_dict:
             collision_dict[node_name].append(node)
-            
+
         else:
             collision_dict[node_name] = [node]
-            
-            
+
     for node in nodes2:
         node_name = node.getName()
         if node_name in collision_dict:
             collision_dict[node_name].append(node)
-            
+
         else:
             collision_dict[node_name] = [node]
-            
-    return collision_dict
-    
 
-def MergeGraph(graph1:Graph, graph2:Graph, merge_list:list = None):
+    return collision_dict
+
+
+def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
     merge_graph = CreateGraph()
     nodes1 = graph1.get_nodes()
     nodes2 = graph2.get_nodes()
-    
+
     # no merging
     if merge_list == None or merge_list == []:
-        AddNodes(merge_graph,nodes1)
-        AddNodes(merge_graph,nodes2)
+        AddNodes(merge_graph, nodes1)
+        AddNodes(merge_graph, nodes2)
 
-    
     # currently assuming that nodes in merge_list are present in the graphs
     # also currently assuming that the tuples only have nodes with the same name -> prob need a helper function to check
     # also currently assuming that the same node cannot be in multiple diff tuples
@@ -218,17 +179,17 @@ def MergeGraph(graph1:Graph, graph2:Graph, merge_list:list = None):
             # iterating through tuple
             name = None
             attribute = {}
-            
+
             # for merged nodes
             for node in merge_nodes:
-                
+
                 name = node.getName()
                 attribute.update(node.getAttributes())
                 merge.append(node.getID())
-        
-            merged_node = Node(name,attribute)
+
+            merged_node = Node(name, attribute)
             nodes_list.append(merged_node)
-        
+
         all_nodes = nodes1 + nodes2
         # for unmerged nodes
         for node in all_nodes:
@@ -236,19 +197,18 @@ def MergeGraph(graph1:Graph, graph2:Graph, merge_list:list = None):
                 name = node.getName()
                 attribute = node.getAttributes()
                 nodes_list.append(node)
-                
-                
-        AddNodes(merge_graph,nodes_list)
 
+        AddNodes(merge_graph, nodes_list)
 
     return merge_graph
 
 
 # returns a list of Nodes in a Graph
-def GetNodes(graph:Graph):
+def GetNodes(graph: Graph):
     return graph.get_nodes()
 
-# helper function for filter               
+
+# helper function for filter
 def common_ids(list_of_lists):
     if not list_of_lists:
         return []
@@ -265,22 +225,23 @@ def common_ids(list_of_lists):
 
     return result_list
 
+
 # helper function to create graphs -> uses link_nodes which is needed
-def create_graph_helper(graph:Graph, name:str, attribute: dict):
+def create_graph_helper(graph: Graph, name: str, attribute: dict):
 
-        named_nodes = graph.search_named_nodes(name)
+    named_nodes = graph.search_named_nodes(name)
 
-        # if empty -> no node with the name was found
-        if not named_nodes:
-            node = graph.add_node(name, attribute)
+    # if empty -> no node with the name was found
+    if not named_nodes:
+        node = graph.add_node(name, attribute)
 
-        # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
-        else:
-            node = graph.update_node(named_nodes[0], attribute)
+    # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
+    else:
+        node = graph.update_node(named_nodes[0], attribute)
 
-        link_nodes(graph, node, attribute)
-    
-                
+    link_nodes(graph, node, attribute)
+
+
 # essentially updates relationships dict and edge information
 def link_nodes(graph: Graph, node: Node, attribute: dict):
     node_id = node.getID()
@@ -290,17 +251,18 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
     for attribute_type, attribute_value in attribute.items():
         temp_dict = {}
         temp_dict[attribute_type] = attribute_value
-        
-        
+
         # returns list of nodes id with the same attribute type and value that isnt the inputted node
         # note -> do i need to iterate through attribute value or will it always only haev one element
         #      -> i will prob need to iterate cuz of something like college:[umd,umbc]
-        for single_attribute_value in attribute_value:  
-            relationship_nodes = graph.relationship_nodes(node, attribute_type, single_attribute_value)
-        
-        #relationship_nodes = graph.relationship_nodes(node, attribute_type, attribute_value[0])
-        # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
-        # if not empty then we need to create edges
+        for single_attribute_value in attribute_value:
+            relationship_nodes = graph.relationship_nodes(
+                node, attribute_type, single_attribute_value
+            )
+
+            # relationship_nodes = graph.relationship_nodes(node, attribute_type, attribute_value[0])
+            # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
+            # if not empty then we need to create edges
             if relationship_nodes:
 
                 for relationship_node_id in relationship_nodes:
@@ -317,7 +279,6 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
                         # else update the edge
                         else:
                             graph.update_edge(edge[0], temp_dict)
-
 
     """
     Old code that handled disambiguation
