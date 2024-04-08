@@ -1,5 +1,17 @@
 import requests
 from AuthorNode import AuthorNode, PaperNode
+"""
+Only function to be used is : generate_author_dict() | generate_author_dict(numpapers) 
+Examples of execution:
+dict1 = generate_author_dict()
+dict2 = generate_author_dict(6) 
+numpaper is a numeric value that the user can enter and corresponds to the number of papers of the author to be processed.
+If numpaper is missing, default value is 5
+
+generate_author_dict() returns a dictionary where each key is a PaperNode object corresponding to each paper of the initial
+author and the value is a list of coauthor nodes corresponding to that Paper
+ 
+"""
 
 
 # Function to fetch author data from the Semantic Scholar API
@@ -141,7 +153,7 @@ def generate_author_dict(numpapers=5):
     author = makeAuthor(author_name, numpapers)
     if author:
         coauthors_dict = create_coauthor_nodes(author)
-        print_coauthor_info(coauthors_dict)
+        #print_coauthor_info(coauthors_dict) #printing each author for checking
         return coauthors_dict
     else:
         print("Author not found. Please try again:")
@@ -169,17 +181,17 @@ def print_coauthor_info(coauthors_dict):
 
 # Function to print author details
 def print_author_details(auth):
-    print("Name:", auth.name)
-    print("Aliases:", ", ".join(auth.aliases))
-    print("URL:", auth.url)
+    print("\tName:", auth.name)
+    print("\tAliases:", ", ".join(auth.aliases))
+    print("\tURL:", auth.url)
     if auth.papers:
-        print("Papers:")
+        print("\tPapers:")
         for paper in auth.papers:
-            print("\tTitle:", paper.title)
-            print("\tYear:", paper.year)
-            print("\tAuthors:")
+            print("\t\tTitle:", paper.title)
+            print("\t\tYear:", paper.year)
+            print("\t\tAuthors:")
             for author in paper.authors:
-                print(f"\t\tName: {author[0]}, Author ID: {author[1]}")
+                print(f"\t\t\tName: {author[0]}, Author ID: {author[1]}")
             print()
     else:
         print("No papers found")
