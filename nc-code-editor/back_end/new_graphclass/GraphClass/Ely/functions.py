@@ -2,7 +2,7 @@ from graphclass import Graph
 from nodeclass import Node
 from edgeclass import Edge
 from parse import parseData
-import networkx as ntx
+import networkx as nx
 import copy
 
 # for both Graph.py and Functions.py, some functions could return int's instead of node/edge/graph objects since changes are already made in the function inside
