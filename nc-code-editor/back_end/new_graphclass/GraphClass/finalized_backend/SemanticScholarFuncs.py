@@ -197,5 +197,5 @@ def print_author_details(auth):
         print("No papers found")
 
 # Both methods of execution:
-generate_author_dict()
+# generate_author_dict()
 # generate_author_dict(6)
