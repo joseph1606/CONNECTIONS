@@ -90,33 +90,32 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # attributes should be a dict like {str:[str]}
 # need to convert attributes dict to proper format
 
+
 def FilterGraph(graph: Graph, attributes: dict = None):
-    
+
     if not dict:
-        return None 
-    
+        return None
+
     filter_graph = CreateGraph()
     attributes = format_dict(attributes)
-    
+
     future_nodes = []
-    
+
     for attr, attr_list in attributes.items():
         relat_dict = graph.relationships[attr]
-        
-        for value, value_list in relat_dict.items(): 
-            print("Values")
-            print(value,value_list)
+
+        for value, value_list in relat_dict.items():
             if (attr_list and value in attr_list) or not attr_list:
                 future_nodes += value_list
-                    
+
     for i in range(len(future_nodes)):
         future_nodes[i] = graph.nodes[future_nodes[i]]
-        
-    AddNodes(filter_graph,future_nodes)
-        
+
+    AddNodes(filter_graph, future_nodes)
+
     return filter_graph
 
-                 
+
 # helper function for FilterGraph
 def format_dict(attributes: dict):
     formatted = {}
@@ -155,10 +154,10 @@ def Collision(graph1: Graph, graph2: Graph):
         else:
             collision_dict[node_name] = [node]
 
-    for key,value in collision_dict.items():
+    for key, value in collision_dict.items():
         if len(value) <= 1:
             del collision_dict[key]
-        
+
     return collision_dict
 
 
@@ -285,37 +284,46 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
                         else:
                             graph.update_edge(edge[0], temp_dict)
 
-    """
-    Old code that handled disambiguation
-    # to avoid interconnected nodes if a new node was created
-    # idk why but shallow copy works
-    # technically if a new node was created for named_nodes1, there wouldn't need to be a need to shallow copy
-    attribute_dup = copy.deepcopy(attribute) if attribute else {}
 
-    disambiguated_node1 = graph.disambiguation(named_nodes1, name1, attribute)
-    disambiguated_node2 = graph.disambiguation(named_nodes2, name2, attribute_dup)
+def ShortestPath(
+    source: Node, target: Node, graph: Graph = None, net: nx = None
+) -> list:
+    # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    if not graph:
+        nx.shortest_path(net, source=source.id, target=target.id)
 
-    # technically if a new node was created in disambiguation there wouldn't be a need to check for an edge
-    # search_edge returns a list of edges; here since two nodes are inputted it returns either an empty list or a list with just one edge
-    edge_objects = graph.search_edge(disambiguated_node1, disambiguated_node2)
+    sp = nx.shortest_path(net, source=source.id, target=target.id)
+    node_sp = []
 
-    # if there was no edge
-    if not edge_objects:
-        graph.add_edge(disambiguated_node1, disambiguated_node2, attribute)
-            
-    # if there was an edge, search_edge returns [edge]
-    else:
-        graph.update_edge(edge_objects[0], attribute)
-    """
+    for id in sp:
+        node_sp.append(graph.nodes[id])
+
+    return sp
 
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
 def Vis(ntx):
     nt = Network("500px", "500px")
     # fancy rendering here
-    nt.from_nx(ntx)
+
+    for node_id in ntx.nodes():
+        nt.add_node(
+            node_id,
+            label=ntx.nodes[node_id]["label"],
+            title=ntx.nodes[node_id]["title"],
+            size=22,
+        )
+
+    for u, v, data in ntx.edges(data=True):
+        nt.add_edge(
+            u, v, title=data["title"], color="rgb{}".format(data["color"]), width=3.6
+        )
+
+    # nt.from_nx(ntx)
     nt.toggle_physics(True)
-    nt.show("ntx.html", notebook=False)
+    nt.show(
+        "ntx.html", notebook=False
+    )  # something between frontend/backend happens here for rendering, but this is the basics
 
 
 def Networkx(graph):
@@ -336,12 +344,14 @@ def Networkx(graph):
     # add edges to networkx object
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
-        ntx.add_edge(node1_id, node2_id, title=title)
+        edge_relationships = list(graph.edges[edge_id].relationships.keys())
+        color = graph.colors[edge_relationships[0]]
+
+        ntx.add_edge(node1_id, node2_id, title=title, color=color)
 
     return ntx
 
 
-# NEEDS TO TAKE CARE OF DIRECTED RELATIONSHIPS
 def titelize(attributes: dict) -> str:
     title = ""
 
