@@ -186,18 +186,13 @@ def FilterGraph(graph: Graph, attributes: dict = None):
                 counter = 0
 
         # filters to ids which have all attributes
-        # print(helper_list)
         node_ids = common_ids(helper_list)
-        # print(node_ids)
         # iterate through node ids that have all the filters
         for node_id in node_ids:
             filter_nodes.append(nodes_dict[node_id])
-            # print(node_id)
-            # print(nodes_dict[node_id].getName())
-            # print(nodes_dict[node_id].getAttributes())
-
-        AddNodes(filter_graph, filter_nodes)
-
+        
+        AddNodes(filter_graph,filter_nodes)
+        
         return filter_graph
 
 
