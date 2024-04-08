@@ -1,6 +1,6 @@
 
 class Node:
-    def __init__(self, name: str, attributes: dict = None):
+    def __init__(self, name: str, attributes: dict):
 
         self.id = id(self)
         self.name = name
@@ -29,19 +29,13 @@ class Node:
     # return self.attributes_id
 
     # attributes = {str:list[str]}
-    # {'institution': ['umd', 'yale', 'columbia']}
+    # {'institution': ['umd', 'yale', 'columbia'],
+    #   'directed' : {mentor:[purtilo]}
+    # 
+    # }
+    #
     def updateAttributes(self, attributes: dict):
         for key, value in attributes.items():
-
-            # might change to below code tbh
-
-            # checks if key is present
-            # if key in self.attributes:
-            # if value not in self.attributes[key]:
-            # self.attributes[key].append(value)
-
-            # else:
-            # self.attributes[key] = value
 
             # checks if key is present
             if key in self.attributes:

@@ -1,7 +1,5 @@
 Person1, Person2, Relationship, Relationship Value
-Walter,andrew,"sex,college","male,umd"
-paUl, stephanie, cmsc435, connections
-PAUL, walTer, connections, parsing
-ELY, paul, sex,male
-walter, REV, sex,female
-REV,Paul, hair,brown
+joel,ely,class,cmsc435
+ElY, Rev, age,21
+Paul, StePHanie, connections, group1
+ANDREW,Walter,connections,group2

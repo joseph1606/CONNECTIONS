@@ -9,8 +9,12 @@ class Graph:
         self.edges = {}  # {edge.id:edge object}
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
         self.relationships = {}
+        
+        
+        self.directed = {}
 
         """
+        
         self.relationships = {
            "Institution": {
                "UMD": [...] #all nodes with “Institution” relationship, “UMD” value 
@@ -24,6 +28,17 @@ class Graph:
                "Paper Name": [.....] #ALL AUTHOR NODES 
                "Paper Name2": [...]
            }
+           
+           "directed":{
+               "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
+           }
+     
+        }
+        
+        self.directed = {
+        
+               "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
+
         }
         """
 

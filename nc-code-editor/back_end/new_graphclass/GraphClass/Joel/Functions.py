@@ -37,9 +37,9 @@ def CreateGraph(csv: str = None):
 def AddNodes(graph: Graph, nodes_list: list[Node]):
 
     for node in nodes_list:
+
         name = node.getName()
         attribute = node.getAttributes()
-
         node = graph.add_node(name, attribute)
         link_nodes(graph, node, attribute)
 
@@ -60,11 +60,11 @@ def SubGraph(graph: Graph, chosen_node: Node):
     name = chosen_node.getName()
     attribute = chosen_node.getAttributes()
 
-    node = graph.add_node(name, attribute)
+    node = Node(name, attribute)
 
     # returns all edges connected to the chosen node
     connected_edges = graph.search_edge(chosen_node)
-    # used to store all nodes that have an edge with the chosen node
+    # used to store all nodes in the new graph
     connected_nodes = [node]
     # iterates to find other nodes in the edge
     for edge in connected_edges:
@@ -87,14 +87,17 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
+# need to convert attributes dict to proper format
 def FilterGraph(graph: Graph, attributes: dict = None):
 
     filter_graph = CreateGraph()
+    attributes = format_dict(attributes)
+
     filter_nodes = []
     node_ids = []
     # list of lists
     helper_list = []
-    # used or filter
+    # used for filter
     counter = 1
 
     # returns a copy of the graph
@@ -115,6 +118,7 @@ def FilterGraph(graph: Graph, attributes: dict = None):
             if attribute_type in relationships:
                 # return all college types
                 if attribute_values == []:
+
                     for x in relationships[attribute_type]:
                         list = relationships[attribute_type][x]
                         helper_list.append(list)
@@ -138,14 +142,33 @@ def FilterGraph(graph: Graph, attributes: dict = None):
                 counter = 0
 
         # filters to ids which have all attributes
+        # print(helper_list)
         node_ids = common_ids(helper_list)
+        # print(node_ids)
         # iterate through node ids that have all the filters
         for node_id in node_ids:
             filter_nodes.append(nodes_dict[node_id])
+            # print(node_id)
+            # print(nodes_dict[node_id].getName())
+            # print(nodes_dict[node_id].getAttributes())
 
         AddNodes(filter_graph, filter_nodes)
 
         return filter_graph
+
+
+# helper function for FilterGraph
+def format_dict(attributes: dict):
+    formatted = {}
+
+    for attribute_type, attribute_values in attributes.items():
+        attribute_type = attribute_type.lower()
+        formatted[attribute_type] = []
+
+        for attribute_value in attribute_values:
+            formatted[attribute_type].append(attribute_value.lower())
+
+    return formatted
 
 
 # returns a dict
@@ -200,14 +223,13 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
             # for merged nodes
             for node in merge_nodes:
+
                 name = node.getName()
                 attribute.update(node.getAttributes())
-
                 merge.append(node.getID())
 
-            # merged_node = Node(name,attribute)
-            # nodes_list.append(merged_node)
-            merge_graph.add_node(name, attribute)
+            merged_node = Node(name, attribute)
+            nodes_list.append(merged_node)
 
         all_nodes = nodes1 + nodes2
         # for unmerged nodes
