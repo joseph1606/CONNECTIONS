@@ -24,8 +24,10 @@ c = GetNodes(z)
 #z.print_relationships()
 p = SubGraph(z,c[7])
 dic = {}
-dic["college"] = []
+dic["CollEge"] = ["UMD"]
 #z.print_relationships()
+print(format_dict(dic))
+
 f = FilterGraph(z,dic)
 d = GetNodes(f)
 

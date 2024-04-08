@@ -89,11 +89,13 @@ def SubGraph(graph: Graph, chosen_node:Node):
 def FilterGraph(graph:Graph,attributes:dict = None):
     
     filter_graph = CreateGraph()
+    attributes = format_dict(attributes)
+    
     filter_nodes = []
     node_ids = []
     # list of lists
     helper_list = []
-    # used or filter
+    # used for filter
     counter = 1 
     
     # returns a copy of the graph
@@ -138,13 +140,13 @@ def FilterGraph(graph:Graph,attributes:dict = None):
                 counter = 0
 
         # filters to ids which have all attributes
-        print(helper_list)
+        #print(helper_list)
         node_ids = common_ids(helper_list)
-        print(node_ids)
+        #print(node_ids)
         # iterate through node ids that have all the filters
         for node_id in node_ids:
             filter_nodes.append(nodes_dict[node_id])
-            print(node_id)
+            #print(node_id)
             #print(nodes_dict[node_id].getName())
             #print(nodes_dict[node_id].getAttributes())
         
@@ -152,6 +154,24 @@ def FilterGraph(graph:Graph,attributes:dict = None):
         
         return filter_graph
 
+# helper function for FilterGraph
+def format_dict(attributes: dict):
+    formatted = {}
+
+    for attribute_type, attribute_values in attributes.items():
+        attribute_type = attribute_type.lower()
+        formatted[attribute_type] = []
+
+        for attribute_value in attribute_values:
+            formatted[attribute_type].append(attribute_value.lower())
+
+    return formatted
+
+            
+        
+        
+        
+        
 # returns a dict
 # key is the name
 # value is a list of nodes with that name
