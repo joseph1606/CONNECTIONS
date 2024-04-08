@@ -154,6 +154,10 @@ def Collision(graph1: Graph, graph2: Graph):
         else:
             collision_dict[node_name] = [node]
 
+    for key,value in collision_dict.items():
+        if len(value) <= 1:
+            del collision_dict[key]
+        
     return collision_dict
 
 
