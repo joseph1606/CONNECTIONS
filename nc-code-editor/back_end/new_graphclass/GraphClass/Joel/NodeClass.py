@@ -1,3 +1,4 @@
+
 class Node:
     def __init__(self, name: str, attributes: dict = None):
 
@@ -7,7 +8,7 @@ class Node:
         # Create a deep copy of the original dictionary if attributes are provided
         # self.attributes = copy.deepcopy(attributes) if attributes else {}
         self.attributes = attributes
-        # self.attributes_id = id(attributes)
+        self.attributes_id = id(attributes)
 
         # shallow copy
         # self.attributes = dict(attributes) if attributes else {}

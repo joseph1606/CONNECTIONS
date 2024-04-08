@@ -1,2 +1,4 @@
-Person1, Relationship, Relationship Value
-Joel, sex,, male
+Person1, Person2, Relationship, Relationship Value
+Joel,Ely,"sex,age","male,21"
+rev,paul,college,umd
+ely,purtilo,DIRECTED,Mentor/Mentee
