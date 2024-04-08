@@ -36,9 +36,9 @@ def CreateGraph(csv:str = None):
 def AddNodes(graph: Graph, nodes_list:list[Node]):
     
     for node in nodes_list:
+        
         name = node.getName()
         attribute = node.getAttributes()
-
         node = graph.add_node(name, attribute)
         link_nodes(graph, node, attribute)
 
@@ -58,12 +58,12 @@ def SubGraph(graph: Graph, chosen_node:Node):
     name = chosen_node.getName()
     attribute = chosen_node.getAttributes()
     
-    node = graph.add_node(name, attribute)
+    node = subgraph.add_node(name, attribute)
     
     # returns all edges connected to the chosen node
     connected_edges = graph.search_edge(chosen_node)
     # used to store all nodes that have an edge with the chosen node
-    connected_nodes = [node]
+    connected_nodes = []
     # iterates to find other nodes in the edge
     for edge in connected_edges:
         
