@@ -5,6 +5,9 @@ from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
 from pyvis.network import Network
+from SemanticScholarFuncs import generate_author_dict
+
+DIRECTED = "DIRECTED"
 
 
 # if a csv was inputted, it will create nodes based off the csv
@@ -23,11 +26,52 @@ def CreateGraph(csv: str = None):
 
         else:
             for name1, name2, attribute in zip(names1, names2, attributes):
-                create_graph_helper(graph, name1, attribute)
+                # creates first node
+                node1 = create_graph_helper(graph, name1, attribute)
+                # creates second node
+                node2 = create_graph_helper(graph, name2, attribute)
 
-                create_graph_helper(graph, name2, attribute)
+                if DIRECTED in attribute:
+                    # adding to relationships accordingly
+                    (one, two) = attribute[DIRECTED]
+
+                    if DIRECTED in node1.getAttributes():
+                        node1.attributes[DIRECTED][two].append(node2)
+                    else:
+                        node1.attributes[DIRECTED] = {}
+                        node1.attributes[DIRECTED][two] = [node2]
+
+                    if DIRECTED in node2.getAttributes():
+                        node2.attriutes[DIRECTED][one].append(node1)
+                    else:
+                        node2.attributes[DIRECTED] = {}
+                        node2.attributes[DIRECTED][one] = [node1]
 
     return graph
+
+
+"""
+CSV INPUT: ely, purtilo, DIRECTED, Mentor/Mentee 
+graph.attributes = {
+        "DIRECTED": {
+            "Mentor": [Node1]
+        }
+}"""
+
+# {
+# "PaperNode": [.....] #ALL AUTHOR NODES
+# "PaperNode2": [...]
+# }
+
+
+def SemanticSearch(author: str) -> Graph:
+    author_dict = generate_author_dict(author)
+    graph = Graph()
+
+    for paper, auth_list in author_dict.items():
+        pass
+
+    # TO BE FINISHED
 
 
 # add nodes to a previously defined graph
@@ -195,6 +239,10 @@ def Collision(graph1: Graph, graph2: Graph):
         else:
             collision_dict[node_name] = [node]
 
+    for key, value in collision_dict.items():
+        if len(value) == 1:
+            del collision_dict[key]
+
     return collision_dict
 
 
@@ -212,7 +260,7 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
     # also currently assuming that the tuples only have nodes with the same name -> prob need a helper function to check
     # also currently assuming that the same node cannot be in multiple diff tuples
     else:
-        # stores list of nodes that were merged; used to make sure we dont over merge shit
+        # stores list of nodes that were merged; used to make sure we dont overmerge
         merge = []
         # stores new nodes to be added
         nodes_list = []
@@ -224,9 +272,9 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
             # for merged nodes
             for node in merge_nodes:
 
-                name = node.getName()
-                attribute.update(node.getAttributes())
-                merge.append(node.getID())
+                name = node.name
+                attribute.update(node.attributes)
+                merge.append(node.id)
 
             merged_node = Node(name, attribute)
             nodes_list.append(merged_node)
@@ -234,9 +282,9 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
         all_nodes = nodes1 + nodes2
         # for unmerged nodes
         for node in all_nodes:
-            if node.getID() not in merge:
-                name = node.getName()
-                attribute = node.getAttributes()
+            if node.id not in merge:
+                name = node.name
+                attribute = node.attributes
                 nodes_list.append(node)
 
         AddNodes(merge_graph, nodes_list)
@@ -290,36 +338,38 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
     # eg {sex:[male], college:[umd]}
     # it iterates twice in the above example
     for attribute_type, attribute_value in attribute.items():
-        temp_dict = {}
-        temp_dict[attribute_type] = attribute_value
+        if attribute_type != DIRECTED:
 
-        # returns list of nodes id with the same attribute type and value that isnt the inputted node
-        # note -> do i need to iterate through attribute value or will it always only haev one element
-        #      -> i will prob need to iterate cuz of something like college:[umd,umbc]
-        for single_attribute_value in attribute_value:
-            relationship_nodes = graph.relationship_nodes(
-                node, attribute_type, single_attribute_value
-            )
+            temp_dict = {}
+            temp_dict[attribute_type] = attribute_value
 
-            # relationship_nodes = graph.relationship_nodes(node, attribute_type, attribute_value[0])
-            # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
-            # if not empty then we need to create edges
-            if relationship_nodes:
+            # returns list of nodes id with the same attribute type and value that isnt the inputted node
+            # note -> do i need to iterate through attribute value or will it always only haev one element
+            #      -> i will prob need to iterate cuz of something like college:[umd,umbc]
+            for single_attribute_value in attribute_value:
+                relationship_nodes = graph.relationship_nodes(
+                    node, attribute_type, single_attribute_value
+                )
 
-                for relationship_node_id in relationship_nodes:
-                    # checks to see if theres an exisitng edge between the two nodes
-                    # makes sure it doesnt create an edge with itself
-                    if relationship_node_id != node_id:
-                        relationship_node = graph.get_node(relationship_node_id)
-                        edge = graph.search_edge(node, relationship_node)
+                # relationship_nodes = graph.relationship_nodes(node, attribute_type, attribute_value[0])
+                # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
+                # if not empty then we need to create edges
+                if relationship_nodes:
 
-                        # if there was no edge
-                        if not edge:
-                            graph.add_edge(node, relationship_node, temp_dict)
+                    for relationship_node_id in relationship_nodes:
+                        # checks to see if theres an exisitng edge between the two nodes
+                        # makes sure it doesnt create an edge with itself
+                        if relationship_node_id != node_id:
+                            relationship_node = graph.get_node(relationship_node_id)
+                            edge = graph.search_edge(node, relationship_node)
 
-                        # else update the edge
-                        else:
-                            graph.update_edge(edge[0], temp_dict)
+                            # if there was no edge
+                            if not edge:
+                                graph.add_edge(node, relationship_node, temp_dict)
+
+                            # else update the edge
+                            else:
+                                graph.update_edge(edge[0], temp_dict)
 
     """
     Old code that handled disambiguation

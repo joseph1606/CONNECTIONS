@@ -1,3 +1,5 @@
+from Functions import DIRECTED
+
 
 class Node:
     def __init__(self, name: str, attributes: dict):
@@ -31,7 +33,7 @@ class Node:
     # attributes = {str:list[str]}
     # {'institution': ['umd', 'yale', 'columbia'],
     #   'directed' : {mentor:[purtilo]}
-    # 
+    #
     # }
     #
     def updateAttributes(self, attributes: dict):

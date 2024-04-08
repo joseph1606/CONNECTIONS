@@ -6,6 +6,7 @@ from parse import parseData
 import copy
 import networkx as nx
 from pyvis.network import Network
+from SemanticScholarFuncs import generate_author_dict
 
 
 # for both Graph.py and Functions.py, some functions could return int's instead of node/edge/graph objects since changes are already made in the function inside

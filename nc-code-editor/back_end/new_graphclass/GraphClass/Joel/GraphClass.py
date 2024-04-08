@@ -3,14 +3,13 @@ from NodeClass import Node
 from EdgeClass import Edge
 import copy
 
+
 class Graph:
     def __init__(self):
         self.nodes = {}  # {node.id: node object}
         self.edges = {}  # {edge.id:edge object}
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
         self.relationships = {}
-        
-        
         self.directed = {}
 
         """
@@ -25,8 +24,8 @@ class Graph:
                "34": [...]
            }
            "Coauthor": {
-               "Paper Name": [.....] #ALL AUTHOR NODES 
-               "Paper Name2": [...]
+               "PaperNode": [.....] #ALL AUTHOR NODES 
+               "PaperNode2": [...]
            }
            
            "directed":{
@@ -50,20 +49,20 @@ class Graph:
         attributes = copy.deepcopy(attributes)
         node = Node(name, attributes)
         self.nodes[node.getID()] = node
-        #print("Creating new node:", node.getName())
-        #print("Node id:", node.getID())
-        #print("Node attributes:", node.getAttributes())
+        # print("Creating new node:", node.getName())
+        # print("Node id:", node.getID())
+        # print("Node attributes:", node.getAttributes())
         return node
 
     # updates a existing node
     def update_node(self, node: Node, attributes: dict):
-        #print("Updating node:", node.getName())
-        #print("Node id:", node.getID())
-        #print("Node attributes:", node.getAttributes())
+        # print("Updating node:", node.getName())
+        # print("Node id:", node.getID())
+        # print("Node attributes:", node.getAttributes())
         attributes = copy.deepcopy(attributes)
         node.updateAttributes(attributes)
         return node
-    
+
     # adds a new edge
     def add_edge(self, node1: Node, node2: Node, attributes: dict):
         attributes = copy.deepcopy(attributes)
@@ -103,11 +102,13 @@ class Graph:
                 if node_id not in self.relationships[attribute_type][attribute_value]:
 
                     # return list of other nodes with same attribute type and value; to be use to create/update edges
-                    relationship_nodes = self.relationships[attribute_type][attribute_value]
+                    relationship_nodes = self.relationships[attribute_type][
+                        attribute_value
+                    ]
                     # update relationships
                     self.relationships[attribute_type][attribute_value].append(node_id)
 
-                # dont need else cuz then the node associated with that particular attribute type and attribute value 
+                # dont need else cuz then the node associated with that particular attribute type and attribute value
                 # is already present in relationships and has the corresponding edges
 
             # if UMD is not present, relationships needs to be updated
@@ -121,10 +122,9 @@ class Graph:
             temp_dict[attribute_value] = [node_id]
             self.relationships[attribute_type] = temp_dict
 
-        #print("****************************************")
-        #print(relationship_nodes)
+        # print("****************************************")
+        # print(relationship_nodes)
         return relationship_nodes
-
 
     # returns a list of nodes that have the inputted name
     def search_named_nodes(self, name: str):
@@ -146,9 +146,12 @@ class Graph:
         else:
             # If two nodes are provided, search for the edge between those nodes
             for (n1_id, n2_id), edge_id in self.connections.items():
-                if (n1_id == node1.getID() and n2_id == node2.getID()) or (n1_id == node2.getID() and n2_id == node1.getID()):
+                if (n1_id == node1.getID() and n2_id == node2.getID()) or (
+                    n1_id == node2.getID() and n2_id == node1.getID()
+                ):
                     edge_objects.append(self.edges[edge_id])
-            
+                    break
+
             """
             # could also do; should be faster
             node1 = node1.getID()
@@ -163,24 +166,23 @@ class Graph:
 
         return edge_objects
 
-    
     def get_node(self, node_id: int):
         if node_id in self.nodes:
             return self.nodes[node_id]
         else:
             return None
-        
+
     # returns a list of all nodes in the graph
     def get_nodes(self):
         nodes = []
         for node_id, node in self.nodes.items():
             nodes.append(node)
         return nodes
-    
+
     # returns nodes dict
     def get_nodes_dict(self):
         return self.nodes
-    
+
     def get_relationships(self):
         return self.relationships
 
@@ -207,14 +209,13 @@ class Graph:
         for relationship, nodes in self.relationships.items():
             print("=======================")
             print(f"{relationship}:")
-            
+
             for value, associated_nodes in nodes.items():
                 print(f"{value}:")
                 for node_id in associated_nodes:
-                    #print(f"{node_id}")
+                    # print(f"{node_id}")
                     print(f"{self.nodes[node_id].getName()}")
                 print()
-
 
 
 """

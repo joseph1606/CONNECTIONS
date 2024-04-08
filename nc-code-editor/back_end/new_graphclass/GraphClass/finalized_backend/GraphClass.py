@@ -1,6 +1,7 @@
 import networkx as nx
 from NodeClass import Node
 from EdgeClass import Edge
+
 # Now most of the functions return the id of the node/edge created/updated
 
 
@@ -136,51 +137,6 @@ class Graph:
                     edge_objects.append(self.edges[edge_id])
 
         return edge_objects
-
-    # first attempt for solving disambiguity
-    # named_nodes is the list of nodes with the inputted name
-    # returns the node object created/updated
-    # NOT NEEDED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    def disambiguation(self, named_nodes: list, name: str, attributes: dict):
-        if not named_nodes:
-            # If there are no nodes with the provided name, create a new node
-            new_node = self.add_node(name, attributes)
-            return new_node
-
-        print("+++++++++++++++++++++++++++++++++++++++++++")
-        for i, node in enumerate(named_nodes, start=1):
-            print(f"{i}. {name}")
-            print(f"{node.getAttributes()}")
-            print()
-
-        last_number = len(named_nodes)
-
-        # Ask the user to choose a node or create a new one
-        while True:
-            choice = input(
-                f"Enter the number of the node you want or 0 to create a new one: "
-            )
-            if choice.isdigit() and 0 <= int(choice) <= last_number:
-                choice = int(choice)
-                break
-            print("Invalid input. Please enter a valid number.")
-
-        if choice == 0:
-            # Create a new node
-            # Assuming attributes for the new node are provided by the user
-            new_node = self.add_node(name, attributes)
-            return new_node
-
-        else:
-            # Get the chosen node
-            chosen_node = named_nodes[choice - 1]
-            chosen_node.updateAttributes(attributes)
-
-            # Now you can use the chosen_node as needed
-            print("You chose: ", chosen_node.getName())
-            print("with attributes: ", chosen_node.getAttributes())
-            print()
-            return chosen_node
 
     def get_node(self, node_id: int):
         if node_id in self.nodes:
