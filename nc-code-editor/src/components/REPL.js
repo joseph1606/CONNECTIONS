@@ -66,9 +66,10 @@ const REPL = () => {
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
+        // WALTER: file.name will give you all the file names
         const formData = new FormData();
-        formData.append('file', file);
-        console.log(formData);
+        formData.set('file', file);
+        formData.set('csvName', file.name);
 
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
@@ -77,16 +78,21 @@ const REPL = () => {
                 window.alert(`Your csv has an error: ${compiledError}. You may reupload the csv after error has been addressed.`);
             }
             console.log('File sent successfully:', response.data);
-            //document.getElementById('functions').textContent = document.getElementById('functions').textContent + '\n' + formData.
         } catch (error) {
             console.error('Error uploading file:', error);
         }
+        document.getElementById('csvreader').value = '';
     }
 
     /**/
 
     const handleInputChange = (e) => {
         setInput(e.target.value);
+    };
+
+    // Function to deep copy the state array
+    const deepCopyStateArray = (array) => {
+        return JSON.parse(JSON.stringify(array));
     };
 
     const handleInputSubmit = async (e) => {
@@ -97,19 +103,19 @@ const REPL = () => {
             setPrevInputs([...prevInputs, `${input}`])
         }
         const payload = {};
-        // change to prev
+        // checks if previous code has generated an output and comments it out in the payload if so
         if (skipConditions) {
-            const updatedInputs = prevInputs.map((line) => {
-                if (skipConditions.includes(line)) {
-                    return "#" + line;
+            const inputCopy = deepCopyStateArray(prevInputs)
+            for (let i = 0; i < skipConditions.length; i++) {
+                const skipMe = skipConditions[i]
+                if (inputCopy.includes(skipMe)) {
+                    inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
                 }
-                return line;
-            });
-            payload['code'] = updatedInputs.join('\n') + '\n' + input;
+            }
+            payload['code'] = inputCopy.join('\n') + '\n' + input;
         } else {
             payload['code'] = prevInputs.join('\n') + '\n' + input;
         }
-        console.log(payload);
         /* contacting API for code compilation */
         try {
             const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
@@ -124,37 +130,33 @@ const REPL = () => {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input]);
-                    // setSkipConditions([...skipConditions, input, compiledError]);
                 } else {
                     setSkipConditions([...skipConditions, input]);
                     openPopup(respGET.data, varName);
                 }
             } else {
+                // if there is an error returned
                 if (compiledError) {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input]);
-                    // setSkipConditions([...skipConditions, input, compiledError]);
                 } else if (compiledResult) {
+                    // if the output is multi-lined, split each line into its own element in an array to return it
                     if (compiledResult.includes('\n')) {
                         const strs = compiledResult.split('\n');
-
                         setOutput([...output, input, ...strs]);
                         setCompiledOutput([...compiledOutput, ...strs]);
                         setSkipConditions([...skipConditions, input]);
-                        // setSkipConditions([...skipConditions, input, ...strs]);
                     } else {
                         setOutput([...output, input, compiledResult]);
                         setCompiledOutput([...compiledOutput, compiledResult]);
                         setSkipConditions([...skipConditions, input]);
-                        // setSkipConditions([...skipConditions, input, compiledResult]);
                     }
                 }
             }
         } catch (error) {
             console.error('Error: ', error);
         }
-        console.log(output);
         setInput('');
     };
 
@@ -177,17 +179,32 @@ const REPL = () => {
                             <div className="terminal-title">Connections REPL</div>
                         </div>
                         <div>
-                            {output.map((line, index) => (
-                                compiledOutput.includes(line) ? (
-                                    <div key={index}><p className='cursor'>{line}</p></div>
-                                ) : (
-                                    err.includes(line) ? (
+                            {output.map((line, index) => {
+                                if (line.includes("https://")) {
+                                    // Extract the URL from the line
+                                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                                    const url = line.match(urlRegex)[0];
+
+                                    // Render the line as an <a> tag with the URL as href
+                                    return (
+                                        <div key={index}>
+                                            <a className='cursor' href={url.slice(0, url.length - 1)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>{line}</a>
+                                        </div>
+                                    );
+                                } else if (compiledOutput.includes(line)) {
+                                    return (
+                                        <div key={index}><p className='cursor'>{line}</p></div>
+                                    );
+                                } else if (err.includes(line)) {
+                                    return (
                                         <div key={index}><p className='cursor' style={{ color: 'red' }}>{line}</p></div>
-                                    ) : (
+                                    );
+                                } else {
+                                    return (
                                         <div key={index}><p className='cursor'>&gt;&gt;&gt; {line}</p></div>
-                                    )
-                                )
-                            ))}
+                                    );
+                                }
+                            })}
                         </div>
                         <div>
                             <p className='cursor'>&gt;&gt;&gt;</p>

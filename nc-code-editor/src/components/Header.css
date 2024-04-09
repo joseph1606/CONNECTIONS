@@ -20,9 +20,9 @@
 #functions {
     background-color: gainsboro;
     border-radius: 10%;
+    margin: auto;
     top: 4vh;
     text-align: center;
-    margin: auto;
     min-height: 30vh;
     padding-bottom: 5px;
     outline: 2px solid darkgray;
@@ -42,5 +42,5 @@ h5 {
 
 p {
     height: fit-content;
-    max-width: 20vw;
+    max-width: 30vw;
 }

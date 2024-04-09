@@ -3,7 +3,7 @@ import REPL from "./components/REPL.js";
 import Header from "./components/Header.js";
 
 function App() {
-  return <div>
+  return <div >
     <Header />
     <REPL />
   </div>;

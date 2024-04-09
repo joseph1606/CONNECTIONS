@@ -31,12 +31,11 @@ function funccheerdown() {
 function Header() {
   return <div>
     <div id='mainheader'>
-      <div style={{ display: 'flex', backgroundColor: "white", margin: '5px', border: '2px solid grey', borderRadius: '15px', fontFamily: 'bold', marginLeft: '.5vw', minWidth: '19vw' }}>
-        <img src={logo} alt="logo" style={{ padding: '5px' }} />
-        <h1 id='title' style={{ color: 'black', width: '9.5vw', height: 'fit-contents', marginTop: '1.25vh' }}>Connections</h1>
-
+      <div style={{ display: 'flex', backgroundColor: "white", margin: '5px', border: '2px solid grey', borderRadius: '15px', fontFamily: 'bold', marginLeft: '.5vw', minWidth: '200px', alignItems: 'center' }}>
+        <img src={logo} alt="logo" style={{ padding: '5px', height: '5vh' }} />
+        <h1 id='title' style={{ color: 'black', width: '9.5vw', height: '2.5vh', fontSize: '2vh' }}>Connections</h1>
       </div>
-      <div id="info" style={{ border: '0px', marginLeft: '70vw', position: 'relative', zIndex: 1, width: '30vw', maxWidth: '30vw' }}>
+      <div id="info" style={{ border: '0px', position: 'absolute', zIndex: 1, width: '30vw', maxWidth: '30vw', right: 0 }}>
         <img id='i' src={i} alt="Info" onMouseOver={popup} onMouseLeave={cheerdown} />
         <div id="functions" style={{ visibility: 'hidden' }} onMouseOver={popup} onMouseLeave={cheerdown}>
           <h1>Functions</h1>
@@ -44,17 +43,17 @@ function Header() {
           <div style={{ height: 'fit-content' }} onMouseLeave={funccheerdown}>
             <h4 onMouseOver={funcpopup} id='select' style={{ outline: '2px solid grey', marginLeft: '10%', marginRight: '10%', backgroundColor: 'white' }}>Select Function:</h4>
             <div id="funclist" onMouseOver={funcpopup} style={{ visibility: 'hidden', backgroundColor: 'whitesmoke', border: '1px solid grey', padding: '2px', height: '100%', position: 'absolute', width: '98%', left: '1%' }}>
-              <div className="funclistitem"><h5 onClick={() => fillinfo(adddesc)}>add():</h5>
-                <h5 onClick={() => fillinfo(graphdesc)}>graph():</h5> </div>
-              <h5 onClick={() => fillinfo(subgraphdesc)}>subgraph():</h5>
-              <h5 onClick={() => fillinfo(visdesc)}>vis():</h5>
-              <h5 onClick={() => fillinfo(mergedesc)}>merge(graph1, graph2):</h5>
-              <h5 onClick={() => fillinfo(savedesc)}>save():</h5>
-              <h5 onClick={() => fillinfo(filterdesc)}>filter(graph,...):</h5>
-              <h5 onClick={() => fillinfo(shortestpathdesc)}>shortestpath(graph, start_attributes, end_attributes):</h5>
+              <div className="funclistitem"><h5 onClick={() => fillinfo(adddesc)}>Add():</h5>
+                <h5 onClick={() => fillinfo(graphdesc)}>Graph():</h5> </div>
+              <h5 onClick={() => fillinfo(subgraphdesc)}>Subgraph():</h5>
+              <h5 onClick={() => fillinfo(visdesc)}>Vis():</h5>
+              <h5 onClick={() => fillinfo(mergedesc)}>Merge(graph1, graph2):</h5>
+              <h5 onClick={() => fillinfo(savedesc)}>Save():</h5>
+              <h5 onClick={() => fillinfo(filterdesc)}>Filter(graph,...):</h5>
+              <h5 onClick={() => fillinfo(shortestpathdesc)}>Shortestpath(graph, start_attributes, end_attributes):</h5>
             </div>
           </div>
-          <div id='info' style={{ borderRadius: '10%', margin: '5px' }}>
+          <div id='funcinfo' style={{ borderRadius: '10%', margin: '5px' }}>
             <h3 id='funcname'></h3>
             <h4 id="parametertitle"></h4><p id='parameterslistedout'></p>
             <h4 id="desctitle"></h4><p id='desciption' ></p>
@@ -72,7 +71,6 @@ export default Header;
 function fillinfo(info) {
   document.getElementById('funclist').onmouseover = null;
   document.getElementById('funclist').style.height = 0;
-  //document.getElementById('info').style.border = '1px solid grey';
 
   document.getElementById('funcname').textContent = info[0];
   document.getElementById('desciption').textContent = info[2];
