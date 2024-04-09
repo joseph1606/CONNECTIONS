@@ -1,10 +1,11 @@
 import "./App.css";
 import REPL from "./components/REPL.js";
-import CSVLoader from "./components/CSV.js";
+import Header from "./components/Header.js";
 
 function App() {
-  return <div><REPL />
-    <CSVLoader />
+  return <div>
+    <Header />
+    <REPL />
   </div>;
 }
 

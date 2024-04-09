@@ -23,6 +23,10 @@ input {
     align-items: flex-end;
     height: 100%;
     overflow-y: scroll;
+    border: 2px solid grey;
+    border-radius: 2.5%;
+    background-color: white;
+    padding: 10px;
 }
 
 .terminal-loader {
@@ -36,13 +40,12 @@ input {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 4px;
     position: relative;
-    max-height: 200px;
     overflow-y: auto;
     scrollbar-width: thin;
     box-sizing: border-box;
     flex-grow: 1;
     max-width: 95%;
-    height: 300px;
+    height: 80vh;
     align-self: flex-start;
 }
 

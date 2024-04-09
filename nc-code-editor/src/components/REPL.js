@@ -68,6 +68,7 @@ const REPL = () => {
         const file = event.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
+        console.log(formData);
 
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
@@ -76,6 +77,7 @@ const REPL = () => {
                 window.alert(`Your csv has an error: ${compiledError}. You may reupload the csv after error has been addressed.`);
             }
             console.log('File sent successfully:', response.data);
+            //document.getElementById('functions').textContent = document.getElementById('functions').textContent + '\n' + formData.
         } catch (error) {
             console.error('Error uploading file:', error);
         }
@@ -136,7 +138,7 @@ const REPL = () => {
                 } else if (compiledResult) {
                     if (compiledResult.includes('\n')) {
                         const strs = compiledResult.split('\n');
-                        
+
                         setOutput([...output, input, ...strs]);
                         setCompiledOutput([...compiledOutput, ...strs]);
                         setSkipConditions([...skipConditions, input]);
@@ -157,40 +159,51 @@ const REPL = () => {
     };
 
     return (
-        <div>
-            <div id="flexbox">
-                <div className="terminal-loader">
-                    <div className="terminal-header">
-                        <div className="terminal-title">Connections REPL</div>
-                    </div>
-                    <div>
-                        {output.map((line, index) => (
-                            compiledOutput.includes(line) ? (
-                                <div key={index}><p className='cursor'>{line}</p></div>
-                            ) : (
-                                err.includes(line) ? (
-                                    <div key={index}><p className='cursor' style={{ color: 'red' }}>{line}</p></div>
+        <div style={{ height: '92.5vh', display: 'flex', backgroundColor: 'gainsboro' }} >
+            <div id='inputbox' style={{ width: '20vw', height: '92.5vh', padding: '10px' }}>
+                <div id='fileinputbox' style={{ width: '100%', height: '100%', padding: '10px', backgroundColor: 'white', borderRadius: '15px', padding: '5%', border: '2px solid grey' }}>
+                    <h2>File Input:</h2>
+                    <input id='csvreader' type="file" accept=".csv" onChange={handleFileUpload} />
+                    <br />
+                    <br />
+                    <h4>Files:</h4>
+                    <p id='files'></p>
+                </div>
+            </div>
+            <div id='codearea' style={{ width: '80vw', height: '92.5vh', zIndex: 0, padding: '10px' }}>
+                <div id="flexbox">
+                    <div className="terminal-loader">
+                        <div className="terminal-header">
+                            <div className="terminal-title">Connections REPL</div>
+                        </div>
+                        <div>
+                            {output.map((line, index) => (
+                                compiledOutput.includes(line) ? (
+                                    <div key={index}><p className='cursor'>{line}</p></div>
                                 ) : (
-                                    <div key={index}><p className='cursor'>&gt;&gt;&gt; {line}</p></div>
+                                    err.includes(line) ? (
+                                        <div key={index}><p className='cursor' style={{ color: 'red' }}>{line}</p></div>
+                                    ) : (
+                                        <div key={index}><p className='cursor'>&gt;&gt;&gt; {line}</p></div>
+                                    )
                                 )
-                            )
-                        ))}
-                    </div>
-                    <div>
-                        <p className='cursor'>&gt;&gt;&gt;</p>
-                        <form onSubmit={handleInputSubmit}>
-                            &nbsp;<input
-                                type="text"
-                                value={input}
-                                onChange={handleInputChange}
-                                width="80"
-                                placeholder="Enter Python code here..."
-                            />
-                        </form>
+                            ))}
+                        </div>
+                        <div>
+                            <p className='cursor'>&gt;&gt;&gt;</p>
+                            <form onSubmit={handleInputSubmit}>
+                                &nbsp;<input
+                                    type="text"
+                                    value={input}
+                                    onChange={handleInputChange}
+                                    width="80"
+                                    placeholder="Enter Python code here..."
+                                />
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-            <input id='csvreader' type="file" accept=".csv" onChange={handleFileUpload} />
         </div>
     );
 };
