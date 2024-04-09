@@ -12,7 +12,7 @@ from flask_cors import CORS
 import requests
 from AutherNode import AuthorNode, PaperNode
 
-sys.path.append('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/finalized_backend')
+sys.path.append('./finalized_backend')
 from Functions import CreateGraph, AddNodes, Vis, Networkx
 #from SemanticFuncs import generate_author_dict
 from parse import parseData
@@ -237,7 +237,7 @@ def upload_file():
     csv_name = request.form['csvName']
     # Do something with the file, e.g., save it to disk
     # errorChecking and check for errors before saving, change name of csv file
-    csv = f'/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/csv_list/{csv_name}'
+    csv = f'./csv_list/{csv_name}'
     file.save(csv)
     try:
         parseData(csv)
