@@ -5,14 +5,14 @@ def parseData(csv):
     df = dd.read_csv(csv).compute()
 
     if df.isna().values.any():
-        raise ValueError("No columns are allowed to be empty")
+        raise ValueError("No columns are allowed to be empty, no leading whitespace is allowed")
     
     offset = 0
 
     # stores as a list all the names (strings) that were put first under the column of person1
     one = df.get(df.columns[0]).tolist()
 
-    #going through the list of person1, if it's a space an error will occur
+    # going through the list of person1, if it's a space an error will occur
     # otherwise it will remove whitespace before/after and capitalize first letter of each word
     for x in range(len(one)):
         if one[x].isspace():

@@ -13,8 +13,8 @@ import requests
 from AutherNode import AuthorNode, PaperNode
 
 sys.path.append('/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/finalized_backend')
-# from Functions import CreateGraph, AddNodes
 from Functions import CreateGraph, AddNodes, Vis, Networkx
+#from SemanticFuncs import generate_author_dict
 from parse import parseData
 from GraphClass import Graph
 '''
@@ -22,6 +22,7 @@ from back_end.new_graphclass.GraphClass.Tester.Joel.Functions import CreateGraph
 from back_end.new_graphclass.GraphClass.Tester.Joel.Graph import input_received, Graph'''
 
 app = Flask(__name__, static_url_path='/lib/bindings')
+#CORS(app)
 CORS(app, origins=['http://localhost:3000'], methods=['GET', 'POST'], allow_headers=['Content-Type'])
 
 
@@ -199,30 +200,7 @@ def is_number(text):
 def compile_code():
     code = request.json['code']
 
-    parts = code.strip().split('\n')
-
-    # need some way to indicate the disambiugation process is still ongoing
-    '''if parts[-2].find("CreateGraph('csv')") != -1:
-        if is_number(parts[-1]):
-            input_received.set()
-        else:
-            return jsonify({'output': None, 'error': "Invalid input. Please enter a valid number."})'''
-       
-        
-    # checks if most recent code line is something like g = CreateGraph("James")
-    '''if len(parts) > 1 and parts[-2].find("CreateGraph") != -1 and parts[-2].find("csv") == -1:
-        # if most recent line is a number btwn 0 to 9 OR keyword 'next'
-        name = parts[-2][parts[-2].index("(") + 2:len(parts[-2]) - 1]
-        if is_number(parts[-1]):
-            # select author from list of authors with parts[-1]
-            makeAuthor(int(parts[-1]), name)
-        else:
-            return jsonify({'output': None, 'error': "Invalid input. Please enter a valid number."})
-        global global_graph_name
-        global_graph_name = (parts[-1].split("=")[0]).strip()
-        if not global_graph_name:
-            return jsonify({'output': None, 'error': str(global_graph_name + ": Not a valid graph name")})'''
-
+    #parts = code.strip().split('\n')
     
     output = StringIO()  # Create StringIO object to capture output
     sys.stdout = output   # Redirect stdout to StringIO object
@@ -246,20 +224,20 @@ def get_graph():
     cwd = os.getcwd()
     filepath = cwd + "/" + var_name + ".html"
     # return ERROR HERE for if graph name is not contained
-    try: 
-        os.path.exists(filepath)
+    if os.path.exists(filepath):
         return send_file(filepath, mimetype='text/html')
-    except Exception as e:
-        return jsonify({'output': None, 'error': str(e)})
+    else:
+        return jsonify({'output': None, 'error': f"No graph with the name {var_name} exists."})
     
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return {'error': 'No file part'}, 400
     file = request.files['file']
+    csv_name = request.form['csvName']
     # Do something with the file, e.g., save it to disk
     # errorChecking and check for errors before saving, change name of csv file
-    csv = '/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv'
+    csv = f'/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/csv_list/{csv_name}'
     file.save(csv)
     try:
         parseData(csv)

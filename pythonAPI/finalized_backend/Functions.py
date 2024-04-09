@@ -7,6 +7,7 @@ import copy
 import networkx as nx
 from pyvis.network import Network
 import inspect
+import os
 
 # for both Graph.py and Functions.py, some functions could return int's instead of node/edge/graph objects since changes are already made in the function inside
 # having int return (on the based of node/edge creation) could speed up shit
@@ -15,22 +16,23 @@ import inspect
 
 # creates a new Graph object from scratch and add nodes to it
 # could change the return type
-def CreateGraph(csv, num=0) -> Graph:
-    # disambiguation with csv parsing
-    # search function, user can use next or prev and then once user has a number then run
-    # g = CreateGraph(name, number)
-    from app import makeAuthor
-    G = Graph()
-    if csv != 'csv':
-        #run semantic shole
-        #generate_author_list(csv)
-        makeAuthor(csv, num)
-        # want to be makeAuthor not display
+def CreateGraph(csv_name: str, num: int = None) -> Graph:
+    if num is None:
+        # This branch is for handling the case when only 'csv_name' is provided
+        G = Graph()
+        file_path = f'/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/csv_list/{csv_name}'
+        if os.path.exists(file_path):
+            AddNodes(G, file_path)
+            return G
+        raise ValueError(f"No uploaded csv with the name {csv_name} exists.")
     else:
-        file_path = '/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv'
-        AddNodes(G,file_path)
-    # not needed
-    return G
+        # This branch is for handling the case when both 'name' and 'num' are provided
+        from SemanticFuncs import generate_author_dict
+        G = Graph()
+        # csv_name is the name of the author in this case
+        #generate_author_dict("Jim Purtilo")
+        return G
+        #makeAuthor(csv_name, num)
 
 def Save(graph: Graph) -> "csv":
     pass
