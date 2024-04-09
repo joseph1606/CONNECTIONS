@@ -14,13 +14,13 @@ from visualization import *
 
 
 G = CreateGraph(
-    "/Users/elycohen/Desktop/College/Computer Science Classes/CMSC435/team_work/git_connections/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Joel/connections.csv"
+    "/Users/elycohen/Desktop/College/Computer Science Classes/CMSC435/team_work/git_connections/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Ely/example_csv.csv"
 )
 
 g_nx = Networkx(G)
 
-
 Vis(g_nx)
+
 
 """
 time = timeit(

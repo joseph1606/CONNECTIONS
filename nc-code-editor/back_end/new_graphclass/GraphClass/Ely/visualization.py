@@ -2,6 +2,7 @@
 We iterate through self.nodes to add all nodes into graph, then we iterate
 through self.connections to connect all added nodes."""
 
+import colorsys
 import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
@@ -18,7 +19,21 @@ from author import PaperNode
 def Vis(ntx):
     nt = Network("500px", "500px")
     # fancy rendering here
-    nt.from_nx(ntx)
+
+    for node_id in ntx.nodes():
+        nt.add_node(
+            node_id,
+            label=ntx.nodes[node_id]["label"],
+            title=ntx.nodes[node_id]["title"],
+            size=22,
+        )
+
+    for u, v, data in ntx.edges(data=True):
+        nt.add_edge(
+            u, v, title=data["title"], color="rgb{}".format(data["color"]), width=3.6
+        )
+
+    # nt.from_nx(ntx)
     nt.toggle_physics(True)
     nt.show(
         "ntx.html", notebook=False
@@ -46,12 +61,8 @@ def Networkx(graph):
         edge_relationships = list(graph.edges[edge_id].relationships.keys())
         color = graph.colors[edge_relationships[0]]
 
-        if "DIRECTED" in graph.edges[edge_id].relationships:
-            ntx.add_edge(node1_id, node2_id, title=title, arrows="to")
-        else:
-            ntx.add_edge(node1_id, node2_id, title=title, color=color)
+        ntx.add_edge(node1_id, node2_id, title=title, color=color)
 
-        print(color)
     return ntx
 
 
@@ -60,12 +71,7 @@ def titelize(attributes: dict) -> str:
 
     # k should be String, v should be List
     for k, v in attributes.items():
-        if k == "DIRECTED":
-            for inner_key, inner_value in v.items():
-                title += inner_key + ": " + ", ".join(inner_value) + "\n"
-
-        else:
-            title += k + ": " + ", ".join(v) + "\n"
+        title += k + ": " + ", ".join(v) + "\n"
 
     return title
 

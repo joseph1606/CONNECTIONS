@@ -1,11 +1,6 @@
-"Ely", "Joel", "MENTOR/MENTEE,Institution", "DIRECTED,UMD"
-"Ely", "Stephanie", "Age, MENTEE/MENTOR", "21,DIRECTED"
-
-
-#so order of relationship associated with "DIRECTED" value is how we implement corresponding a node's relationship:value pairing. 
-#so for 
-Ely.attributes{
-    "Mentor": "Joel"
-    "Institution": "UMD"
-    "Mentee": "Stephanie"
-}
+Joel,"Age,Major,Institution","21,Computer Science,Yale"
+Ely,"Institution,Major,Hair Color,Height","UMD,Physics,Brown,6.2"
+Revaant,"Institution,Major","UMD,Computer Science"
+Paul,"Major,Hair Color","Computer Science, Blond"
+Stephanie,"Major,Language","Architecture,English"
+Walter,"Institution,Age,Language","Yale,23,English"

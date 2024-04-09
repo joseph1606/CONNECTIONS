@@ -10,7 +10,6 @@ class Graph:
         self.edges = {}  # {edge.id:edge object}
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
         self.relationships = {}
-        self.directed = {}
 
         """
         
