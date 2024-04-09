@@ -32,8 +32,8 @@ http://vegetable.cs.umd.edu:3000/
     If no parameter is provided, an empty graph is generated. 
 
     Note:
-	    i) Currently cannot handle Directed Relationships
-	    ii) Currently does not have any Semantic Scholar implementation
+	    (i) Currently cannot handle Directed Relationships
+	    (ii) Currently does not have any Semantic Scholar implementation
 
 
     Usage Prototype/Example:
@@ -53,7 +53,7 @@ http://vegetable.cs.umd.edu:3000/
     Usage Prototype/Example:
 
    ```
-   filtered_graph = FilterGraph(filtered_graph, attributes={"attribute1": ["value1"], "attribute2": [“value2”,”value3”]
+   filtered_graph = FilterGraph(filtered_graph, attributes={"attribute1": ["value1"], "attribute2": [“value2”,”value3”]})
    ```
    
 4. Networkx:
