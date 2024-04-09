@@ -72,7 +72,7 @@ http://vegetable.cs.umd.edu:3000/
     Vis(networkx_graph)
 
     Description: 
-    Visualizes the input graph by taking in an <Networkx Object> using the Pyvis library.
+    Visualizes the Networkx Object using the Pyvis library.
     Generates an interactive HTML visualization of the graph.
 
 
