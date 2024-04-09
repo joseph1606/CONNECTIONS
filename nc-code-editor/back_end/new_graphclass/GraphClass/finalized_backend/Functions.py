@@ -5,7 +5,8 @@ from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
 from pyvis.network import Network
-from SemanticScholarFuncs import generate_author_dict
+
+# from SemanticScholarFuncs import generate_author_dict
 
 
 # if a csv was inputted, it will create nodes based off the csv
@@ -27,7 +28,7 @@ def CreateGraph(csv: str = None):
                 create_graph_helper(graph, name1, attribute)
 
                 create_graph_helper(graph, name2, attribute)
-
+    graph.generateColors()
     return graph
 
 

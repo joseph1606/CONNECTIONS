@@ -2,6 +2,7 @@ import networkx as nx
 from NodeClass import Node
 from EdgeClass import Edge
 import copy
+import colorsys
 
 
 class Graph:
@@ -10,8 +11,7 @@ class Graph:
         self.edges = {}  # {edge.id:edge object}
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
         self.relationships = {}
-
-        self.directed = {}
+        self.colors = {}
 
         """
         
@@ -216,6 +216,21 @@ class Graph:
                     # print(f"{node_id}")
                     print(f"{self.nodes[node_id].getName()}")
                 print()
+
+    def generateColors(self):
+        hue = 0
+        saturation = 0.8
+        value = 0.8
+
+        for k in self.relationships.keys():
+            hue += 0.618033988749895
+            hue %= 1.0
+            r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
+            r_int = int(r * 255)
+            g_int = int(g * 255)
+            b_int = int(b * 255)
+
+            self.colors[k] = (r_int, g_int, b_int)
 
 
 """
