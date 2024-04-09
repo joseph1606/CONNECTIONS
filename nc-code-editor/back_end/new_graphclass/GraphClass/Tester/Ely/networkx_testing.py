@@ -21,8 +21,8 @@ edge = Edge("parent/child")
 G = nx.Graph()
 
 # G.add_node(p.id, name=p.name)
-G.add_edge(ely, mom, object=edge)
-G.add_edge(ely, 1)
+G.add_edge(ely, mom, cnx=edge)
+# G.add_edge(ely, 1)
 
 
 # create labels for dictionary
@@ -33,24 +33,34 @@ def generate_label(node):
         return ""
 
 
+def to_json(graph):
+    graph_dict = {}
+
+    for node in graph:
+        print(node)
+        graph_dict[node.id] = graph.name
+
+    return graph_dict
+
+
 # create a labels dictionary to pass as a parameter
 labels = {node_id: generate_label(node_id) for node_id in G.nodes}
 
 
-nx.draw(G, with_labels=True, labels=labels, font_weight="bold")
+# nx.draw(G, with_labels=True, labels=labels, font_weight="bold")
 
-edge_objects = nx.get_edge_attributes(G, "object")
+edge_objects = nx.get_edge_attributes(G, "cnx")
 edge_labels = {}
 
 for k, v in edge_objects.items():
     edge_labels[k] = v.type
 
 # print(edge_labels)
-nx.draw_networkx_edge_labels(G, pos=nx.spring_layout(G), edge_labels=edge_labels)
+# nx.draw_networkx_edge_labels(G, pos=nx.spring_layout(G), edge_labels=edge_labels)
 # plt.show()
 
-
+graph_dict = to_json(G)
 nt = Network("500px", "500px")
 # populates the nodes and edges data structures
-nt.from_nx(G)
-nt.show("nx.html")
+nt.from_nx(graph_dict)
+# nt.show("nx.html")
