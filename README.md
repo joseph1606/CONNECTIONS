@@ -26,8 +26,9 @@ http://vegetable.cs.umd.edu:3000/
     CreateGraph(csv: str = None)
 
     Description: 
-    Creates a new graph object, optionally populated with nodes from a CSV file.
-    If no CSV file is provided, an empty graph is generated.
+    Creates a new graph object, optionally populated with nodes from the CSV file uploaded on the App.
+    An error will be generated if no csv file was uploaded if a string was passed.
+    If no parameter is provided, an empty graph is generated. 
 
     Note:
 	    i) Currently cannot handle Directed Relationships
@@ -37,7 +38,7 @@ http://vegetable.cs.umd.edu:3000/
     Usage Prototype/Example:
 
    ```
-   graph = CreateGraph(csv="data.csv")
+   graph = CreateGraph("data.csv")
    ```
    
 3. FilterGraph:
@@ -69,7 +70,7 @@ http://vegetable.cs.umd.edu:3000/
 
 5. Vis:
 
-    Vis(networkx_graph)
+    Vis(ntx_graph)
 
     Description: 
     Visualizes the Networkx Object using the Pyvis library.
