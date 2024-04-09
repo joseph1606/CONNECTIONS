@@ -286,6 +286,25 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
                             graph.update_edge(edge[0], temp_dict)
 
 
+def nodeFromGraph(graph: Graph, name: str):
+    node_list = []
+
+    for node_id, node in graph.nodes.items():
+        if node.name == name:
+            node_list.append(node)
+
+    return node_list
+
+
+def namesInGraph(graph: Graph):
+    name_set = set()
+
+    for node_id, node in graph.nodes.items():
+        name_set.add(node.name)
+
+    return list(name_set)
+
+
 def ShortestPath(
     source: Node, target: Node, graph: Graph = None, net: nx = None
 ) -> list:
