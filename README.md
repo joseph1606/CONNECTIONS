@@ -26,7 +26,8 @@ http://vegetable.cs.umd.edu:3000/
     CreateGraph(csv: str = None)
 
     Description: 
-    Creates a new graph object, optionally populated with nodes from the CSV file uploaded on the App.
+    Creates a new graph object, populated with nodes from the CSV file uploaded on the App.
+    The user is expected to upload a file (say with name "data.csv") and pass the name of the file as a string. (e.g. CreateGraph("data.csv")).
     An error will be generated if no csv file was uploaded if a string was passed.
     If no parameter is provided, an empty graph is generated. 
 
@@ -52,7 +53,7 @@ http://vegetable.cs.umd.edu:3000/
     Usage Prototype/Example:
 
    ```
-   filtered_graph = FilterGraph(graph, attributes={"attribute1": ["value1"], "attribute2": [“value2”,”value3”]
+   filtered_graph = FilterGraph(filtered_graph, attributes={"attribute1": ["value1"], "attribute2": [“value2”,”value3”]
    ```
    
 4. Networkx:
