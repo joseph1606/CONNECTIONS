@@ -15,11 +15,11 @@ z = MergeGraph(x,y)
 
 #z = MergeGraph(x,y,[(a[0],b[0])])
 c = GetNodes(z)
-#z.print_nodes()
+z.print_nodes()
 #z.print_edges()
-z.print_relationships()
+#z.print_relationships()
 
-#m = Networkx(z)
+m = Networkx(z)
 #Vis(m)
 #z.print_relationships()
 

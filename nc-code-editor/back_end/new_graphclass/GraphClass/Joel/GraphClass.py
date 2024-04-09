@@ -199,8 +199,10 @@ class Graph:
             print("Edge info: ")
             # print(edge.getNode1().getID())
             print(edge.getNode1().getName())
+            print(edge.getNode1().getID())
             # print(edge.getNode2().getID())
             print(edge.getNode2().getName())
+            print(edge.getNode2().getID())
 
             print(edge.getRelationships())
             print()

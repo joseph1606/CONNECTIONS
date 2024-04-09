@@ -82,7 +82,7 @@ def SubGraph(graph: Graph, chosen_node: Node):
 
     # adding connected nodes to subgraph
     AddNodes(subgraph, connected_nodes)
-
+    subgraph.generateColors()
     return subgraph
 
 
@@ -113,7 +113,7 @@ def FilterGraph(graph: Graph, attributes: dict = None):
         future_nodes[i] = graph.nodes[future_nodes[i]]
 
     AddNodes(filter_graph, future_nodes)
-
+    filter_graph.generateColors()
     return filter_graph
 
 
@@ -205,6 +205,7 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
         AddNodes(merge_graph, nodes_list)
 
+    merge_graph.generateColors()
     return merge_graph
 
 

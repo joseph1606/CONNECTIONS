@@ -1,47 +1,26 @@
 import networkx as nx
-from timeit import timeit
-
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from Functions import *
+from parse import parseData
+   
+x = CreateGraph("connections3.csv")
+print("---------------------------------------------------------------------------")
+y = CreateGraph("connections.csv")
+
+z = MergeGraph(x,y)
+
+#z = MergeGraph(x,y,[(a[0],b[0])])
+c = GetNodes(z)
+z.print_nodes()
+#z.print_edges()
+#z.print_relationships()
+
+m = Networkx(z)
+#Vis(m)
+#z.print_relationships()
 
 
-# import new_graphclass.GraphClass.finalized_backend.GraphClass
 
-# from parse import parseData
-
-
-G = CreateGraph(
-    "/Users/elycohen/Desktop/College/Computer Science Classes/CMSC435/team_work/git_connections/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Ely/example_csv.csv"
-)
-
-g_nx = Networkx(G)
-
-Vis(g_nx)
-
-
-"""
-time = timeit(
-    lambda: vis(g_nx),
-    number=1,
-)
-
-print(time)"""
-
-
-"""
-print(
-    "------------------------------------------------------------------------------------------------------"
-)
-G.print_nodes()
-print("Edges:- ")
-# G.print_relationships()
-G.print_edges()
-"""
-
-"""
-print("********************************************************************************************")
-x = SubGraph(G,"name1")
-print("===============================================================================================")
-x.print_nodes()
-
-"""
+#f.print_nodes()
+#f.print_edges()
+#f.print_relationships()
