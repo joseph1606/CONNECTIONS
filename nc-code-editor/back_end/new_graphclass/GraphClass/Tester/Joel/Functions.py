@@ -3,6 +3,7 @@ from Node import Node
 from Edge import Edge
 from parse import parseData
 import copy
+import os
 
 # for both Graph.py and Functions.py, some functions could return int's instead of node/edge/graph objects since changes are already made in the function inside
 # having int return (on the based of node/edge creation) could speed up shit
@@ -10,9 +11,14 @@ import copy
 
 # creates a new Graph object from scratch and add nodes to it
 # could change the return type
-def CreateGraph(csv):
+def CreateGraph(csv:str):
     G = Graph()
-    AddNodes(G,csv)
+    if csv != 'csv':
+        #run semantic shole
+        print()
+    else:
+        file_path = '/Users/andrewtimmer/repo_connection/new_connections/nc-code-editor/back_end/new_graphclass/GraphClass/Tester/Joel/data.csv'
+        AddNodes(G,file_path)
     # not needed
     return G
 
@@ -55,7 +61,7 @@ def AddNodes(graph: Graph, csv):
             # if there was an edge, search_edge returns [edge]
             else:
                 graph.update_edge(edge_objects[0], attribute)
-                    
+    #graph.print_nodes()   
     return graph
 
 def SubGraph(graph: Graph, name: str):

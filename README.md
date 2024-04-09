@@ -31,20 +31,22 @@ $ python3 app.py
 To ensure graphs can be rendered run the following:
 #### Windows
 ```console
-$ (Get-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py) -replace 'self\.write_html(name, open_browser=False,notebook=True)','self\.write_html(name, open_browser=False,notebook=False)' | Set-Content pythonAPI\venv\lib\python3.12\site-packages\pyvis\network.py
+$ (Get-Content \venv\lib\python3.12\site-packages\pyvis\network.py) -replace 'self\.write_html(name, open_browser=False,notebook=True)','self\.write_html(name, open_browser=False,notebook=False)' | Set-Content \venv\lib\python3.12\site-packages\pyvis\network.py
 ```
 #### Linux
 ```console
-$ sed -i 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
-ok=False)/g' pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
+$ sed -i 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebook=False)/g' /venv/lib/python3.12/site-packages/pyvis/network.py
 ```
 #### MacOS
 ```console
-$ sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebo
-ok=False)/g' pythonAPI/venv/lib/python3.12/site-packages/pyvis/network.py
+$ sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebook=False)/g' /venv/lib/python3.12/site-packages/pyvis/network.py
 ```
 
-
+### Step 4
+Then run the backend app:
+```console
+$ python3 app.py
+```
 
 ## Getting started
 

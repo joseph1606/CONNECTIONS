@@ -1,0 +1,46 @@
+#mainheader {
+    height: 7.5vh;
+    width: 100vw;
+    background-color: rgb(138, 154, 91);
+    display: flex
+}
+
+#i {
+    display: block;
+    height: 7vh;
+    width: 7vh;
+    margin: auto;
+    margin-top: .25vh;
+    padding: 5px;
+    background-color: white;
+    border: 3px solid grey;
+    border-radius: 30px;
+}
+
+#functions {
+    background-color: gainsboro;
+    border-radius: 10%;
+    margin: auto;
+    top: 4vh;
+    text-align: center;
+    min-height: 30vh;
+    padding-bottom: 5px;
+    outline: 2px solid darkgray;
+}
+
+h5 {
+    outline: 1px solid darkgray;
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    padding: 2px;
+}
+
+.funclistitem {
+    text-align: center;
+}
+
+p {
+    height: fit-content;
+    max-width: 30vw;
+}
