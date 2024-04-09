@@ -1,5 +1,3 @@
-from Functions import DIRECTED
-
 
 class Node:
     def __init__(self, name: str, attributes: dict):

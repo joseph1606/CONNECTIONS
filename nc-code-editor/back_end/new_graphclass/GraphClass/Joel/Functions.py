@@ -1,6 +1,5 @@
 from GraphClass import Graph
 from NodeClass import Node
-from EdgeClass import Edge
 from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
@@ -8,7 +7,6 @@ from pyvis.network import Network
 from SemanticScholarFuncs import generate_author_dict
 
 DIRECTED = "DIRECTED"
-
 
 # if a csv was inputted, it will create nodes based off the csv
 # else (in the case of no input) it will just create an empty graph -> user can use AddNodes to add nodes to it
