@@ -57,6 +57,8 @@ http://vegetable.cs.umd.edu:3000/
    ```
    
 4. Networkx:
+    
+    Networkx(graph)
 
     Description: 
     Converts the input graph object into a NetworkX graph object.
@@ -81,6 +83,6 @@ http://vegetable.cs.umd.edu:3000/
     Usage Prototype/Example:
 
    ```
-   Vis(networkx_graph)
+   Vis(ntx_graph)
    ```
 
