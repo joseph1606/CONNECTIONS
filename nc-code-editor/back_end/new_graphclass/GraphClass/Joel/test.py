@@ -23,8 +23,11 @@ dic["age"] = ["21","22"]
 #z.print_relationships()
 
 
-ssgraph = SSCreateGraph("james purtilo")
+ssgraph1 = SSCreateGraph("james purtilo")
+ssgraph2 = SSCreateGraph("Tim")
 
 
-#ssgraph.print_nodes()
-ssgraph.print_relationships()
+merge = MergeGraph(ssgraph1,ssgraph2)
+
+
+merge.print_nodes()

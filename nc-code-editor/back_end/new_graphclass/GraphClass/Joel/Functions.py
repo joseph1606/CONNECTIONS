@@ -8,7 +8,6 @@ from SemanticScholarFuncs import *
 
 # from SemanticScholarFuncs import generate_author_dict
 
-
 # if a csv was inputted, it will create nodes based off the csv
 # else (in the case of no input) it will just create an empty graph -> user can use AddNodes to add nodes to it
 def CreateGraph(csv: str = None):
@@ -44,7 +43,6 @@ def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
     
     coauthor_list = [list of AuthorNodes]
     
-    
     papers_list = [list of Unique PaperNodes]
     """
     
@@ -52,19 +50,15 @@ def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
     coauthor_list = list(coauthor_mapping.values())
     papers_list = list(coauthors_dict.keys())
     
-    paper_titles = []
-    for paper in papers_list:
-        paper_titles.append(paper.title)
-    
     for author in coauthor_list:
         paper_titles = []
         for paper in author.papers:
-            paper_titles.append(paper.title)
+            # should change this to just papers
+            paper_titles.append(paper)
   
         author.attributes = {}
         author.attributes["papers"] = paper_titles
 
-    
     ssgraph = CreateGraph()
  
     # creates redunant AuthorNodes but for now (CDR) this will do
@@ -73,9 +67,7 @@ def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
     
     return ssgraph
     
-    
-    
-    
+
 # add nodes to a previously defined graph
 # takes in a graph object and a list of nodes to be added to that graph object
 # will automatically creates a new node even if a node with the same name already exists -> will not update any exisiting node in the graph
@@ -94,7 +86,6 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             link_nodes(graph, node, attribute)
                    
         else:
-            
             name = node.getName()
             attribute = node.getAttributes()
             node = graph.add_node(name, attribute)

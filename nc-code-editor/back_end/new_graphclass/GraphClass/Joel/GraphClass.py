@@ -82,8 +82,7 @@ class Graph:
         edge.updateRelationships(attributes)
         return edge
 
-    # returns list of nodes ids that have the same attribute type and corresponding value
-    # which is use to create/update edges
+    # returns list of nodes ids that have the same attribute type and corresponding value -> which is use to create/update edges
     # also updates relationships dict
     def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
         relationship_nodes = []
