@@ -47,13 +47,24 @@ def display_author_options(aliases):
 
     return list_of_aliases
 
+# Function to retrieve all author options
+def get_author_options(author_name):
+    list_of_aliases = []
+    if author_name["total"] > 0:
+        for author in author_name["data"]:
+            name = author.get("name")
+            url = author.get("url")
+            list_of_aliases.append((name, url))
+    return list_of_aliases
+
+def print_author_options(list_of_aliases):
+    for i, (name, url) in enumerate(list_of_aliases, start=1):
+        print(f"{i}. {name} ({url})")
 
 # Function to select an author from the displayed options
 def select_author_from_list(list_of_aliases, choice):
     try:
-        selected_index = (
-            choice - 1
-        )
+        selected_index = choice - 1
         selected_author = list_of_aliases[selected_index]
         return selected_author
     except (ValueError, IndexError):
@@ -95,12 +106,13 @@ def parse_author_data(author_data, numpapers):
 
 def searchAuthor(name):
     disamb = fetch_author(name)
-    display_author_options(disamb)
+    list_of_aliases = get_author_options(disamb)
+    print_author_options(list_of_aliases)
 
 # Function to make an AuthorNode object based on user input
-def makeAuthor(name, choice:int, numpapers):
-    # disamb = fetch_author(name)
-    # list_of_aliases = display_author_options(disamb)
+def makeAuthor(name, choice, numpapers):
+    disamb = fetch_author(name)
+    list_of_aliases = get_author_options(disamb)
 
     selected_author = select_author_from_list(list_of_aliases, choice)
 
@@ -108,7 +120,7 @@ def makeAuthor(name, choice:int, numpapers):
         author_nodes = parse_author_data(disamb, numpapers)
         selected_author_node = None
         for author in author_nodes:
-            if author.name == selected_author:
+            if author.name == selected_author[0]:
                 selected_author_node = author
                 break
 
@@ -119,6 +131,7 @@ def makeAuthor(name, choice:int, numpapers):
 
     else:
         print("No data found. Try again")
+
 
 
 # Function to create coauthor nodes for a given author node

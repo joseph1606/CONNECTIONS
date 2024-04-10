@@ -23,7 +23,9 @@ from SemanticScholarFuncs import *
 #f.print_edges()
 #f.print_relationships()
 
-user_input = input("Enter a name: ")
-#searchAuthor(user_input)
-generate_author_dict(user_input)
+user_input = "James Purtilo"
+searchAuthor(user_input)
+# x = makeAuthor(user_input,1,5)
+# print_author_details(x)
+# generate_author_dict(user_input,1)
 
