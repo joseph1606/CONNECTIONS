@@ -182,12 +182,12 @@ def create_coauthor_nodes(author_node):
 
 
 # Function to generate a dictionary containing coauthors for a given author
-def generate_author_dict(author_name:str, choice:int=1, numpapers:int=5):
+def generate_author_dict(author_name:str, choice:int, numpapers:int):
     author = makeAuthor(author_name, choice, numpapers)
     if author:
         coauthors_dict,coauthors_map = create_coauthor_nodes(author)
-        print_coauthor_info(coauthors_dict)  # printing each author for checking
-        return coauthors_dict
+        #print_coauthor_info(coauthors_dict)  # printing each author for checking
+        return (coauthors_dict,coauthors_map)
     else:
         print("Author not found. Please try again:") #->   CHANGE TO ERROR MESSAGE
         generate_author_dict()
