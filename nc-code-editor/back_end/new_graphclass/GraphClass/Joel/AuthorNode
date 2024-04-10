@@ -1,5 +1,3 @@
-# from APITesting import print_semscholar as sem_print
-
 from NodeClass import Node
 
 
