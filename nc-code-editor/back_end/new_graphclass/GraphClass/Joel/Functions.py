@@ -205,39 +205,59 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
     # currently assuming that nodes in merge_list are present in the graphs
     # also currently assuming that the tuples only have nodes with the same name -> prob need a helper function to check
     # also currently assuming that the same node cannot be in multiple diff tuples
+    # assumes that nodes in the tuples are in the graph
     else:
         # stores list of nodes that were merged; used to make sure we dont over merge shit
         merge = []
         # stores new nodes to be added
         nodes_list = []
+        
         for merge_nodes in merge_list:
             # iterating through tuple
             name = None
             attribute = {}
-
+            # checks to see if an authornode was merged
+            counter = 0
+            
+            aliases = None
+            authorId = None
+            url = None
+            papers = None
+            
             # for merged nodes        
             for node in merge_nodes:
                 name = node.getName()
-                node_attributes = node.getAttributes()
-                
+                node_attributes = node.getAttributes()               
+
                 # Update attribute dictionary
                 for key, value in node_attributes.items():
                     if key in attribute:
                         attribute[key].extend(value)  # Extend the existing list
                     else:
                         attribute[key] = value  # Add a new key-value pair if it doesn't exist
-                
+                        
+                if isinstance(node,AuthorNode):
+                    # needs to be addressed
+                    aliases = node.aliases
+                    authorId = node.authorId
+                    url = node.url
+                    papers = node.papers
+                    counter = 1
+                            
                 merge.append(node.getID())
-
-            merged_node = Node(name, attribute)
+                
+            if counter == 1:
+                merged_node = AuthorNode(name,attribute, aliases,authorId,url,papers)
+            else:
+                merged_node = Node(name, attribute)
+                
+            # update self.nodes    
             merge_graph.nodes[merged_node.getID()] = merged_node
 
         all_nodes = nodes1 + nodes2
         # for unmerged nodes
         for node in all_nodes:
             if node.getID() not in merge:
-                name = node.getName()
-                attribute = node.getAttributes()
                 nodes_list.append(node)
 
         AddNodes(merge_graph, nodes_list)
