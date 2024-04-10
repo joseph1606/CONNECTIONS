@@ -4,9 +4,11 @@ from EdgeClass import Edge
 from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
-from pyvis.network import Network
+from SemanticScholarFuncs import *
+import pyvis.network as Network
 
 # from SemanticScholarFuncs import generate_author_dict
+
 
 # if a csv was inputted, it will create nodes based off the csv
 # else (in the case of no input) it will just create an empty graph -> user can use AddNodes to add nodes to it
@@ -31,6 +33,42 @@ def CreateGraph(csv: str = None):
     return graph
 
 
+def SSCreateGraph(author_name: str, choice: int = 1, numpapers: int = 5):
+    """
+    coauthors_dict:
+    PaperNode1: [list of AuthorNodes]
+    PaperNode2: [list of AuthorNodes]
+    .....
+
+    coauthor_mapping:
+    AuthorNode.id : AuthorNode
+
+    coauthor_list = [list of AuthorNodes]
+
+    papers_list = [list of Unique PaperNodes]
+    """
+
+    (coauthors_dict, coauthor_mapping) = generate_author_dict(
+        author_name, choice, numpapers
+    )
+    coauthor_list = list(coauthor_mapping.values())
+    # papers_list = list(coauthors_dict.keys())
+
+    ssgraph = CreateGraph()
+
+    for author in coauthor_list:
+        author.attributes = {}
+        author.attributes["PAPERS"] = author.papers
+        ssgraph.nodes[author.getID()] = author
+
+        link_nodes(ssgraph, author, author.getAttributes())
+
+    # creates redunant AuthorNodes but for now (CDR) this will do
+    # AddNodes(ssgraph,coauthor_list)
+
+    return ssgraph
+
+
 # add nodes to a previously defined graph
 # takes in a graph object and a list of nodes to be added to that graph object
 # will automatically creates a new node even if a node with the same name already exists -> will not update any exisiting node in the graph
@@ -38,11 +76,21 @@ def CreateGraph(csv: str = None):
 def AddNodes(graph: Graph, nodes_list: list[Node]):
 
     for node in nodes_list:
+        if isinstance(node, AuthorNode):
+            name = node.getName()
+            attribute = node.getAttributes()
+            aliases = node.aliases
+            authorId = node.authorId
+            url = node.url
+            papers = node.papers
+            node = graph.add_ssnode(name, attribute, aliases, authorId, url, papers)
+            link_nodes(graph, node, attribute)
 
-        name = node.getName()
-        attribute = node.getAttributes()
-        node = graph.add_node(name, attribute)
-        link_nodes(graph, node, attribute)
+        else:
+            name = node.getName()
+            attribute = node.getAttributes()
+            node = graph.add_node(name, attribute)
+            link_nodes(graph, node, attribute)
 
     return graph
 
@@ -57,16 +105,10 @@ def SubGraph(graph: Graph, chosen_node: Node):
 
     subgraph = CreateGraph()
 
-    # to avoid interconnected nodes
-    name = chosen_node.getName()
-    attribute = chosen_node.getAttributes()
-
-    node = Node(name, attribute)
-
     # returns all edges connected to the chosen node
     connected_edges = graph.search_edge(chosen_node)
     # used to store all nodes in the new graph
-    connected_nodes = [node]
+    connected_nodes = [chosen_node]
     # iterates to find other nodes in the edge
     for edge in connected_edges:
 
@@ -88,7 +130,6 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
-# need to convert attributes dict to proper format
 def FilterGraph(graph: Graph, attributes: dict = None):
 
     if not dict:
@@ -105,9 +146,6 @@ def FilterGraph(graph: Graph, attributes: dict = None):
         for value, value_list in relat_dict.items():
             if (attr_list and value in attr_list) or not attr_list:
                 future_nodes += value_list
-
-    for i in range(len(future_nodes)):
-        future_nodes[i] = graph.nodes[future_nodes[i]]
 
     AddNodes(filter_graph, future_nodes)
     filter_graph.generateColors()
@@ -172,39 +210,65 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
     # currently assuming that nodes in merge_list are present in the graphs
     # also currently assuming that the tuples only have nodes with the same name -> prob need a helper function to check
     # also currently assuming that the same node cannot be in multiple diff tuples
+    # assumes that nodes in the tuples are in the graph
     else:
         # stores list of nodes that were merged; used to make sure we dont over merge shit
         merge = []
         # stores new nodes to be added
         nodes_list = []
+
         for merge_nodes in merge_list:
             # iterating through tuple
             name = None
             attribute = {}
+            # checks to see if an authornode was merged
+            counter = 0
 
-            # for merged nodes        
+            aliases = []
+            authorId = None
+            url = ""
+            papers = []
+
+            # for merged nodes
             for node in merge_nodes:
-                name = node.getName()
-                node_attributes = node.getAttributes()
-                
+                name = node.name
+                node_attributes = node.attributes
+
                 # Update attribute dictionary
                 for key, value in node_attributes.items():
                     if key in attribute:
-                        attribute[key].extend(value)  # Extend the existing list
+                        list(
+                            set(attribute[key].extend(value))
+                        )  # Extend the existing list
                     else:
-                        attribute[key] = value  # Add a new key-value pair if it doesn't exist
-                
+                        attribute[key] = (
+                            value  # Add a new key-value pair if it doesn't exist
+                        )
+
+                if isinstance(node, AuthorNode):
+                    # needs to be addressed
+                    aliases = list(set(aliases + node.aliases))
+                    authorId = node.authorId
+                    url = node.url
+                    papers = list(set(papers + node.papers))
+                    counter = 1
+
                 merge.append(node.getID())
 
-            merged_node = Node(name, attribute)
-            nodes_list.append(merged_node)
+            if counter == 1:
+                merged_node = AuthorNode(
+                    name, attribute, aliases, authorId, url, papers
+                )
+            else:
+                merged_node = Node(name, attribute)
+
+            # update self.nodes
+            merge_graph.nodes[merged_node.getID()] = merged_node
 
         all_nodes = nodes1 + nodes2
         # for unmerged nodes
         for node in all_nodes:
             if node.getID() not in merge:
-                name = node.getName()
-                attribute = node.getAttributes()
                 nodes_list.append(node)
 
         AddNodes(merge_graph, nodes_list)
@@ -254,7 +318,6 @@ def create_graph_helper(graph: Graph, name: str, attribute: dict):
 
 # essentially updates relationships dict and edge information
 def link_nodes(graph: Graph, node: Node, attribute: dict):
-    node_id = node.getID()
     # iterates through one row of attributes
     # eg {sex:[male], college:[umd]}
     # it iterates twice in the above example
@@ -270,16 +333,15 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
                 node, attribute_type, single_attribute_value
             )
 
-            # relationship_nodes = graph.relationship_nodes(node, attribute_type, attribute_value[0])
             # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
             # if not empty then we need to create edges
             if relationship_nodes:
 
-                for relationship_node_id in relationship_nodes:
+                for relationship_node in relationship_nodes:
                     # checks to see if theres an exisitng edge between the two nodes
                     # makes sure it doesnt create an edge with itself
-                    if relationship_node_id != node_id:
-                        relationship_node = graph.get_node(relationship_node_id)
+                    if relationship_node != node:
+                        relationship_node = graph.get_node(relationship_node.getID())
                         edge = graph.search_edge(node, relationship_node)
 
                         # if there was no edge
@@ -327,9 +389,11 @@ def ShortestPath(
 
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
-def Vis(ntx):
+def Vis(ntx: nx.Graph):
+    if type(ntx) != nx.Graph:
+        raise ValueError("Passed parameter is not of type Networkx.Graph")
+
     nt = Network("500px", "500px")
-    # fancy rendering here
 
     for node_id in ntx.nodes():
         nt.add_node(
@@ -382,7 +446,8 @@ def titelize(attributes: dict) -> str:
 
     # k should be String, v should be List
     for k, v in attributes.items():
-        title += k + ": " + ", ".join(v) + "\n"
+        if k != "COAUTHOR":
+            title += k + ": " + ", ".join(v) + "\n"
 
     return title
 

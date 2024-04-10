@@ -1,6 +1,7 @@
 import networkx as nx
 from NodeClass import Node
 from EdgeClass import Edge
+from AuthorNode import AuthorNode
 import copy
 import colorsys
 
@@ -11,6 +12,7 @@ class Graph:
         self.edges = {}  # {edge.id:edge object}
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
         self.relationships = {}
+        self.directed = {}
         self.colors = {}
 
         """
@@ -20,13 +22,15 @@ class Graph:
                "UMD": [...] #all nodes with “Institution” relationship, “UMD” value 
                "Yale": [...]
            },
+           
            "Age": {
-               "21": [...] #all nodes with “Age” relationship, “21” value
+               "21": [...] #all nodes with “Age” relationship, “21” value -> NOT A LIST OF NODE IDS, A LIST OF NODES (references)
                "34": [...]
            }
-           "Coauthor": {
-               "Paper Name": [.....] #ALL AUTHOR NODES 
-               "Paper Name2": [...]
+           
+           "Paper": {
+               "PaperNode": [.....] #ALL AUTHOR NODES 
+               "PaperNode2": [...]
            }
            
            "directed":{
@@ -50,19 +54,22 @@ class Graph:
         attributes = copy.deepcopy(attributes)
         node = Node(name, attributes)
         self.nodes[node.getID()] = node
-        # print("Creating new node:", node.getName())
-        # print("Node id:", node.getID())
-        # print("Node attributes:", node.getAttributes())
         return node
 
     # updates a existing node
     def update_node(self, node: Node, attributes: dict):
-        # print("Updating node:", node.getName())
-        # print("Node id:", node.getID())
-        # print("Node attributes:", node.getAttributes())
         attributes = copy.deepcopy(attributes)
         node.updateAttributes(attributes)
         return node
+
+    # adds a Semantic Scholar Node to graph
+    def add_ssnode(
+        self, name: str, attributes: dict, aliases, authorId, url, papers=None
+    ):
+        attributes = copy.deepcopy(attributes)
+        ssnode = AuthorNode(name, attributes, aliases, authorId, url, papers)
+        self.nodes[ssnode.getID()] = ssnode
+        return ssnode
 
     # adds a new edge
     def add_edge(self, node1: Node, node2: Node, attributes: dict):
@@ -78,12 +85,12 @@ class Graph:
         edge.updateRelationships(attributes)
         return edge
 
-    # returns list of nodes ids that have the same attribute type and corresponding value
-    # which is use to create/update edges
+    # returns list of nodes ids that have the same attribute type and corresponding value -> which is use to create/update edges
     # also updates relationships dict
     def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
         relationship_nodes = []
-        node_id = node.getID()
+        # node_id = node.getID()
+
         """
         self.relationships = {
            "Institution": {
@@ -100,27 +107,27 @@ class Graph:
             if attribute_value in self.relationships[attribute_type]:
 
                 # to avoid dups; could also switch to sets?
-                if node_id not in self.relationships[attribute_type][attribute_value]:
+                if node not in self.relationships[attribute_type][attribute_value]:
 
                     # return list of other nodes with same attribute type and value; to be use to create/update edges
                     relationship_nodes = self.relationships[attribute_type][
                         attribute_value
                     ]
                     # update relationships
-                    self.relationships[attribute_type][attribute_value].append(node_id)
+                    self.relationships[attribute_type][attribute_value].append(node)
 
                 # dont need else cuz then the node associated with that particular attribute type and attribute value
                 # is already present in relationships and has the corresponding edges
 
             # if UMD is not present, relationships needs to be updated
             else:
-                self.relationships[attribute_type][attribute_value] = [node_id]
+                self.relationships[attribute_type][attribute_value] = [node]
 
         # if institution isnt present need to add it to dict
         else:
             temp_dict = {}
             # before adding institution we need to add umd
-            temp_dict[attribute_value] = [node_id]
+            temp_dict[attribute_value] = [node]
             self.relationships[attribute_type] = temp_dict
 
         # print("****************************************")
@@ -151,18 +158,7 @@ class Graph:
                     n1_id == node2.getID() and n2_id == node1.getID()
                 ):
                     edge_objects.append(self.edges[edge_id])
-
-            """
-            # could also do; should be faster
-            node1 = node1.getID()
-            node2 = node2.getID()
-            
-            if (node1,node2) in self.connections:
-                edge_objects.append(self.connections[(node1,node2)])
-            else:
-                edge_objects.append(self.connections[(node1,node2)])
-
-            """
+                    break
 
         return edge_objects
 
@@ -199,8 +195,10 @@ class Graph:
             print("Edge info: ")
             # print(edge.getNode1().getID())
             print(edge.getNode1().getName())
+            print(edge.getNode1().getID())
             # print(edge.getNode2().getID())
             print(edge.getNode2().getName())
+            print(edge.getNode2().getID())
 
             print(edge.getRelationships())
             print()
@@ -212,9 +210,9 @@ class Graph:
 
             for value, associated_nodes in nodes.items():
                 print(f"{value}:")
-                for node_id in associated_nodes:
+                for node in associated_nodes:
                     # print(f"{node_id}")
-                    print(f"{self.nodes[node_id].getName()}")
+                    print(f"{node.getName()}")
                 print()
 
     def generateColors(self):
