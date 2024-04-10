@@ -132,8 +132,6 @@ def makeAuthor(name, choice, numpapers):
     else:
         print("No data found. Try again")
 
-
-
 # Function to create coauthor nodes for a given author node
 def create_coauthor_nodes(author_node):
     coauthors_dict = {}  # Dictionary to store coauthor nodes for each paper

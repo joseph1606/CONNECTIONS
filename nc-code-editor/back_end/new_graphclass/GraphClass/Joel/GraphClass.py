@@ -1,8 +1,9 @@
 import networkx as nx
 from NodeClass import Node
 from EdgeClass import Edge
+from AuthorNode import AuthorNode
 import copy
-
+import colorsys
 
 class Graph:
     def __init__(self):
@@ -11,6 +12,7 @@ class Graph:
         self.connections = {}  # {(node1.id, node2.id) : edge.id}
         self.relationships = {}
         self.directed = {}
+        self.colors = {}
 
         """
         
@@ -19,11 +21,13 @@ class Graph:
                "UMD": [...] #all nodes with “Institution” relationship, “UMD” value 
                "Yale": [...]
            },
+           
            "Age": {
                "21": [...] #all nodes with “Age” relationship, “21” value
                "34": [...]
            }
-           "Coauthor": {
+           
+           "Paper": {
                "PaperNode": [.....] #ALL AUTHOR NODES 
                "PaperNode2": [...]
            }
@@ -49,19 +53,20 @@ class Graph:
         attributes = copy.deepcopy(attributes)
         node = Node(name, attributes)
         self.nodes[node.getID()] = node
-        # print("Creating new node:", node.getName())
-        # print("Node id:", node.getID())
-        # print("Node attributes:", node.getAttributes())
         return node
 
     # updates a existing node
     def update_node(self, node: Node, attributes: dict):
-        # print("Updating node:", node.getName())
-        # print("Node id:", node.getID())
-        # print("Node attributes:", node.getAttributes())
         attributes = copy.deepcopy(attributes)
         node.updateAttributes(attributes)
         return node
+    
+    # adds a Semantic Scholar Node to graph
+    def add_ssnode(self,name:str,attributes:dict,aliases, authorId, url, papers=None):
+        attributes = copy.deepcopy(attributes)
+        ssnode = AuthorNode(name,attributes,aliases,authorId,url,papers)
+        self.nodes[ssnode.getID()] = ssnode
+        return ssnode
 
     # adds a new edge
     def add_edge(self, node1: Node, node2: Node, attributes: dict):
@@ -83,6 +88,7 @@ class Graph:
     def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
         relationship_nodes = []
         node_id = node.getID()
+        
         """
         self.relationships = {
            "Institution": {
@@ -152,18 +158,6 @@ class Graph:
                     edge_objects.append(self.edges[edge_id])
                     break
 
-            """
-            # could also do; should be faster
-            node1 = node1.getID()
-            node2 = node2.getID()
-            
-            if (node1,node2) in self.connections:
-                edge_objects.append(self.connections[(node1,node2)])
-            else:
-                edge_objects.append(self.connections[(node1,node2)])
-
-            """
-
         return edge_objects
 
     def get_node(self, node_id: int):
@@ -219,6 +213,20 @@ class Graph:
                     print(f"{self.nodes[node_id].getName()}")
                 print()
 
+    def generateColors(self):
+        hue = 0
+        saturation = 0.8
+        value = 0.8
+
+        for k in self.relationships.keys():
+            hue += 0.618033988749895
+            hue %= 1.0
+            r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
+            r_int = int(r * 255)
+            g_int = int(g * 255)
+            b_int = int(b * 255)
+
+            self.colors[k] = (r_int, g_int, b_int)
 
 """
     # first attempt for solving disambiguity

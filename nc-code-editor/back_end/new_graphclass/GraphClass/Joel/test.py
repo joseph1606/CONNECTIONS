@@ -3,28 +3,28 @@ import matplotlib.pyplot as plt
 from Functions import *
 from parse import parseData
    
-x = CreateGraph("connections3.csv")
+#x = CreateGraph("connections3.csv")
 print("---------------------------------------------------------------------------")
-y = CreateGraph("connections.csv")
+#y = CreateGraph("connections.csv")
 
-a = GetNodes(x)
-b = GetNodes(y)
+#a = GetNodes(x)
+#b = GetNodes(y)
 
-
-z = MergeGraph(x,y)
 
 #z = MergeGraph(x,y,[(a[0],b[0])])
-c = GetNodes(z)
-z.print_nodes()
+
+#z = MergeGraph(x,y,[(a[0],b[0])])
+dic = {}
+dic["age"] = ["21","22"]
+#filter = FilterGraph(z,dic)
+#c = GetNodes(z)
+#z.print_nodes()
 #z.print_edges()
 #z.print_relationships()
 
-m = Networkx(z)
-#Vis(m)
-#z.print_relationships()
+
+ssgraph = SSCreateGraph("james purtilo")
 
 
-
-#f.print_nodes()
-#f.print_edges()
-#f.print_relationships()
+#ssgraph.print_nodes()
+ssgraph.print_relationships()

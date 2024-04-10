@@ -8,7 +8,6 @@ from pyvis.network import Network
 
 # from SemanticScholarFuncs import generate_author_dict
 
-
 # if a csv was inputted, it will create nodes based off the csv
 # else (in the case of no input) it will just create an empty graph -> user can use AddNodes to add nodes to it
 def CreateGraph(csv: str = None):
@@ -90,8 +89,6 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
 # need to convert attributes dict to proper format
-
-
 def FilterGraph(graph: Graph, attributes: dict = None):
 
     if not dict:
@@ -185,11 +182,18 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
             name = None
             attribute = {}
 
-            # for merged nodes
+            # for merged nodes        
             for node in merge_nodes:
-
                 name = node.getName()
-                attribute.update(node.getAttributes())
+                node_attributes = node.getAttributes()
+                
+                # Update attribute dictionary
+                for key, value in node_attributes.items():
+                    if key in attribute:
+                        attribute[key].extend(value)  # Extend the existing list
+                    else:
+                        attribute[key] = value  # Add a new key-value pair if it doesn't exist
+                
                 merge.append(node.getID())
 
             merged_node = Node(name, attribute)
