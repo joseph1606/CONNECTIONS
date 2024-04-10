@@ -14,7 +14,7 @@ class Node:
         # self.attributes = dict(attributes) if attributes else {}
 
     def __eq__(self, other):
-        return isinstance(other, Node) and self.name == other.name
+        return isinstance(other, Node) and self.id == other.id
 
     def getID(self):
         return self.id

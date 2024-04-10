@@ -23,7 +23,7 @@ class Graph:
            },
            
            "Age": {
-               "21": [...] #all nodes with “Age” relationship, “21” value
+               "21": [...] #all nodes with “Age” relationship, “21” value -> NOT A LIST OF NODE IDS, A LIST OF NODES (references)
                "34": [...]
            }
            
@@ -86,7 +86,7 @@ class Graph:
     # also updates relationships dict
     def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
         relationship_nodes = []
-        node_id = node.getID()
+        #node_id = node.getID()
         
         """
         self.relationships = {
@@ -104,25 +104,25 @@ class Graph:
             if attribute_value in self.relationships[attribute_type]:
 
                 # to avoid dups; could also switch to sets?
-                if node_id not in self.relationships[attribute_type][attribute_value]:
+                if node not in self.relationships[attribute_type][attribute_value]:
 
                     # return list of other nodes with same attribute type and value; to be use to create/update edges
                     relationship_nodes = self.relationships[attribute_type][attribute_value]
                     # update relationships
-                    self.relationships[attribute_type][attribute_value].append(node_id)
+                    self.relationships[attribute_type][attribute_value].append(node)
 
                 # dont need else cuz then the node associated with that particular attribute type and attribute value
                 # is already present in relationships and has the corresponding edges
 
             # if UMD is not present, relationships needs to be updated
             else:
-                self.relationships[attribute_type][attribute_value] = [node_id]
+                self.relationships[attribute_type][attribute_value] = [node]
 
         # if institution isnt present need to add it to dict
         else:
             temp_dict = {}
             # before adding institution we need to add umd
-            temp_dict[attribute_value] = [node_id]
+            temp_dict[attribute_value] = [node]
             self.relationships[attribute_type] = temp_dict
 
         # print("****************************************")
@@ -205,9 +205,9 @@ class Graph:
 
             for value, associated_nodes in nodes.items():
                 print(f"{value}:")
-                for node_id in associated_nodes:
+                for node in associated_nodes:
                     # print(f"{node_id}")
-                    print(f"{self.nodes[node_id].getName()}")
+                    print(f"{node.getName()}")
                 print()
 
     def generateColors(self):

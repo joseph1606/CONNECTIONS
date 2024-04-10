@@ -50,15 +50,17 @@ def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
     coauthor_list = list(coauthor_mapping.values())
     #papers_list = list(coauthors_dict.keys())
     
+    ssgraph = CreateGraph()
+      
     for author in coauthor_list:  
         author.attributes = {}
-        author.attributes["papers"] = author.papers
-
-    ssgraph = CreateGraph()
+        author.attributes["PAPERS"] = author.papers
+        ssgraph.nodes[author.getID()] = author
+        
+        link_nodes(ssgraph, author, author.getAttributes())
  
     # creates redunant AuthorNodes but for now (CDR) this will do
-    AddNodes(ssgraph,coauthor_list)
-    
+    #AddNodes(ssgraph,coauthor_list)
     
     return ssgraph
     
@@ -123,7 +125,6 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
-# need to convert attributes dict to proper format
 def FilterGraph(graph: Graph, attributes: dict = None):
 
     if not dict:
@@ -140,9 +141,6 @@ def FilterGraph(graph: Graph, attributes: dict = None):
         for value, value_list in relat_dict.items():
             if (attr_list and value in attr_list) or not attr_list:
                 future_nodes += value_list
-
-    for i in range(len(future_nodes)):
-        future_nodes[i] = graph.nodes[future_nodes[i]]
 
     AddNodes(filter_graph, future_nodes)
     filter_graph.generateColors()
@@ -232,7 +230,7 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
                 merge.append(node.getID())
 
             merged_node = Node(name, attribute)
-            nodes_list.append(merged_node)
+            merge_graph.nodes[merged_node.getID()] = merged_node
 
         all_nodes = nodes1 + nodes2
         # for unmerged nodes
@@ -289,7 +287,6 @@ def create_graph_helper(graph: Graph, name: str, attribute: dict):
 
 # essentially updates relationships dict and edge information
 def link_nodes(graph: Graph, node: Node, attribute: dict):
-    node_id = node.getID()
     # iterates through one row of attributes
     # eg {sex:[male], college:[umd]}
     # it iterates twice in the above example
@@ -309,11 +306,11 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
             # if not empty then we need to create edges
             if relationship_nodes:
 
-                for relationship_node_id in relationship_nodes:
+                for relationship_node in relationship_nodes:
                     # checks to see if theres an exisitng edge between the two nodes
                     # makes sure it doesnt create an edge with itself
-                    if relationship_node_id != node_id:
-                        relationship_node = graph.get_node(relationship_node_id)
+                    if relationship_node != node:
+                        relationship_node = graph.get_node(relationship_node.getID())
                         edge = graph.search_edge(node, relationship_node)
 
                         # if there was no edge
