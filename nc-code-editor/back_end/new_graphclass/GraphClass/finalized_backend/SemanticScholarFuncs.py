@@ -2,12 +2,17 @@ import requests
 from AuthorNode import AuthorNode, PaperNode
 
 """
-Only function to be used are: generate_author_dict() | generate_author_dict(numpapers) 
+Edited: 
+
+
+Only function to be used is: generate_author_dict(author_name, choice, numpapers)
 Examples of execution:
 dict1 = generate_author_dict()
 dict2 = generate_author_dict(6) 
 numpaper is a numeric value that the user can enter and corresponds to the number of papers of the author to be processed.
 If numpaper is missing, default value is 5
+choice is the choice of author from using searchAuthor. the user will have to remember and input the choice.
+If choice is missing, default value is 1
 
 generate_author_dict() returns a dictionary where each key is a PaperNode object corresponding to each paper of the initial
 author and the value is a list of coauthor nodes corresponding to that Paper
@@ -44,10 +49,10 @@ def display_author_options(aliases):
 
 
 # Function to select an author from the displayed options
-def select_author_from_list(list_of_aliases):
+def select_author_from_list(list_of_aliases, choice):
     try:
         selected_index = (
-            int(input("Enter the number corresponding to the desired author: ")) - 1
+            choice - 1
         )
         selected_author = list_of_aliases[selected_index]
         return selected_author
@@ -88,13 +93,16 @@ def parse_author_data(author_data, numpapers):
             author_nodes.append(author_node)
     return author_nodes
 
+def searchAuthor(name):
+    disamb = fetch_author(name)
+    display_author_options(disamb)
 
 # Function to make an AuthorNode object based on user input
-def makeAuthor(name, numpapers):
-    disamb = fetch_author(name)
-    list_of_aliases = display_author_options(disamb)
+def makeAuthor(name, choice:int, numpapers):
+    # disamb = fetch_author(name)
+    # list_of_aliases = display_author_options(disamb)
 
-    selected_author = select_author_from_list(list_of_aliases)
+    selected_author = select_author_from_list(list_of_aliases, choice)
 
     if selected_author:
         author_nodes = parse_author_data(disamb, numpapers)
@@ -116,7 +124,8 @@ def makeAuthor(name, numpapers):
 # Function to create coauthor nodes for a given author node
 def create_coauthor_nodes(author_node):
     coauthors_dict = {}  # Dictionary to store coauthor nodes for each paper
-    coauthor_mapping = {}  # Dictionary to map coauthor authorIds to nodes
+    #coauthor_mapping = {}  # Dictionary to map coauthor authorIds to nodes
+    coauthor_mapping = {author_node.authorId: author_node}
     # Iterate through each paper of the author
     for paper in author_node.papers:
         r = requests.post(
@@ -146,7 +155,7 @@ def create_coauthor_nodes(author_node):
                     coauthor_node
                 )  # Add coauthor node to paper's coauthor list
         coauthors_dict.setdefault(paper, []).append(author_node)
-    return coauthors_dict
+    return (coauthors_dict, coauthor_mapping)
 
 
 """
@@ -162,14 +171,14 @@ def create_coauthor_nodes(author_node):
 
 
 # Function to generate a dictionary containing coauthors for a given author
-def generate_author_dict(author_name, numpapers=5):
-    author = makeAuthor(author_name, numpapers)
+def generate_author_dict(author_name:str, choice:int=1, numpapers:int=5):
+    author = makeAuthor(author_name, choice, numpapers)
     if author:
-        coauthors_dict = create_coauthor_nodes(author)
-        # print_coauthor_info(coauthors_dict)  # printing each author for checking
+        coauthors_dict,coauthors_map = create_coauthor_nodes(author)
+        print_coauthor_info(coauthors_dict)  # printing each author for checking
         return coauthors_dict
     else:
-        # print("Author not found. Please try again:") ->   CHANGE TO ERROR MESSAGE
+        print("Author not found. Please try again:") #->   CHANGE TO ERROR MESSAGE
         generate_author_dict()
 
 
@@ -216,5 +225,5 @@ def print_author_details(auth):
 
 
 # Both methods of execution:
-# generate_author_dict()
+# generate_author_dict("Jim Purtilo")
 # generate_author_dict(6)
