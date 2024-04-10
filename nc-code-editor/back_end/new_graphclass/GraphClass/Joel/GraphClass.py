@@ -107,9 +107,7 @@ class Graph:
                 if node_id not in self.relationships[attribute_type][attribute_value]:
 
                     # return list of other nodes with same attribute type and value; to be use to create/update edges
-                    relationship_nodes = self.relationships[attribute_type][
-                        attribute_value
-                    ]
+                    relationship_nodes = self.relationships[attribute_type][attribute_value]
                     # update relationships
                     self.relationships[attribute_type][attribute_value].append(node_id)
 

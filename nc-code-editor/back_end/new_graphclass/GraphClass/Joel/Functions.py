@@ -48,16 +48,11 @@ def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
     
     (coauthors_dict, coauthor_mapping) = generate_author_dict(author_name,choice, numpapers)
     coauthor_list = list(coauthor_mapping.values())
-    papers_list = list(coauthors_dict.keys())
+    #papers_list = list(coauthors_dict.keys())
     
-    for author in coauthor_list:
-        paper_titles = []
-        for paper in author.papers:
-            # should change this to just papers
-            paper_titles.append(paper)
-  
+    for author in coauthor_list:  
         author.attributes = {}
-        author.attributes["papers"] = paper_titles
+        author.attributes["papers"] = author.papers
 
     ssgraph = CreateGraph()
  
@@ -104,16 +99,10 @@ def SubGraph(graph: Graph, chosen_node: Node):
 
     subgraph = CreateGraph()
 
-    # to avoid interconnected nodes
-    name = chosen_node.getName()
-    attribute = chosen_node.getAttributes()
-
-    node = Node(name, attribute)
-
     # returns all edges connected to the chosen node
     connected_edges = graph.search_edge(chosen_node)
     # used to store all nodes in the new graph
-    connected_nodes = [node]
+    connected_nodes = [chosen_node]
     # iterates to find other nodes in the edge
     for edge in connected_edges:
 
@@ -130,7 +119,6 @@ def SubGraph(graph: Graph, chosen_node: Node):
     AddNodes(subgraph, connected_nodes)
     subgraph.generateColors()
     return subgraph
-
 
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
