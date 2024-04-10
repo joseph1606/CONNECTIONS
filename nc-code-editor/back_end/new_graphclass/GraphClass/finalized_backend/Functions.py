@@ -33,7 +33,7 @@ def CreateGraph(csv: str = None):
     return graph
 
 
-def SSCreateGraph(author_name: str, choice: int = 1, numpapers: int = 5):
+def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
     """
     coauthors_dict:
     PaperNode1: [list of AuthorNodes]
@@ -58,7 +58,7 @@ def SSCreateGraph(author_name: str, choice: int = 1, numpapers: int = 5):
 
     for author in coauthor_list:
         author.attributes = {}
-        author.attributes["PAPERS"] = author.papers
+        author.attributes["COAUTHOR"] = author.papers
         ssgraph.nodes[author.getID()] = author
 
         link_nodes(ssgraph, author, author.getAttributes())
