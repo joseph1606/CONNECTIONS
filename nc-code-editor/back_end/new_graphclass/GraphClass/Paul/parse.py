@@ -1,22 +1,25 @@
-
-# To delete, needs to imported instead
-class Node:
-    def __init__(self, name: str, attributes: dict = None):
-        self.name = name
-        self.attributes = attributes
-
-    def getName(self):
-        return self.name
-
-    def getAttributes(self):
-        return self.attributes
-
-
-
 import dask.dataframe as dd
 import pandas
+import AuthorNode as author
 
-# to do, deal with whitespace
+
+"""
+Pauls comments
+
+To do after CDR
+i) Needs to be able to handle leading whitespace
+ii) Needs to be able to save graphs with directed edges
+    - Depending on implementation, throwing an error if directed is in a type1 csv.
+
+"""
+
+"""
+Joels Comments
+iv) The attribute values for a DIRECTED type need to be in lowercase
+"""
+
+
+# to do: leading whitespace cannot be read by dask, must look into this more
 def parseData(csv):
     df = dd.read_csv(csv).compute()
 
@@ -68,7 +71,7 @@ def parseData(csv):
             
         # Loops through all relationships given in current cell
         for x in range(len(currkey)):
-            key = currkey[x].strip()
+            key = currkey[x].strip().title()
             if key.isspace() or not key: #if the key is empty or whitespace an error occurs
                 raise ValueError("Error: All relationships must have corresponding value")
             
@@ -88,7 +91,8 @@ def parseData(csv):
                 if (not rel[0] or not rel[1]):
                     raise ValueError("Error: Incorrect directed relationship format")
                 value = (rel[0], rel[1])
-            
+            else:
+                value = value.title()
             # Saves the key,value pair to the dictionary
             if key in pairing:
                 pairing[key].append(value)  # If key already exists, append value to existing list
@@ -100,23 +104,60 @@ def parseData(csv):
     return (one, two, three)
 
 # to do: cannot save graphs with directed edges
-# to do: needs testing
 def saveData(nodes, filePath):
     names = list()
     attributes = list()
+    authors = list()
 
-    # Gets all information out of the list of nodes
-    for id, node in nodes:
-        names.append(node.getName())
-        attributes.append(node.getAttributes())
+    # Gets all information out of the list of nodes, and sorts into authors and non authors
+    for node in nodes:
+        if type(node) is author.AuthorNode:
+            authors.append(node)
+        else:
+            names.append(node.getName())
+            attributes.append(node.getAttributes())
 
-    # Formats data in the correct way
+
+    # Formats non author data in the correct way
     data = dict()
     ks = list()
     vs = list()
     for x in attributes:
-        ks.append(','.join(list(x.keys())))
-        vs.append(','.join(list(x.values())))
+
+        keyslist = list(x.keys())
+        valuelist = list(x.values())
+        values_to_save = list()
+        keys_to_save = list()
+
+        # Unpacks list of lists into values
+        for y in range(len(valuelist)):
+            for z in range(len(valuelist[y])):
+                keys_to_save.append(keyslist[y])
+                values_to_save.append(valuelist[y][z])
+
+        ks.append(','.join(keys_to_save))
+        vs.append(','.join(values_to_save))
+        
+
+    for x in authors:
+        keys_to_save = list()
+        values_to_save = list()
+        keys_to_save.append("AUTHORID")
+        values_to_save.append(x.authorId)
+        for i in range(len(x.papers)):
+            keys_to_save.append("PAPER")
+            values_to_save.append(x.papers[i].title)
+
+
+
+        names.append(x.getName())
+        ks.append(','.join(keys_to_save))
+        vs.append(','.join(values_to_save))
+
+
+
+
+
 
     # Puts all data into a dictionary
     data["Person 1"] = names
@@ -127,38 +168,3 @@ def saveData(nodes, filePath):
     pandas_df = pandas.DataFrame(data)
     df = dd.from_pandas(pandas_df, npartitions=1)
     df.compute().to_csv(filePath, index=False)
-
-
-
-
-# temp testing
-#test1 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/test1-load.csv')
-#test2 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/test2-load.csv')
-#test3 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/test3-load.csv')
-#error1 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/error1.csv')
-#error2 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/error2.csv')
-#error3 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/error3.csv')
-#error4 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/error4.csv')
-#error5 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/error5.csv')
-#error6 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/error6.csv')
-#error7 = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/error7.csv')
-#test = parseData('new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/CSV_Parsing/Paul/Tester/test2.csv')
-
-#print(test)
-
-
-#print(test1)
-#print(test2)
-#print(test3)
-#print(error1)
-#print(error2)
-#print(error3)
-#print(error4)
-#print(error5)
-#print(error6)
-#print(error7)
-
-
-#saveData('data_storage_branch/new_graphclass/CSV_Parsing/Tester/test1-save.csv', test1)
-#saveData('data_storage_branch/new_graphclass/CSV_Parsing/Tester/test2-save.csv', test2)
-#saveData('data_storage_branch/new_graphclass/CSV_Parsing/Tester/test3-save.csv', test3)

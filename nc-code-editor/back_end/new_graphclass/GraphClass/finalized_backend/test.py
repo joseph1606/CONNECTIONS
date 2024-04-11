@@ -108,3 +108,16 @@ print("-------------------------------------------------------------------------
 # x = makeAuthor(user_input,1,5)
 # print_author_details(x)
 # generate_author_dict(user_input,1)
+
+
+
+s = SemanticSearch("Jim Purtilo",1,2)
+
+saveData(
+    s.get_nodes(),
+    "nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test4.csv",
+)
+
+v = CreateGraph(
+    "nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test4.csv"
+)
