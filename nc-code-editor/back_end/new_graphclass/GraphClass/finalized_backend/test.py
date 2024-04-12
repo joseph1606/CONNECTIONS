@@ -5,37 +5,15 @@ from parse import *
 from SemanticScholarFuncs import *
 
 
-x = CreateGraph(
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/connections3.csv"
-)
-y = CreateGraph(
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/connections.csv"
-)
-z = MergeGraph(x, y)
+x = CreateGraph("./connections3.csv")
+y = CreateGraph("./connections.csv")
+l = Collision(x, y)
 
-saveData(
-    x.get_nodes(),
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test1.csv",
-)
-saveData(
-    y.get_nodes(),
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test2.csv",
-)
-saveData(
-    z.get_nodes(),
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test3.csv",
-)
 
-a = CreateGraph(
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test1.csv"
-)
-b = CreateGraph(
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test2.csv"
-)
-c = CreateGraph(
-    "new_connections-Group2Backend/nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test3.csv"
-)
-
+# n = MergeGraph(x, y, [l["Ely"], l["Stephanie"]])
+n = FilterGraph(y, {"age": ["21"]})
+n = Networkx(y)
+Vis(n)
 # a = x, b = y, c = z
 # visualization seems to be broken, temp test code is commented below
 
@@ -108,16 +86,3 @@ print("-------------------------------------------------------------------------
 # x = makeAuthor(user_input,1,5)
 # print_author_details(x)
 # generate_author_dict(user_input,1)
-
-
-
-s = SemanticSearch("Jim Purtilo",1,2)
-
-saveData(
-    s.get_nodes(),
-    "nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test4.csv",
-)
-
-v = CreateGraph(
-    "nc-code-editor/back_end/new_graphclass/GraphClass/finalized_backend/test4.csv"
-)

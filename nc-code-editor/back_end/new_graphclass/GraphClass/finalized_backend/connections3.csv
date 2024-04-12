@@ -1,4 +1,10 @@
-Person1, Person2, Relationship, Relationship Value
-joel,ely,class,cmsc435
-ElY, Rev, age,21
+Person1, Relationship, Relationship Value
+Ely,hair color,brown
+Stephanie,profession,singer
+John,profession,handyman
+John,college,umd
+Stephanie,sex,female
+Lisa,age,28
+Lisa,profession,nurse
+Ely,college,umd
 

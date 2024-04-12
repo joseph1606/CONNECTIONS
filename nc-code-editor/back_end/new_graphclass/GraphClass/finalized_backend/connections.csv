@@ -1,3 +1,8 @@
 Person1, Person2, Relationship, Relationship Value
 Joe,James,"sex,age","male,21"
-
+Joel,Ely,college,umd
+Ely,Stephanie,class,CMSC435
+Walter,Paul,"class,college","CMSC435,umd"
+Purtilo,Ely,"sex","male"
+Andrew,Walter,eye color,brown
+Ely, Andrew, age, 21
