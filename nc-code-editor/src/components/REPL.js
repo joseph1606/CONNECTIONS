@@ -8,6 +8,7 @@ const REPL = () => {
     const [output, setOutput] = useState([]);
     const [prevInputs, setPrevInputs] = useState([]);
     const [countArrowKey, setCountArrowKey] = useState(0);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
     const [compiledOutput, setCompiledOutput] = useState([]);
     const [skipConditions, setSkipConditions] = useState([]);
 
@@ -67,26 +68,33 @@ const REPL = () => {
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         const formData = new FormData();
-        formData.append('file', file);
-        console.log(formData);
+        formData.set('file', file);
+        formData.set('csvName', file.name);
 
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
             if (response.data.error) {
                 const compiledError = response.data.error;
                 window.alert(`Your csv has an error: ${compiledError}. You may reupload the csv after error has been addressed.`);
+            } else {
+                console.log('File sent successfully:', response.data);
+                setUploadedFiles([...uploadedFiles, file.name]);
             }
-            console.log('File sent successfully:', response.data);
-            //document.getElementById('functions').textContent = document.getElementById('functions').textContent + '\n' + formData.
         } catch (error) {
             console.error('Error uploading file:', error);
         }
+        document.getElementById('csvreader').value = '';
     }
 
     /**/
 
     const handleInputChange = (e) => {
         setInput(e.target.value);
+    };
+
+    // Function to deep copy the state array
+    const deepCopyStateArray = (array) => {
+        return JSON.parse(JSON.stringify(array));
     };
 
     const handleInputSubmit = async (e) => {
@@ -97,19 +105,19 @@ const REPL = () => {
             setPrevInputs([...prevInputs, `${input}`])
         }
         const payload = {};
-        // change to prev
+        // checks if previous code has generated an output and comments it out in the payload if so
         if (skipConditions) {
-            const updatedInputs = prevInputs.map((line) => {
-                if (skipConditions.includes(line)) {
-                    return "#" + line;
+            const inputCopy = deepCopyStateArray(prevInputs)
+            for (let i = 0; i < skipConditions.length; i++) {
+                const skipMe = skipConditions[i]
+                if (inputCopy.includes(skipMe)) {
+                    inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
                 }
-                return line;
-            });
-            payload['code'] = updatedInputs.join('\n') + '\n' + input;
+            }
+            payload['code'] = inputCopy.join('\n') + '\n' + input;
         } else {
             payload['code'] = prevInputs.join('\n') + '\n' + input;
         }
-        console.log(payload);
         /* contacting API for code compilation */
         try {
             const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
@@ -120,41 +128,72 @@ const REPL = () => {
             if (functionName === "Vis") {
                 const varName = input.substring(functionNameStart + 1, input.length - 1);
                 const respGET = await axios.get('http://127.0.0.1:5000/get_graph?varName=' + varName);
+                // if there is an error
                 if (respGET.data.error) {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input]);
-                    // setSkipConditions([...skipConditions, input, compiledError]);
+                // if not, open graph popup window
                 } else {
                     setSkipConditions([...skipConditions, input]);
                     openPopup(respGET.data, varName);
                 }
-            } else {
+            } else if (functionName === "Save") {
+                // if there is an error
                 if (compiledError) {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input]);
-                    // setSkipConditions([...skipConditions, input, compiledError]);
+                // if not, download csv file
+                } else {
+                    const varName = input.substring(functionNameStart + 1, input.length - 1);
+                    const respGET = await axios.get('http://127.0.0.1:5000/save_graph?varName=' + varName, {
+                        responseType: 'blob', // Set the response type to blob
+                    });
+                    // Create a URL for the Blob object
+                    const url = window.URL.createObjectURL(new Blob([respGET.data]));
+
+                    // Create a temporary <a> element and set its attributes
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = varName + '.csv'; // Specify the filename to download
+                    a.style.display = 'none';
+
+                    // Append the <a> element to the document body
+                    document.body.appendChild(a);
+
+                    // Trigger the click event to start the download
+                    a.click();
+
+                    // Clean up by removing the <a> element and revoking the URL
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    setSkipConditions([...skipConditions, input]);
+                }
+            } else {
+                // if there is an error returned
+                if (compiledError) {
+                    setErr([...err, compiledError]);
+                    setOutput([...output, input, compiledError]);
+                    setSkipConditions([...skipConditions, input]);
                 } else if (compiledResult) {
+                    // if the output is multi-lined, split each line into its own element in an array to return it
                     if (compiledResult.includes('\n')) {
                         const strs = compiledResult.split('\n');
-
                         setOutput([...output, input, ...strs]);
                         setCompiledOutput([...compiledOutput, ...strs]);
                         setSkipConditions([...skipConditions, input]);
-                        // setSkipConditions([...skipConditions, input, ...strs]);
                     } else {
                         setOutput([...output, input, compiledResult]);
                         setCompiledOutput([...compiledOutput, compiledResult]);
                         setSkipConditions([...skipConditions, input]);
-                        // setSkipConditions([...skipConditions, input, compiledResult]);
                     }
                 }
             }
         } catch (error) {
             console.error('Error: ', error);
         }
-        console.log(output);
         setInput('');
     };
 
@@ -167,7 +206,9 @@ const REPL = () => {
                     <br />
                     <br />
                     <h4>Files:</h4>
-                    <p id='files'></p>
+                    {uploadedFiles.map((line, index) => (
+                        <div key={index}><p>{line}</p></div>
+                    ))}
                 </div>
             </div>
             <div id='codearea' style={{ width: '80vw', height: '92.5vh', zIndex: 0, padding: '10px' }}>
@@ -177,17 +218,32 @@ const REPL = () => {
                             <div className="terminal-title">Connections REPL</div>
                         </div>
                         <div>
-                            {output.map((line, index) => (
-                                compiledOutput.includes(line) ? (
-                                    <div key={index}><p className='cursor'>{line}</p></div>
-                                ) : (
-                                    err.includes(line) ? (
+                            {output.map((line, index) => {
+                                if (line.includes("https://")) {
+                                    // Extract the URL from the line
+                                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                                    const url = line.match(urlRegex)[0];
+
+                                    // Render the line as an <a> tag with the URL as href
+                                    return (
+                                        <div key={index}>
+                                            <a className='cursor' href={url.slice(0, url.length - 1)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: 'green' }}>{line}</a>
+                                        </div>
+                                    );
+                                } else if (compiledOutput.includes(line)) {
+                                    return (
+                                        <div key={index}><p className='cursor'>{line}</p></div>
+                                    );
+                                } else if (err.includes(line)) {
+                                    return (
                                         <div key={index}><p className='cursor' style={{ color: 'red' }}>{line}</p></div>
-                                    ) : (
+                                    );
+                                } else {
+                                    return (
                                         <div key={index}><p className='cursor'>&gt;&gt;&gt; {line}</p></div>
-                                    )
-                                )
-                            ))}
+                                    );
+                                }
+                            })}
                         </div>
                         <div>
                             <p className='cursor'>&gt;&gt;&gt;</p>
