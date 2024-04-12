@@ -166,7 +166,7 @@ def FilterGraph(graph: Graph, attributes: dict = None):
                 if attributes[attr] != [] and attributes[attr] != None:
                     new_values = []
                     for v in values:
-                        if type(v) is str:
+                        if isinstance(v, str):
                             v = v.title()
                         # this means that the passed in filter dictionary has to be following .title() format
                         if v in attributes[attr]:
@@ -451,7 +451,7 @@ def ShortestPath(
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
 def Vis(ntx: nx.Graph):
-    if type(ntx) != nx.Graph:
+    if not isinstance(ntx, nx.Graph):
         raise ValueError("Passed parameter is not of type Networkx.Graph")
 
     nt = Network("500px", "500px")
@@ -484,7 +484,7 @@ def Networkx(graph):
 
         title = titelize(node.attributes)
 
-        if type(node) is AuthorNode:
+        if isinstance(node, AuthorNode):
             aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
             papers = paper_string(node.papers)
             title = aliases + papers + title

@@ -230,6 +230,25 @@ class Graph:
 
             self.colors[k] = (r_int, g_int, b_int)
 
+    def setColors(self, color_dict: dict):
+        for key, color in color_dict.items():
+            key = key.title()
+            if (
+                isinstance(color, tuple)
+                and len(color) == 3
+                and all(isinstance(c, int) for c in color)
+            ):
+                if key in self.colors:
+                    self.colors[key] = color
+                else:
+                    raise ValueError(str(key) + " relationship is not in graph.")
+            else:
+                raise ValueError(
+                    "Desired color for "
+                    + str(key)
+                    + "  is not in (int, int, int) format."
+                )
+
 
 """
     # first attempt for solving disambiguity
