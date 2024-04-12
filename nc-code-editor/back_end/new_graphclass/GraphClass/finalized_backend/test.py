@@ -8,11 +8,11 @@ from SemanticScholarFuncs import *
 x = CreateGraph("./connections3.csv")
 y = CreateGraph("./connections.csv")
 l = Collision(x, y)
+# g = SemanticSearch("Jim Purtilo")
 
-
-# n = MergeGraph(x, y, [l["Ely"], l["Stephanie"]])
-n = FilterGraph(y, {"age": ["21"]})
-n = Networkx(y)
+m = MergeGraph(x, y, [l["Ely"], l["Stephanie"]])
+f = FilterGraph(m, {"age": ["21"], "COLLEGE": []})
+n = Networkx(m)
 Vis(n)
 # a = x, b = y, c = z
 # visualization seems to be broken, temp test code is commented below

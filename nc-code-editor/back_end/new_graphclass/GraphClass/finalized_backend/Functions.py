@@ -65,7 +65,7 @@ def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
 
     # creates redunant AuthorNodes but for now (CDR) this will do
     # AddNodes(ssgraph,coauthor_list)
-
+    ssgraph.generateColors()
     return ssgraph
 
 
@@ -511,6 +511,6 @@ def paper_string(papers) -> str:
     title = ""
 
     for paper in papers:
-        title += paper.title + ": " + paper.year + "\n"
+        title += paper.title + ": " + str(paper.year) + "\n"
 
     return title
