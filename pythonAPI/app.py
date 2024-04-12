@@ -66,7 +66,7 @@ def upload_file():
     csv_name = request.form['csvName']
     # Do something with the file, e.g., save it to disk
     # errorChecking and check for errors before saving, change name of csv file
-    csv = f'/Users/andrewtimmer/repo_connection/new_connections/pythonAPI/csv_list/{csv_name}'
+    csv = f'{os.getcwd()}/csv_list/{csv_name}'
     file.save(csv)
     try:
         parseData(csv)
