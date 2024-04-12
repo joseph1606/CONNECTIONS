@@ -58,7 +58,7 @@ def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
 
     for author in coauthor_list:
         author.attributes = {}
-        author.attributes["COAUTHOR"] = author.papers
+        author.attributes["COAUTHOR".title()] = author.papers
         ssgraph.nodes[author.getID()] = author
 
         link_nodes(ssgraph, author, author.getAttributes())
@@ -507,8 +507,10 @@ def titelize(attributes: dict) -> str:
 
     # k should be String, v should be List
     for k, v in attributes.items():
-        if k != "COAUTHOR":
+        if k != "COAUTHOR".title():
             title += k + ": " + ", ".join(v) + "\n"
+        else:
+            title += k.title()
 
     return title
 
