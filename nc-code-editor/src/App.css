@@ -1,5 +1,7 @@
 .App {
+  max-height: fit-content;
   text-align: center;
+  border: 2px solid red;
 }
 
 .App-logo {

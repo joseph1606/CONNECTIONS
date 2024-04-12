@@ -22,7 +22,10 @@ You should notice a difference in your prompt. Then install required packages wi
 ```console
 $ pip install -r requirements.txt
 ```
-
+Then run the backend app:
+```console
+$ python3 app.py
+```
 
 ### Step 3
 To ensure graphs can be rendered run the following:
