@@ -8,6 +8,7 @@ const REPL = () => {
     const [output, setOutput] = useState([]);
     const [prevInputs, setPrevInputs] = useState([]);
     const [countArrowKey, setCountArrowKey] = useState(0);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
     const [compiledOutput, setCompiledOutput] = useState([]);
     const [skipConditions, setSkipConditions] = useState([]);
 
@@ -76,8 +77,10 @@ const REPL = () => {
             if (response.data.error) {
                 const compiledError = response.data.error;
                 window.alert(`Your csv has an error: ${compiledError}. You may reupload the csv after error has been addressed.`);
+            } else {
+                console.log('File sent successfully:', response.data);
+                setUploadedFiles([...uploadedFiles, file.name]);
             }
-            console.log('File sent successfully:', response.data);
         } catch (error) {
             console.error('Error uploading file:', error);
         }
@@ -126,13 +129,48 @@ const REPL = () => {
             if (functionName === "Vis") {
                 const varName = input.substring(functionNameStart + 1, input.length - 1);
                 const respGET = await axios.get('http://127.0.0.1:5000/get_graph?varName=' + varName);
+                // if there is an error
                 if (respGET.data.error) {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input]);
+                    // if not, open graph popup window
                 } else {
                     setSkipConditions([...skipConditions, input]);
                     openPopup(respGET.data, varName);
+                }
+            } else if (functionName === "Save") {
+                // if there is an error
+                if (compiledError) {
+                    setErr([...err, compiledError]);
+                    setOutput([...output, input, compiledError]);
+                    setSkipConditions([...skipConditions, input]);
+                    // if not, download csv file
+                } else {
+                    const varName = input.substring(functionNameStart + 1, input.length - 1);
+                    const respGET = await axios.get('http://127.0.0.1:5000/save_graph?varName=' + varName, {
+                        responseType: 'blob', // Set the response type to blob
+                    });
+                    // Create a URL for the Blob object
+                    const url = window.URL.createObjectURL(new Blob([respGET.data]));
+
+                    // Create a temporary <a> element and set its attributes
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = varName + '.csv'; // Specify the filename to download
+                    a.style.display = 'none';
+
+                    // Append the <a> element to the document body
+                    document.body.appendChild(a);
+
+                    // Trigger the click event to start the download
+                    a.click();
+
+                    // Clean up by removing the <a> element and revoking the URL
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    setSkipConditions([...skipConditions, input]);
                 }
             } else {
                 // if there is an error returned
@@ -160,6 +198,8 @@ const REPL = () => {
         setInput('');
     };
 
+    const [files, setfilelist] = useState('');
+
     return (
         <div style={{ height: '92.5vh', display: 'flex', backgroundColor: 'gainsboro' }} >
             <div id='inputbox' style={{ width: '20vw', height: '92.5vh', padding: '10px' }}>
@@ -169,7 +209,9 @@ const REPL = () => {
                     <br />
                     <br />
                     <h4>Files:</h4>
-                    <p id='files'></p>
+                    {uploadedFiles.map((line, index) => (
+                        <div key={index}><p>{line}</p></div>
+                    ))}
                 </div>
             </div>
             <div id='codearea' style={{ width: '80vw', height: '92.5vh', zIndex: 0, padding: '10px' }}>
@@ -188,7 +230,7 @@ const REPL = () => {
                                     // Render the line as an <a> tag with the URL as href
                                     return (
                                         <div key={index}>
-                                            <a className='cursor' href={url.slice(0, url.length - 1)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>{line}</a>
+                                            <a className='cursor' href={url.slice(0, url.length - 1)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: 'green' }}>{line}</a>
                                         </div>
                                     );
                                 } else if (compiledOutput.includes(line)) {
