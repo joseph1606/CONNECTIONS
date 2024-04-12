@@ -7,16 +7,19 @@ import AuthorNode as author
 Pauls comments
 
 To do after CDR
-i) Needs to be able to handle leading whitespace
-ii) Needs to be able to save graphs with directed edges
-    - Depending on implementation, throwing an error if directed is in a type1 csv.
+i) Leading whitespace issue
+
+To discuss at meeting:
+i) Search by scholar id, search by paper id, store paper id in the paper node class. All author nodes will have an AUTHORID, which could be checked when creating, and used to query
+    semantic scholar, along with querying paper ids to recreate the graph.
+
+ii) Discuss how saving directed graphs should work, and the format for reading them. How can i get directed edges?
+
 
 """
 
-"""
-Joels Comments
-iv) The attribute values for a DIRECTED type need to be in lowercase
-"""
+
+
 
 
 # to do: leading whitespace cannot be read by dask, must look into this more
@@ -71,7 +74,7 @@ def parseData(csv):
             
         # Loops through all relationships given in current cell
         for x in range(len(currkey)):
-            key = currkey[x].strip().title()
+            key = currkey[x].strip()
             if key.isspace() or not key: #if the key is empty or whitespace an error occurs
                 raise ValueError("Error: All relationships must have corresponding value")
             
@@ -84,15 +87,32 @@ def parseData(csv):
             if key == 'DIRECTED':
                 rel = value.split("/")
 
-                # Error if too many or too little '/'s are used
-                if len(rel) != 2:
-                    raise ValueError("Error: Incorrect directed relationship format")
-                # Error if either side of the '/' is empty
-                if (not rel[0] or not rel[1]):
-                    raise ValueError("Error: Incorrect directed relationship format")
-                value = (rel[0], rel[1])
-            else:
-                value = value.title()
+                # name1,name2,DIRECTED,mentor/mentee
+                if offset == 1:                
+                    # Error if too many or too little '/'s are used
+                    if len(rel) != 2:
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    # Error if either side of the '/' is empty
+                    if (not rel[0] or not rel[1]):
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    value = (rel[0].lower(), rel[1].lower())
+                # name1,DIRECTED,name2/mentor/mentee
+                elif offset == 0:
+                    # Error if too many or too little '/'s are used
+                    if len(rel) != 3:
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    
+                    # Error if any part is empty
+                    if (not rel[0] or not rel[1] or not rel[2]):
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    
+                    # returns (name2,mentor,mentee) such that name1 -> name2, mentor/mentee
+                    value = (rel[0].title(), rel[1].lower(), rel[2].lower())
+
+            # Change all non author info to lower case
+            elif not (key == 'AUTHORID' or key == 'PAPER'):
+                key = key.lower()
+                value = value.lower()
             # Saves the key,value pair to the dictionary
             if key in pairing:
                 pairing[key].append(value)  # If key already exists, append value to existing list
@@ -148,16 +168,9 @@ def saveData(nodes, filePath):
             keys_to_save.append("PAPER")
             values_to_save.append(x.papers[i].title)
 
-
-
         names.append(x.getName())
         ks.append(','.join(keys_to_save))
         vs.append(','.join(values_to_save))
-
-
-
-
-
 
     # Puts all data into a dictionary
     data["Person 1"] = names
