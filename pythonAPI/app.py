@@ -7,9 +7,13 @@ from flask_cors import CORS
 
 
 sys.path.append(os.getcwd() + '/finalized_backend')
-from Functions import CreateGraph, AddNodes, Vis, Networkx, MergeGraph, FilterGraph, SubGraph, SemanticGraph
+from AuthorNode import *
+from EdgeClass import *
+from Functions import *
+from GraphClass import *
+from NodeClass import *
 from parse import parseData, Save
-from SemanticScholarFuncs import AuthorSearch
+from SemanticScholarFuncs import *
 
 app = Flask(__name__, static_url_path='/lib/bindings')
 CORS(app, origins=['http://localhost:3000'], methods=['GET', 'POST'], allow_headers=['Content-Type'])

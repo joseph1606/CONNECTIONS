@@ -150,12 +150,13 @@ def FilterGraph(graph: Graph, attributes: dict = None):
         attr = attr.title()
 
         if attr in graph.relationships:
-            relat_dict = graph.relationships[attr]
 
-            for value, value_list in relat_dict.items():
+            for value, value_list in graph.relationships[attr].items():
                 value = value.title()
                 if (attr_list and value in attr_list) or not attr_list:
-                    future_nodes += value_list
+                    for node in value_list:
+                        if node not in future_nodes:
+                            future_nodes.append(node)
 
     # get rid of unwanted filter attributes
     for node in future_nodes:
@@ -167,7 +168,7 @@ def FilterGraph(graph: Graph, attributes: dict = None):
             attr = attr.title()
             if attr in attributes:
                 # if desired filter has desired values get values that exist
-                if attributes[attr] != []:
+                if attributes[attr] != [] and attributes[attr] != None:
                     new_values = []
                     for v in values:
                         if type(v) is str:
@@ -337,7 +338,6 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
     return merge_graph
 
 
-
 # returns a list of Nodes in a Graph
 def GetNodes(graph: Graph):
     return graph.get_nodes()
@@ -454,7 +454,7 @@ def Vis(ntx):
     if type(ntx) != nx.Graph:
         raise ValueError("Passed parameter is not of type Networkx.Graph")
     
-    nt = Network("500px", "500px")
+    nt = Network("1000px", "1000px")
 
     for node_id in ntx.nodes():
         nt.add_node(

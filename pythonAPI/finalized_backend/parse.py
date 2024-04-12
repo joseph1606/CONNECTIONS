@@ -23,7 +23,7 @@ rev,paul,college,umd
 ely,purtilo,"age,DIRECTED","21,"Mentor/Mentee""
 """
 
-
+# to do: leading whitespace cannot be read by dask, must look into this more
 def parseData(csv):
     df = dd.read_csv(csv).compute()
 
@@ -75,7 +75,7 @@ def parseData(csv):
             
         # Loops through all relationships given in current cell
         for x in range(len(currkey)):
-            key = currkey[x].strip()
+            key = currkey[x].strip().title()
             if key.isspace() or not key: #if the key is empty or whitespace an error occurs
                 raise ValueError("All relationships must have corresponding value")
             
@@ -95,7 +95,8 @@ def parseData(csv):
                 if (not rel[0] or not rel[1]):
                     raise ValueError("Incorrect directed relationship format")
                 value = (rel[0], rel[1])
-            
+            else:
+                value = value.title()
             # Saves the key,value pair to the dictionary
             if key in pairing:
                 pairing[key].append(value)  # If key already exists, append value to existing list
