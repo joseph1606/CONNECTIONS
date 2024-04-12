@@ -4,3 +4,4 @@ pythonAPI/venv/
 pythonAPI/*.html
 pythonAPI/__pycache__/
 pythonAPI/finalized_backend/__pycache__/
+/pythonAPI/finalized_backend/__pycache__
