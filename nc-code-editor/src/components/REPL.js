@@ -68,6 +68,7 @@ const REPL = () => {
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         // WALTER: file.name will give you all the file names
+        // ANDREW: tanks that was helpful
         const formData = new FormData();
         formData.set('file', file);
         formData.set('csvName', file.name);
@@ -134,7 +135,7 @@ const REPL = () => {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input]);
-                // if not, open graph popup window
+                    // if not, open graph popup window
                 } else {
                     setSkipConditions([...skipConditions, input]);
                     openPopup(respGET.data, varName);
@@ -145,7 +146,7 @@ const REPL = () => {
                     setErr([...err, compiledError]);
                     setOutput([...output, input, compiledError]);
                     setSkipConditions([...skipConditions, input]);
-                // if not, download csv file
+                    // if not, download csv file
                 } else {
                     const varName = input.substring(functionNameStart + 1, input.length - 1);
                     const respGET = await axios.get('http://127.0.0.1:5000/save_graph?varName=' + varName, {
@@ -197,6 +198,8 @@ const REPL = () => {
         }
         setInput('');
     };
+
+    const [files, setfilelist] = useState('');
 
     return (
         <div style={{ height: '92.5vh', display: 'flex', backgroundColor: 'gainsboro' }} >
