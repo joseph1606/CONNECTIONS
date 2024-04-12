@@ -68,7 +68,6 @@ const REPL = () => {
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         // WALTER: file.name will give you all the file names
-        // ANDREW: tanks that was helpful
         const formData = new FormData();
         formData.set('file', file);
         formData.set('csvName', file.name);
