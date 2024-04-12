@@ -1,9 +1,4 @@
 import dask.dataframe as dd
-<<<<<<< HEAD
-import pandas
-import os
-import inspect
-from GraphClass import Graph
 
 """
 Mine (Joel's) comments
@@ -29,7 +24,7 @@ def parseData(csv):
     df = dd.read_csv(csv).compute()
 
     if df.isna().values.any():
-       raise ValueError("No columns are allowed to be empty, no leading whitespace is allowed")
+       raise ValueError("Error: No columns are allowed to be empty, no leading whitespace is allowed")
     
     offset = 0
     
@@ -56,7 +51,7 @@ def parseData(csv):
             
         offset = 1
     elif len(df.columns) != 3:
-        raise ValueError("Incorrect format")
+        raise ValueError("Error: Incorrect format")
 
     # Gets the relationships and relationship values
     three = []
@@ -72,17 +67,17 @@ def parseData(csv):
 
         # Error if not a relationships have a corresponding value, or vice versa
         if len(currkey) != len(currvalue):
-            raise ValueError("All relationships must have corresponding value")
+            raise ValueError("Error: All relationships must have corresponding value")
             
         # Loops through all relationships given in current cell
         for x in range(len(currkey)):
             key = currkey[x].strip()
             if key.isspace() or not key: #if the key is empty or whitespace an error occurs
-                raise ValueError("All relationships must have corresponding value")
+                raise ValueError("Error: All relationships must have corresponding value")
             
             value = currvalue[x].strip()
             if value.isspace() or not value: #if the value is empty or whitespace an error occurs
-                raise ValueError("All relationships must have corresponding value")
+                raise ValueError("Error: All relationships must have corresponding value")
             
             # If the current key marks a directed graph, adjusts value to the correct format
             # Correct format is 'example1/example2'
@@ -91,10 +86,10 @@ def parseData(csv):
 
                 # Error if too many or too little '/'s are used
                 if len(rel) != 2:
-                    raise ValueError("Incorrect directed relationship format")
+                    raise ValueError("Error: Incorrect directed relationship format")
                 # Error if either side of the '/' is empty
                 if (not rel[0] or not rel[1]):
-                    raise ValueError("Incorrect directed relationship format")
+                    raise ValueError("Error: Incorrect directed relationship format")
                 value = (rel[0], rel[1])
             
             # Saves the key,value pair to the dictionary
@@ -106,80 +101,3 @@ def parseData(csv):
         three.append(pairing)
 
     return (one, two, three)
-
-# to do: cannot save graphs with directed edges
-def Save(graph: Graph):
-    if type(graph) != Graph:
-        raise ValueError("Parameter received is not a valid graph.")
-    nodes = graph.get_nodes()
-    names = list()
-    attributes = list()
-
-    # Gets all information out of the list of nodes
-    for node in nodes:
-        names.append(node.getName())
-        attributes.append(node.getAttributes())
-
-    # Formats data in the correct way
-    data = dict()
-    ks = list()
-    vs = list()
-    for x in attributes:
-        keyslist = list(x.keys())
-        valuelist = list(x.values())
-        values_to_save = list()
-        keys_to_save = list()
-
-        # Unpacks list of lists into values
-        for y in range(len(valuelist)):
-            for z in range(len(valuelist[y])):
-                values_to_save.append(valuelist[y][z])
-                keys_to_save.append(keyslist[y])
-
-        vs.append(','.join(values_to_save))
-        ks.append(','.join(keys_to_save))
-
-
-    # Puts all data into a dictionary
-    data["Person 1"] = names
-    data['Relationship'] = ks
-    data['Relationship Value'] = vs
-
-    # Saves dictionary to csv
-    pandas_df = pandas.DataFrame(data)
-    df = dd.from_pandas(pandas_df, npartitions=1)
-    caller_frame = inspect.currentframe().f_back
-    obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
-    df.compute().to_csv(f"{os.getcwd()}/csv_list/{obj_name}.csv", index=False)
-=======
-
-def parseData(csv):
-    df = dd.read_csv(csv)
-    df = df.where(df.notnull(), None).compute()
-
-    offset = 0
-
-    one = df.get(df.columns[0]).tolist()
-    two = None
-    if len(df.columns) == 4:
-        two = df.get(df.columns[1]).tolist()
-        offset = 1
-    
-    three = []
-    keys = df.get(df.columns[1 + offset]).tolist()
-    values = df.get(df.columns[2 + offset]).tolist()
-    for i in range(len(keys)):
-        currkey = keys[i].split(',')
-        currvalue = values[i].split(',')
-        pairing = {}  # Initialize a dictionary for each iteration
-        for x in range(len(currkey)):
-            key = currkey[x].strip()  # Remove any leading/trailing whitespace
-            value = currvalue[x].strip()  # Remove any leading/trailing whitespace
-            if key in pairing:
-                pairing[key].append(value)  # If key already exists, append value to existing list
-            else:
-                pairing[key] = [value]  # If key doesn't exist, create a new list with value
-        three.append(pairing)  # Append the dictionary to the list
-
-    return (one, two, three)
->>>>>>> Group2Backend

@@ -1,0 +1,4 @@
+Person1,Person2,Relationship,Relationship Value
+Purtilo,Paul,DIRECTED,Prof/Student
+Purtilo,Joel,"University,DIRECTED","UMD,Prof/Student"
+Purtilo,Ely,"University,DIRECTED,DIRECTED","UMD,Prof/Student,Mentor/Mentee"

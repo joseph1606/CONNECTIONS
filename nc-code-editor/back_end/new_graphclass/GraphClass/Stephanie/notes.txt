@@ -1,0 +1,4 @@
+To make directed edges of nodes you have when doing add_edge(node1_ID, node2_ID, arrows="to")
+
+Information does show up if you hover over the nodes as long as it is in the TITLE variable of add_node()
+The LABEL variable will make this label visible always (under the node in the graph) in add_node()
