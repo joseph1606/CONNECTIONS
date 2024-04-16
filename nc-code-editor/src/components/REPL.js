@@ -130,7 +130,7 @@ const REPL = () => {
         // if the input is a string and is not the block code toggler, add it to prevInputs
         if ((input)) {
             if ((input.trim() !== ":{") && (input.trim() !== ":}")) {
-                setPrevInputs([...prevInputs, `${input}`]);
+                setPrevInputs([...prevInputs, `${input.trim()}`]);
             }
         }
         // if multiLine is enabled
@@ -248,6 +248,9 @@ const REPL = () => {
                 setMultiLine(true);
                 setSkipConditions([...skipConditions, input]);
                 setBlockCode([]);
+            } else if (input === 'clear') {
+                setSkipConditions([...skipConditions, input]);
+                setOutput([]);
             } else {
                 const payload = {};
                 // checks if previous code has generated an output and comments it out in the payload if so
@@ -264,6 +267,7 @@ const REPL = () => {
                     payload['code'] = prevInputs.join('\n') + '\n' + input;
                 }
                 /* contacting API for code compilation */
+                console.log(payload);
                 try {
                     const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
                     const compiledError = resp.data.error;
