@@ -16,7 +16,7 @@ const REPL = () => {
 
     const openPopup = (htmlData, graphName) => {
         // opens a new window
-        const newWindow = window.open('', '_blank', 'width=600,height=520');
+        const newWindow = window.open('', '_blank', 'width=1000,height=1000');
         // adds a title of the graph name on the window
         const i = htmlData.indexOf("<head>");
         htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
