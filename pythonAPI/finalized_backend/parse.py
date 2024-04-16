@@ -150,4 +150,5 @@ def Save(graph: Graph):
     df = dd.from_pandas(pandas_df, npartitions=1)
     caller_frame = inspect.currentframe().f_back
     obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
+    print(f"{obj_name}.csv")
     df.compute().to_csv(f"{os.getcwd()}/csv_list/{obj_name}.csv", index=False)
