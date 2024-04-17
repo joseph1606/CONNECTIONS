@@ -1,0 +1,4 @@
+Person1, Person2, Relationship, Relationship Value
+Joel, Ely, college, umd
+Rev, Walter, college, umbc -> {college:umd}
+Purtilo, Ely, DIRECTED, "Mentor/Mentee" -> {DIRECTED: (Mentor,Mentee)} -> 
