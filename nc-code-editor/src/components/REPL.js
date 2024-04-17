@@ -6,7 +6,10 @@ const REPL = () => {
     const [err, setErr] = useState([]);
     const [input, setInput] = useState('');
     const [output, setOutput] = useState([]);
+    const [inFunc, setInFunc] = useState(0);
+    const [blockCode, setBlockCode] = useState([]);
     const [prevInputs, setPrevInputs] = useState([]);
+    const [multiLine, setMultiLine] = useState(false);
     const [countArrowKey, setCountArrowKey] = useState(0);
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [compiledOutput, setCompiledOutput] = useState([]);
@@ -89,6 +92,28 @@ const REPL = () => {
 
     /**/
 
+    /* functionality for tabbing behavior in input tag */
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Tab') {
+            e.preventDefault(); // prevent default tab behavior
+
+            // Get cursor position
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+
+            // Insert tab character at cursor position
+            const newValue = input.substring(0, start) + '\t' + input.substring(end);
+
+            // Update input value and cursor position
+            setInput(newValue);
+            e.target.selectionStart = e.target.selectionEnd = start + 1;
+        }
+        if (inFunc > 0 && /^\s*$/.test(input) && e.key === 'Backspace') {
+            setInFunc(inFunc - 1);
+        }
+    };
+
     const handleInputChange = (e) => {
         setInput(e.target.value);
     };
@@ -102,103 +127,245 @@ const REPL = () => {
         e.preventDefault();
         setCountArrowKey(0);
         setOutput([...output, `${input}`]);
-        if (input) {
-            setPrevInputs([...prevInputs, `${input}`])
-        }
-        const payload = {};
-        // checks if previous code has generated an output and comments it out in the payload if so
-        if (skipConditions) {
-            const inputCopy = deepCopyStateArray(prevInputs)
-            for (let i = 0; i < skipConditions.length; i++) {
-                const skipMe = skipConditions[i]
-                if (inputCopy.includes(skipMe)) {
-                    inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
-                }
+        // if the input is a string and is not the block code toggler, add it to prevInputs
+        if ((input)) {
+            if ((input.trim() !== ":{") && (input.trim() !== ":}")) {
+                setPrevInputs([...prevInputs, `${input.trim()}`]);
             }
-            payload['code'] = inputCopy.join('\n') + '\n' + input;
-        } else {
-            payload['code'] = prevInputs.join('\n') + '\n' + input;
         }
-        /* contacting API for code compilation */
-        try {
-            const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
-            const compiledError = resp.data.error;
-            const compiledResult = resp.data.output;
-            const functionNameStart = input.indexOf("(");
-            const functionName = input.substring(0, functionNameStart);
-            if (functionName === "Vis") {
-                const varName = input.substring(functionNameStart + 1, input.length - 1);
-                const respGET = await axios.get('http://127.0.0.1:5000/get_graph?varName=' + varName);
-                // if there is an error
-                if (respGET.data.error) {
-                    setErr([...err, compiledError]);
-                    setOutput([...output, input, compiledError]);
-                    setSkipConditions([...skipConditions, input]);
-                    // if not, open graph popup window
+        // if multiLine is enabled
+        if (multiLine) {
+            // if the input is closing the block code, run the code that was just entered
+            if (input.trim() === ":}") {
+                setMultiLine(false);
+                setSkipConditions([...skipConditions, input]);
+                setInFunc(0);
+
+                const payload = {};
+                // checks if previous code has generated an output and comments it out in the payload if so
+                if (skipConditions) {
+                    const inputCopy = deepCopyStateArray(prevInputs);
+                    for (let i = 0; i < skipConditions.length; i++) {
+                        const skipMe = skipConditions[i];
+                        if (inputCopy.includes(skipMe)) {
+                            inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
+                        }
+                    }
+                    payload['code'] = inputCopy.join('\n') + '\n';
                 } else {
-                    setSkipConditions([...skipConditions, input]);
-                    openPopup(respGET.data, varName);
+                    payload['code'] = prevInputs.join('\n') + '\n';
                 }
-            } else if (functionName === "Save") {
-                // if there is an error
-                if (compiledError) {
-                    setErr([...err, compiledError]);
-                    setOutput([...output, input, compiledError]);
-                    setSkipConditions([...skipConditions, input]);
-                    // if not, download csv file
-                } else {
-                    const varName = input.substring(functionNameStart + 1, input.length - 1);
-                    const respGET = await axios.get('http://127.0.0.1:5000/save_graph?varName=' + varName, {
-                        responseType: 'blob', // Set the response type to blob
-                    });
-                    // Create a URL for the Blob object
-                    const url = window.URL.createObjectURL(new Blob([respGET.data]));
+                /* contacting API for code compilation */
+                try {
+                    const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
+                    const compiledError = resp.data.error;
+                    const compiledResult = resp.data.output;
+                    const functionNameStart = input.indexOf("(");
 
-                    // Create a temporary <a> element and set its attributes
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = varName + '.csv'; // Specify the filename to download
-                    a.style.display = 'none';
+                    for (const prev of prevInputs) {
+                        if (prev.includes("print")) {
+                            setSkipConditions([...skipConditions, prev]);
+                        }
+                    }
+                    // if there is an error returned
+                    if (compiledError) {
+                        setErr([...err, compiledError]);
+                        setOutput([...output, input, compiledError]);
+                        setSkipConditions([...skipConditions, ...blockCode, input]);
+                    } else if (compiledResult) {
+                        // if the output is multi-lined, split each line into its own element in an array to return it
+                        if (compiledResult.includes('\n')) {
+                            const keepThese = []
+                            const strs = compiledResult.split('\n');
+                            // checks if any outputs end in .html or .csv to determine if the Vis or Save functionality needs to run
+                            for (const str of strs) {
+                                if (/.html$/.test(str)) {
+                                    const varName = str.replace(/\.html$/, '');
+                                    const respGET = await axios.get('http://127.0.0.1:5000/get_graph?varName=' + varName);
+                                    // if there is an error
+                                    if (respGET.data.error) {
+                                        setErr([...err, compiledError]);
+                                        setOutput([...output, input, compiledError]);
+                                        setSkipConditions([...skipConditions, input]);
+                                        // if not, open graph popup window
+                                    } else {
+                                        setSkipConditions([...skipConditions, input]);
+                                        openPopup(respGET.data, varName);
+                                    }
+                                } else if (/.csv$/.test(str)) {
+                                    // if there is an error
+                                    if (compiledError) {
+                                        setErr([...err, compiledError]);
+                                        setOutput([...output, input, compiledError]);
+                                        setSkipConditions([...skipConditions, input]);
+                                        // if not, download csv file
+                                    } else {
+                                        const varName = input.substring(functionNameStart + 1, input.length - 1);
+                                        const respGET = await axios.get('http://127.0.0.1:5000/save_graph?varName=' + varName, {
+                                            responseType: 'blob', // Set the response type to blob
+                                        });
+                                        // Create a URL for the Blob object
+                                        const url = window.URL.createObjectURL(new Blob([respGET.data]));
 
-                    // Append the <a> element to the document body
-                    document.body.appendChild(a);
+                                        // Create a temporary <a> element and set its attributes
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = varName + '.csv'; // Specify the filename to download
+                                        a.style.display = 'none';
 
-                    // Trigger the click event to start the download
-                    a.click();
+                                        // Append the <a> element to the document body
+                                        document.body.appendChild(a);
 
-                    // Clean up by removing the <a> element and revoking the URL
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
+                                        // Trigger the click event to start the download
+                                        a.click();
 
-                    setSkipConditions([...skipConditions, input]);
+                                        // Clean up by removing the <a> element and revoking the URL
+                                        document.body.removeChild(a);
+                                        window.URL.revokeObjectURL(url);
+
+                                        setSkipConditions([...skipConditions, input]);
+                                    }
+                                } else {
+                                    // removes the .html or .csv from being added to compiledOutput
+                                    keepThese.push(str)
+                                }
+                            }
+                            setOutput([...output, input, ...keepThese]);
+                            setCompiledOutput([...compiledOutput, ...keepThese]);
+                        } else {
+                            setOutput([...output, input, compiledResult]);
+                            setCompiledOutput([...compiledOutput, compiledResult]);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error: ', error);
                 }
             } else {
-                // if there is an error returned
-                if (compiledError) {
-                    setErr([...err, compiledError]);
-                    setOutput([...output, input, compiledError]);
-                    setSkipConditions([...skipConditions, input]);
-                } else if (compiledResult) {
-                    // if the output is multi-lined, split each line into its own element in an array to return it
-                    if (compiledResult.includes('\n')) {
-                        const strs = compiledResult.split('\n');
-                        setOutput([...output, input, ...strs]);
-                        setCompiledOutput([...compiledOutput, ...strs]);
-                        setSkipConditions([...skipConditions, input]);
-                    } else {
-                        setOutput([...output, input, compiledResult]);
-                        setCompiledOutput([...compiledOutput, compiledResult]);
-                        setSkipConditions([...skipConditions, input]);
+                setBlockCode([...blockCode, input]);
+            }
+        } else {
+            if (input === ":{") {
+                setMultiLine(true);
+                setSkipConditions([...skipConditions, input]);
+                setBlockCode([]);
+            } else if (input === 'clear') {
+                setSkipConditions([...skipConditions, input]);
+                setOutput([]);
+            } else {
+                const payload = {};
+                // checks if previous code has generated an output and comments it out in the payload if so
+                if (skipConditions) {
+                    const inputCopy = deepCopyStateArray(prevInputs);
+                    for (let i = 0; i < skipConditions.length; i++) {
+                        const skipMe = skipConditions[i];
+                        if (inputCopy.includes(skipMe)) {
+                            inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
+                        }
                     }
+                    payload['code'] = inputCopy.join('\n') + '\n' + input;
+                } else {
+                    payload['code'] = prevInputs.join('\n') + '\n' + input;
+                }
+                /* contacting API for code compilation */
+                console.log(payload);
+                try {
+                    const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
+                    const compiledError = resp.data.error;
+                    const compiledResult = resp.data.output;
+                    const functionNameStart = input.indexOf("(");
+
+                    // if there is an error returned
+                    if (compiledError) {
+                        setErr([...err, compiledError]);
+                        setOutput([...output, input, compiledError]);
+                        setSkipConditions([...skipConditions, input]);
+                        // if a output is returned
+                    } else if (compiledResult) {
+                        // if the output is multi-lined, split each line into its own element in an array to return it
+                        if (compiledResult.includes('\n')) {
+                            const strs = compiledResult.split('\n');
+                            const keepThese = []
+                            // checks if any outputs end in .html or .csv to determine if the Vis or Save functionality needs to run
+                            for (const str of strs) {
+                                if (/.html$/.test(str)) {
+                                    const varName = str.replace(/\.html$/, '');
+                                    const respGET = await axios.get('http://127.0.0.1:5000/get_graph?varName=' + varName);
+                                    // if there is an error
+                                    if (respGET.data.error) {
+                                        setErr([...err, compiledError]);
+                                        setOutput([...output, input, compiledError]);
+                                        setSkipConditions([...skipConditions, input]);
+                                        // if not, open graph popup window
+                                    } else {
+                                        setSkipConditions([...skipConditions, input]);
+                                        openPopup(respGET.data, varName);
+                                    }
+                                } else if (/.csv$/.test(str)) {
+                                    // if there is an error
+                                    if (compiledError) {
+                                        setErr([...err, compiledError]);
+                                        setOutput([...output, input, compiledError]);
+                                        setSkipConditions([...skipConditions, input]);
+                                        // if not, download csv file
+                                    } else {
+                                        const varName = input.substring(functionNameStart + 1, input.length - 1);
+                                        const respGET = await axios.get('http://127.0.0.1:5000/save_graph?varName=' + varName, {
+                                            responseType: 'blob', // Set the response type to blob
+                                        });
+                                        // Create a URL for the Blob object
+                                        const url = window.URL.createObjectURL(new Blob([respGET.data]));
+
+                                        // Create a temporary <a> element and set its attributes
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = varName + '.csv'; // Specify the filename to download
+                                        a.style.display = 'none';
+
+                                        // Append the <a> element to the document body
+                                        document.body.appendChild(a);
+
+                                        // Trigger the click event to start the download
+                                        a.click();
+
+                                        // Clean up by removing the <a> element and revoking the URL
+                                        document.body.removeChild(a);
+                                        window.URL.revokeObjectURL(url);
+
+                                        setSkipConditions([...skipConditions, input]);
+                                    }
+                                } else {
+                                    // removes the .html or .csv from being added to compiledOutput
+                                    keepThese.push(str)
+                                }
+                            }
+                            setOutput([...output, input, ...keepThese]);
+                            setCompiledOutput([...compiledOutput, ...keepThese]);
+                            setSkipConditions([...skipConditions, input]);
+                        } else {
+                            setOutput([...output, input, compiledResult]);
+                            setCompiledOutput([...compiledOutput, compiledResult]);
+                            setSkipConditions([...skipConditions, input]);
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error: ', error);
                 }
             }
-        } catch (error) {
-            console.error('Error: ', error);
         }
-        setInput('');
+        if (multiLine) {
+            if (input[input.length - 1] === ":") {
+                setInFunc(inFunc + 1);
+                setInput('\t'.repeat(inFunc + 1) + '');
+            } else if ((inFunc > 0) && (input.trim() !== ":}")) {
+                setInput('\t'.repeat(inFunc) + '');
+            } else {
+                setInput('');
+            }
+        } else {
+            setInput('');
+        }
     };
-
-    const [files, setfilelist] = useState('');
 
     return (
         <div style={{ height: '92.5vh', display: 'flex', backgroundColor: 'gainsboro' }} >
@@ -241,6 +408,10 @@ const REPL = () => {
                                     return (
                                         <div key={index}><p className='cursor' style={{ color: 'red' }}>{line}</p></div>
                                     );
+                                } else if (line.includes('\t')) {
+                                    return (
+                                        <div key={index}><p className='cursor'>&gt;&gt;&gt; {line.replace(/\t/g, '\u00a0\u00a0\u00a0\u00a0')}</p></div>
+                                    );
                                 } else {
                                     return (
                                         <div key={index}><p className='cursor'>&gt;&gt;&gt; {line}</p></div>
@@ -255,6 +426,7 @@ const REPL = () => {
                                     type="text"
                                     value={input}
                                     onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
                                     width="80"
                                     placeholder="Enter Python code here..."
                                 />

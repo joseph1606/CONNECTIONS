@@ -15,6 +15,7 @@ form {
 input {
     all: unset;
     width: 97.5%;
+    tab-size: 4;
 }
 
 #flexbox {
