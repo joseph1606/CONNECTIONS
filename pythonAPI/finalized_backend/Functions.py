@@ -4,11 +4,9 @@ from EdgeClass import Edge
 from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
-from pyvis.network import Network
-import inspect
 from SemanticScholarFuncs import *
-import os
 
+# from SemanticScholarFuncs import generate_author_dict
 
 # if a csv was inputted, it will create nodes based off the csv
 # else (in the case of no input) it will just create an empty graph -> user can use AddNodes to add nodes to it
@@ -17,12 +15,7 @@ def CreateGraph(csv: str = None):
 
     # case when we need to create nodes from a csv file
     if csv:
-        file_path = f'{os.getcwd()}/csv_list/{csv}'
-
-        if not os.path.exists(file_path):
-            raise ValueError(f"No uploaded csv with the name {csv} exists.")
-        
-        (names1, names2, attributes) = parseData(file_path)
+        (names1, names2, attributes) = parseData(csv)
 
         if names2 is None:
             # iterates through each row of inputs from csv
@@ -34,45 +27,43 @@ def CreateGraph(csv: str = None):
                 create_graph_helper(graph, name1, attribute)
 
                 create_graph_helper(graph, name2, attribute)
-
     graph.generateColors()
     return graph
 
-def SemanticGraph(author_name: str, choice: int = 1, numpapers: int = 5):
+
+def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
     """
     coauthors_dict:
     PaperNode1: [list of AuthorNodes]
     PaperNode2: [list of AuthorNodes]
     .....
-
+    
     coauthor_mapping:
     AuthorNode.id : AuthorNode
-
+    
     coauthor_list = [list of AuthorNodes]
-
+    
     papers_list = [list of Unique PaperNodes]
     """
-
-    (coauthors_dict, coauthor_mapping) = generate_author_dict(
-        author_name, choice, numpapers
-    )
+    
+    (coauthors_dict, coauthor_mapping) = generate_author_dict(author_name,choice, numpapers)
     coauthor_list = list(coauthor_mapping.values())
-    # papers_list = list(coauthors_dict.keys())
-
+    #papers_list = list(coauthors_dict.keys())
+    
     ssgraph = CreateGraph()
-
-    for author in coauthor_list:
+      
+    for author in coauthor_list:  
         author.attributes = {}
-        author.attributes["COAUTHOR"] = author.papers
+        author.attributes["PAPERS"] = author.papers
         ssgraph.nodes[author.getID()] = author
-
+        
         link_nodes(ssgraph, author, author.getAttributes())
-
+ 
     # creates redunant AuthorNodes but for now (CDR) this will do
-    # AddNodes(ssgraph,coauthor_list)
-    ssgraph.generateColors()
+    #AddNodes(ssgraph,coauthor_list)
+    
     return ssgraph
-
+    
 
 # add nodes to a previously defined graph
 # takes in a graph object and a list of nodes to be added to that graph object
@@ -81,16 +72,16 @@ def SemanticGraph(author_name: str, choice: int = 1, numpapers: int = 5):
 def AddNodes(graph: Graph, nodes_list: list[Node]):
 
     for node in nodes_list:
-        if isinstance(node, AuthorNode):
+        if isinstance(node,AuthorNode):
             name = node.getName()
             attribute = node.getAttributes()
             aliases = node.aliases
             authorId = node.authorId
             url = node.url
             papers = node.papers
-            node = graph.add_ssnode(name, attribute, aliases, authorId, url, papers)
+            node = graph.add_ssnode(name,attribute,aliases,authorId,url,papers)
             link_nodes(graph, node, attribute)
-
+                   
         else:
             name = node.getName()
             attribute = node.getAttributes()
@@ -131,60 +122,25 @@ def SubGraph(graph: Graph, chosen_node: Node):
     subgraph.generateColors()
     return subgraph
 
-
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
 def FilterGraph(graph: Graph, attributes: dict = None):
 
     if not dict:
-        raise ValueError("Desired filter is not in dictionary wrapper")
+        return None
 
     filter_graph = CreateGraph()
     attributes = format_dict(attributes)
 
     future_nodes = []
 
-    # get all nodes with relationships and relationship values desired in attributes parameter
     for attr, attr_list in attributes.items():
-        attr = attr.title()
+        relat_dict = graph.relationships[attr]
 
-        if attr in graph.relationships:
-
-            for value, value_list in graph.relationships[attr].items():
-                value = value.title()
-                if (attr_list and value in attr_list) or not attr_list:
-                    for node in value_list:
-                        if node not in future_nodes:
-                            future_nodes.append(node)
-
-    # get rid of unwanted filter attributes
-    for node in future_nodes:
-        new_attr = {}
-
-        # go through current attributes' keys and values
-        for attr, values in node.attributes.items():
-            # if relationship in desired filter
-            attr = attr.title()
-            if attr in attributes:
-                # if desired filter has desired values get values that exist
-                if attributes[attr] != [] and attributes[attr] != None:
-                    new_values = []
-                    for v in values:
-                        if type(v) is str:
-                            v = v.title()
-                        # this means that the passed in filter dictionary has to be following .title() format
-                        if v in attributes[attr]:
-                            new_values.append(v)
-
-                    # if there was a desired value in the nodes existing values
-                    if new_values != []:
-                        new_attr[attr] = values
-                # no specified desired values, take all values
-                else:
-                    new_attr[attr] = values
-
-        node.attributes = new_attr
+        for value, value_list in relat_dict.items():
+            if (attr_list and value in attr_list) or not attr_list:
+                future_nodes += value_list
 
     AddNodes(filter_graph, future_nodes)
     filter_graph.generateColors()
@@ -196,14 +152,11 @@ def format_dict(attributes: dict):
     formatted = {}
 
     for attribute_type, attribute_values in attributes.items():
-        attribute_type = attribute_type.title()
+        attribute_type = attribute_type.lower()
         formatted[attribute_type] = []
 
-        if attribute_values and attribute_type != "COAUTHOR".title():
-            for attribute_value in attribute_values:
-                formatted[attribute_type].append(attribute_value.title())
-        else:
-            formatted[attribute_type] = attribute_values
+        for attribute_value in attribute_values:
+            formatted[attribute_type].append(attribute_value.lower())
 
     return formatted
 
@@ -232,101 +185,76 @@ def Collision(graph1: Graph, graph2: Graph):
         else:
             collision_dict[node_name] = [node]
 
-    remove = []
     for key, value in collision_dict.items():
         if len(value) <= 1:
-            remove.append(key)
-
-    for key in remove:
-        del collision_dict[key]
+            del collision_dict[key]
 
     return collision_dict
 
 
-"""def clean_graphs(graph1: Graph, graph2: Graph, merge_list: list):
-    for tuple in merge_list:
-        for node in tuple:
-            if node.id in graph1.nodes:
-                del graph1.nodes[node.id]
-            else:
-                del graph2.nodes[node.id]
-
-    return graph1, graph2
-"""
-
-
 def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
-
     merge_graph = CreateGraph()
+    nodes1 = graph1.get_nodes()
+    nodes2 = graph2.get_nodes()
 
     # no merging
     if merge_list == None or merge_list == []:
-        AddNodes(merge_graph, list(graph1.nodes.values()))
-        AddNodes(merge_graph, list(graph2.nodes.values()))
+        AddNodes(merge_graph, nodes1)
+        AddNodes(merge_graph, nodes2)
 
     # currently assuming that nodes in merge_list are present in the graphs
     # also currently assuming that the tuples only have nodes with the same name -> prob need a helper function to check
     # also currently assuming that the same node cannot be in multiple diff tuples
     # assumes that nodes in the tuples are in the graph
     else:
-
-        # remove nodes being merge from existing graphs
-        # graph1, graph2 = clean_graphs(graph1, graph2, merge_list)
-
         # stores list of nodes that were merged; used to make sure we dont over merge shit
         merge = []
         # stores new nodes to be added
         nodes_list = []
-
+        
         for merge_nodes in merge_list:
             # iterating through tuple
             name = None
             attribute = {}
             # checks to see if an authornode was merged
             counter = 0
-
-            aliases = []
+            
+            aliases = None
             authorId = None
-            url = ""
-            papers = []
-
-            # for merged nodes
+            url = None
+            papers = None
+            
+            # for merged nodes        
             for node in merge_nodes:
-                name = node.name
-                merge.append(node.getID())
+                name = node.getName()
+                node_attributes = node.getAttributes()               
 
                 # Update attribute dictionary
-                for key, value in node.attributes.items():
-                    # iterate through each value in relationship values
-                    for v in value:
-                        if key in attribute and v not in attribute[key]:
-                            attribute[key].append(v)
-                        # Extend the existing list
-                        else:
-                            attribute[key] = value
-                            break
-
-                    # Add a new key-value pair if it doesn't exist
-
-                if isinstance(node, AuthorNode):
+                for key, value in node_attributes.items():
+                    if key in attribute:
+                        attribute[key].extend(value)  # Extend the existing list
+                    else:
+                        attribute[key] = value  # Add a new key-value pair if it doesn't exist
+                        
+                if isinstance(node,AuthorNode):
                     # needs to be addressed
-                    aliases = list(set(aliases + node.aliases))
+                    aliases = node.aliases
                     authorId = node.authorId
                     url = node.url
-                    papers = list(set(papers + node.papers))
+                    papers = node.papers
                     counter = 1
-
+                            
+                merge.append(node.getID())
+                
             if counter == 1:
-                merged_node = AuthorNode(
-                    name, attribute, aliases, authorId, url, papers
-                )
+                merged_node = AuthorNode(name,attribute, aliases,authorId,url,papers)
             else:
                 merged_node = Node(name, attribute)
+                
+            # update self.nodes    
+            merge_graph.nodes[merged_node.getID()] = merged_node
 
-            # update self.nodes
-            nodes_list.append(merged_node)
-
-        all_nodes = list(graph1.nodes.values()) + list(graph2.nodes.values())
+        all_nodes = nodes1 + nodes2
         # for unmerged nodes
         for node in all_nodes:
             if node.getID() not in merge:
@@ -451,10 +379,8 @@ def ShortestPath(
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
 def Vis(ntx):
-    if type(ntx) != nx.Graph:
-        raise ValueError("Passed parameter is not of type Networkx.Graph")
-    
-    nt = Network("1000px", "1000px")
+    nt = Network("500px", "500px")
+    # fancy rendering here
 
     for node_id in ntx.nodes():
         nt.add_node(
@@ -471,10 +397,8 @@ def Vis(ntx):
 
     # nt.from_nx(ntx)
     nt.toggle_physics(True)
-    caller_frame = inspect.currentframe().f_back
-    obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is ntx][0]
     nt.show(
-        f"{obj_name}.html", notebook=False
+        "ntx.html", notebook=False
     )  # something between frontend/backend happens here for rendering, but this is the basics
 
 
@@ -509,8 +433,7 @@ def titelize(attributes: dict) -> str:
 
     # k should be String, v should be List
     for k, v in attributes.items():
-        if k != "COAUTHOR":
-            title += k + ": " + ", ".join(v) + "\n"
+        title += k + ": " + ", ".join(v) + "\n"
 
     return title
 
@@ -519,6 +442,6 @@ def paper_string(papers) -> str:
     title = ""
 
     for paper in papers:
-        title += paper.title + ": " + str(paper.year) + "\n"
+        title += paper.title + ": " + paper.year + "\n"
 
     return title
