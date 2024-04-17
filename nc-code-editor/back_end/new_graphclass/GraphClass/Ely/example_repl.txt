@@ -1,0 +1,6 @@
+new_graph = CreateGraph("csv")
+institution_cnx = Filter(new_graph, "Institution")
+vis(institution_cnx) 
+
+instititution_auth = Filter(new_graph, "Institution", "Coauthor")
+vis(instititution_auth)
