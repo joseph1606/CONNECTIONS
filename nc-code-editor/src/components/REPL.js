@@ -572,7 +572,7 @@ const REPL = () => {
                 <div id='filetogglebtn' onClick={filecollapse} style={{ position: 'absolute', zIndex: 2, marginLeft: '-18px', width: '20px', height: '50px', marginTop: '5vh', backgroundColor: 'white', border: '2px solid grey' }}>
                     <p id='filetoggle' style={{ position: 'relative', margin: 'auto', height: '25px', marginTop: '12.5px', width: '50%', marginLeft: '5px' }}>&gt;</p>
                 </div>
-                <div id='fileinputbox' style={{ position: 'relative', width: '100%', height: '100%', padding: '10px', backgroundColor: 'white', borderRadius: '15px', padding: '5%', border: '2px solid grey' }}>
+                <div id='fileinputbox' style={{ position: 'relative', width: '100%', zIndex: 2, height: '100%', padding: '10px', backgroundColor: 'white', borderRadius: '15px', padding: '5%', border: '2px solid grey' }}>
                     <h2>File Input:</h2>
                     <input id='csvreader' type="file" accept=".csv" onChange={handleFileUpload} />
                     <br />
