@@ -37,6 +37,7 @@ input {
 #tabselect button {
     height: 3vh;
     margin-right: 1vw;
+    padding: 2px;
 }
 
 #terminal-loader {
