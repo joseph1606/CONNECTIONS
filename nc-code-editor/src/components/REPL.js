@@ -16,6 +16,28 @@ const REPL = () => {
     const [skipConditions, setSkipConditions] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [format, setFormat] = useState(0);
+    var filecollapsed = false;
+
+    const filecollapse = () => {
+        if (filecollapsed) {
+            document.getElementById('codearea').style.width = '85vw'
+            document.getElementById('inputbox').style.width = '15vw'
+            document.getElementById('fileinputbox').style.visibility = 'visible';
+            document.getElementById('fileinputbox').style.display = '';
+            document.getElementById('filetoggle').textContent = '>';
+            document.getElementById('filetogglebtn').style.marginLeft = '-18px';
+            filecollapsed = false;
+        } else {
+            document.getElementById('codearea').style.width = '100vw'
+            document.getElementById('inputbox').style.width = '0vw'
+            document.getElementById('fileinputbox').style.visibility = 'collapse';
+            document.getElementById('fileinputbox').style.display = 'none';
+            document.getElementById('filetoggle').textContent = '<';
+            document.getElementById('filetogglebtn').style.marginLeft = '-10px';
+            filecollapsed = true;
+        }
+        console.log(filecollapsed)
+    }
 
     const editor = () => {
         document.getElementById('terminal-loader').style.visibility = 'visible';
@@ -435,25 +457,14 @@ const REPL = () => {
 
     return (
         <div style={{ height: '92.5vh', display: 'flex', backgroundColor: 'gainsboro' }} >
-            <div id='inputbox' style={{ width: '20vw', height: '92.5vh', padding: '10px' }}>
-                <div id='fileinputbox' style={{ width: '100%', height: '100%', padding: '10px', backgroundColor: 'white', borderRadius: '15px', padding: '5%', border: '2px solid grey' }}>
-                    <h2>File Input:</h2>
-                    <input id='csvreader' type="file" accept=".csv" onChange={handleFileUpload} />
-                    <br />
-                    <br />
-                    <h4>Files:</h4>
-                    {uploadedFiles.map((line, index) => (
-                        <div id={index} key={index}><p>{line}</p></div>
-                    ))}
-                </div>
-            </div>
-            <div id='codearea' style={{ width: '80vw', height: '92.5vh', zIndex: 0, padding: '10px' }}>
+            <div id='codearea' style={{ width: '85vw', height: '92.5vh', zIndex: 0, padding: '10px' }}>
                 <div id="flexbox">
                     <div id='tabselect' style={{
                         marginLeft: '35px'
                     }}>
                         <button onClick={editor}>Editor</button>
                         <button onClick={viewData}>View File Data</button>
+                        <button>Output</button>
                     </div>
                     <div id="terminal-loader">
                         <div className="terminal-header">
@@ -555,6 +566,21 @@ const REPL = () => {
                             }
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div id='inputbox' style={{ width: '15vw', height: '92.5vh', padding: '10px' }}>
+                <div id='filetogglebtn' onClick={filecollapse} style={{ position: 'absolute', zIndex: 2, marginLeft: '-18px', width: '20px', height: '50px', marginTop: '5vh', backgroundColor: 'white', border: '2px solid grey' }}>
+                    <p id='filetoggle' style={{ position: 'relative', margin: 'auto', height: '25px', marginTop: '12.5px', width: '50%', marginLeft: '5px' }}>&gt;</p>
+                </div>
+                <div id='fileinputbox' style={{ position: 'relative', width: '100%', height: '100%', padding: '10px', backgroundColor: 'white', borderRadius: '15px', padding: '5%', border: '2px solid grey' }}>
+                    <h2>File Input:</h2>
+                    <input id='csvreader' type="file" accept=".csv" onChange={handleFileUpload} />
+                    <br />
+                    <br />
+                    <h4>Files:</h4>
+                    {uploadedFiles.map((line, index) => (
+                        <div id={index} key={index}><p>{line}</p></div>
+                    ))}
                 </div>
             </div>
         </div>
