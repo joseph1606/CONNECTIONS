@@ -10,6 +10,7 @@ const REPL = () => {
     const [blockCode, setBlockCode] = useState([]);
     const [prevInputs, setPrevInputs] = useState([]);
     const [multiLine, setMultiLine] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
     const [countArrowKey, setCountArrowKey] = useState(0);
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [compiledOutput, setCompiledOutput] = useState([]);
@@ -103,6 +104,33 @@ const REPL = () => {
     }
 
 
+    /* for creating a session id */
+    
+    useEffect(() => {
+        // Make a request to the server to initiate a session
+        axios.get('http://127.0.0.1:5000/initiate')
+            .then(response => {
+                // Retrieve the session ID from the response
+                const sessionId = response.data.session_id;
+                // Set the session ID in the state
+                setSessionId(sessionId);
+            })
+            .catch(error => {
+                console.error('Error initiating session:', error);
+            });
+    }, []); // Only run once on component mount
+    
+    /**/
+
+    // Axios interceptor to add session ID to request headers
+    
+    axios.interceptors.request.use(config => {
+        if (sessionId) {
+            config.headers['session'] = sessionId;
+        }
+        return config;
+    });
+
     /* for popup graph display window */
 
     const openPopup = (htmlData, graphName) => {
@@ -133,14 +161,14 @@ const REPL = () => {
     useEffect(() => {
         function handleKeyDown(event) {
             if ((event.key === 'ArrowUp') && (countArrowKey < prevInputs.length - 1)) {
-                setInput(prevInputs[prevInputs.length - countArrowKey - 1]);
+                setInput(prevInputs[prevInputs.length - countArrowKey - 1].trim());
                 setCountArrowKey(countArrowKey + 1);
             } else if ((event.key === 'ArrowUp') && (countArrowKey === prevInputs.length - 1)) {
-                setInput(prevInputs[0]);
+                setInput(prevInputs[0].trim());
             } else if ((event.key === 'ArrowDown') && (countArrowKey === 0)) {
                 setInput('');
             } else if (event.key === 'ArrowDown') {
-                setInput(prevInputs[prevInputs.length - countArrowKey]);
+                setInput(prevInputs[prevInputs.length - countArrowKey].trim());
                 setCountArrowKey(countArrowKey - 1);
             }
         }
@@ -161,6 +189,7 @@ const REPL = () => {
         // WALTER: file.name will give you all the file names
         const formData = new FormData();
         formData.set('file', file);
+        formData.set('csvName', file.name);
         read();
 
         try {
@@ -170,7 +199,16 @@ const REPL = () => {
                 window.alert(`Your csv has an error: ${compiledError}. You may reupload the csv after error has been addressed.`);
             } else {
                 console.log('File sent successfully:', response.data);
-                setUploadedFiles([...uploadedFiles, file.name]);
+                const lastIndex = file.name.lastIndexOf('.');
+                const base = file.name.substring(0, lastIndex);
+                const ext = file.name.substring(lastIndex + 1);
+                let fileName = file.name;
+                let counter = 1;
+                while (uploadedFiles.includes(fileName)) {
+                    fileName = `${base} (${counter}).${ext}`;
+                    counter += 1
+                }
+                setUploadedFiles([...uploadedFiles, fileName]);
             }
         } catch (error) {
             console.error('Error uploading file:', error);
@@ -218,7 +256,7 @@ const REPL = () => {
         // if the input is a string and is not the block code toggler, add it to prevInputs
         if ((input)) {
             if ((input.trim() !== ":{") && (input.trim() !== ":}")) {
-                setPrevInputs([...prevInputs, `${input.trim()}`]);
+                setPrevInputs([...prevInputs, `${input}`]);
             }
         }
         // if multiLine is enabled

@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, send_file
 import time
 import sys
 import os
+import uuid
+import global_vars
 from io import StringIO
 from flask_cors import CORS
 
@@ -16,7 +18,7 @@ from parse import parseData, Save
 from SemanticScholarFuncs import *
 
 app = Flask(__name__, static_url_path='/lib/bindings')
-CORS(app, origins=['http://localhost:3000'], methods=['GET', 'POST'], allow_headers=['Content-Type'])
+CORS(app, origins=['http://localhost:3000'], methods=['GET', 'POST'], expose_headers='Access-Control-Allow-Origin')
 
 
 # It will contain the current command run and all the previous commands ran for that instance of the site
@@ -55,7 +57,8 @@ def get_graph():
 @app.route('/save_graph', methods=['GET'])
 def save_graph():
     var_name = request.args.get('varName')
-    filepath = f"{os.getcwd()}/csv_list/{var_name}.csv"
+    session_id = request.headers.get('session')
+    filepath = f"{os.getcwd()}/csv_list/{session_id}/{var_name}.csv"
     # return ERROR HERE for if graph name is not contained
     if os.path.exists(filepath):
         return send_file(filepath, as_attachment=True, download_name=f'{var_name}.csv', mimetype='text/csv')
@@ -68,15 +71,31 @@ def upload_file():
         return {'error': 'No file part'}, 400
     file = request.files['file']
     csv_name = request.form['csvName']
-    # Do something with the file, e.g., save it to disk
-    # errorChecking and check for errors before saving, change name of csv file
-    csv = f'{os.getcwd()}/csv_list/{csv_name}'
+    # get session id from header
+    session_id = request.headers.get('session')
+    # if path does not exist for csv and session, make it
+    filepath = f'{os.getcwd()}/csv_list/{session_id}'
+    if not os.path.exists(filepath):
+        os.makedirs(filepath)
+    csv = f'{filepath}/{csv_name}'
+
+    base, ext = os.path.splitext(csv_name)
+    counter = 1
+    while os.path.exists(csv):
+        csv = f"{filepath}/{base} ({counter}){ext}"
+        counter += 1
     file.save(csv)
+    global_vars.session_id = session_id
     try:
         parseData(csv)
     except Exception as e:
         return jsonify({'output': None, 'error': str(e)})
     return {'message': 'File uploaded successfully'}, 200
+
+@app.route('/initiate', methods=['GET'])
+def initiate():
+    session_id = str(uuid.uuid4())
+    return jsonify({'session_id': session_id}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

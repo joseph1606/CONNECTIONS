@@ -5,6 +5,8 @@ from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
 from SemanticScholarFuncs import *
+import os
+import global_vars
 
 # from SemanticScholarFuncs import generate_author_dict
 
@@ -15,7 +17,12 @@ def CreateGraph(csv: str = None):
 
     # case when we need to create nodes from a csv file
     if csv:
-        (names1, names2, attributes) = parseData(csv)
+        file_path = f'{os.getcwd()}/csv_list/{global_vars.session_id}/{csv}'
+
+        if not os.path.exists(file_path):
+            raise ValueError(f"No uploaded csv with the name {csv} exists.")
+        
+        (names1, names2, attributes) = parseData(file_path)
 
         if names2 is None:
             # iterates through each row of inputs from csv
