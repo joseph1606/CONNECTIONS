@@ -14,6 +14,72 @@ const REPL = () => {
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [compiledOutput, setCompiledOutput] = useState([]);
     const [skipConditions, setSkipConditions] = useState([]);
+    const [tableData, setTableData] = useState([]);
+    const [format, setFormat] = useState(0);
+
+    const editor = () => {
+        document.getElementById('terminal-loader').style.visibility = 'visible';
+        document.getElementById('terminal-loader').style.display = '';
+        document.getElementById('terminal-loader').style.visibility = 'visible';
+        document.getElementById('terminal-loader').style.display = '';
+    }
+    const viewData = () => {
+        console.log(document.getElementById('terminal-loader').style.display)
+        document.getElementById('terminal-loader').style.visibility = 'collpase';
+        document.getElementById('terminal-loader').style.display = 'none';
+
+    }
+
+    const read = () => {
+        var fr = new FileReader();
+        fr.onload = function () {
+            let lines = fr.result.split('\r\n')
+            lines.forEach(myFunction);
+
+            function myFunction(value, index, array) {
+                lines[index] = lines[index].split(',')
+            }
+            // console.log(lines)
+            if (lines[0].length == 3) {
+                const table = []
+
+                for (let i = 1; i < lines.length; i++) {
+                    table.push({
+                        persona: lines[i][0],
+                        relat: lines[i][1],
+                        relatv: lines[i][2],
+                    });
+                }
+
+                setTableData([[], ...table])
+                setFormat(2)
+
+            } else if (lines[0].length == 4) {
+
+                const table = []
+
+                for (let i = 1; i < lines.length; i++) {
+                    table.push({
+                        persona: lines[i][0],
+                        personb: lines[i][1],
+                        relat: lines[i][2],
+                        relatv: lines[i][3],
+                    });
+                }
+
+                setTableData([[], ...table])
+                setFormat(1)
+            } else {
+                document.getElementById('format').textContent = 'Incorrect Format';
+                setTableData([[], []])
+                setFormat(0)
+            }
+        }
+        fr.readAsText(document.getElementById('csvreader').files[0]);
+
+        document.getElementById('dataviewer').style.border = '1px solid black';
+    }
+
 
     /* for popup graph display window */
 
@@ -73,7 +139,7 @@ const REPL = () => {
         // WALTER: file.name will give you all the file names
         const formData = new FormData();
         formData.set('file', file);
-        formData.set('csvName', file.name);
+        read();
 
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
@@ -377,13 +443,19 @@ const REPL = () => {
                     <br />
                     <h4>Files:</h4>
                     {uploadedFiles.map((line, index) => (
-                        <div key={index}><p>{line}</p></div>
+                        <div id={index} key={index}><p>{line}</p></div>
                     ))}
                 </div>
             </div>
             <div id='codearea' style={{ width: '80vw', height: '92.5vh', zIndex: 0, padding: '10px' }}>
                 <div id="flexbox">
-                    <div className="terminal-loader">
+                    <div id='tabselect' style={{
+                        marginLeft: '35px'
+                    }}>
+                        <button onClick={editor}>Editor</button>
+                        <button onClick={viewData}>View File Data</button>
+                    </div>
+                    <div id="terminal-loader">
                         <div className="terminal-header">
                             <div className="terminal-title">Connections REPL</div>
                         </div>
@@ -433,6 +505,56 @@ const REPL = () => {
                             </form>
                         </div>
                     </div>
+                    <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh' }}>
+                        <thead>
+                            {(() => {
+                                if (format == 1) {
+                                    return (
+                                        <tr>
+                                            <th>Person 1</th>
+                                            <th>Person 2</th>
+                                            <th>Relationship</th>
+                                            <th>Relationship Value</th>
+                                        </tr>
+                                    );
+                                } else if (format == 2) {
+                                    return (
+                                        <tr>
+                                            <th>Person</th>
+                                            <th>Relationship</th>
+                                            <th>Relationship Value</th>
+                                        </tr>
+                                    );
+                                } else {
+                                    return null; // or return an appropriate default header
+                                }
+                            })()}
+                        </thead>
+                        <tbody>
+                            {
+                                tableData.map((obj) => {
+                                    if (Object.keys(obj).length == 4) {
+                                        return (
+                                            <tr >
+                                                <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
+                                                <td style={{ border: ' 1px solid black' }}>{obj.personb}</td>
+                                                <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
+                                                <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                            </tr>
+                                        );
+                                    } else if (Object.keys(obj).length == 3) {
+                                        return (
+                                            <tr>
+                                                <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
+                                                <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
+                                                <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                            </tr>
+                                        );
+                                    }
+                                })
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
