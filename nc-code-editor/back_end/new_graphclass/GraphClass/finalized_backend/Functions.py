@@ -6,6 +6,7 @@ from parse import parseData
 import networkx as nx
 from SemanticScholarFuncs import *
 from pyvis.network import Network
+import pandas
 
 # from SemanticScholarFuncs import generate_author_dict
 
@@ -92,6 +93,7 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             node = graph.add_node(name, attribute)
             link_nodes(graph, node, attribute)
 
+    graph.generateColors()
     return graph
 
 
@@ -100,7 +102,6 @@ def SubGraph(graph: Graph, chosen_node: Node):
 
     # is the chosen node even in the graph?
     if chosen_node.getID() not in graph.get_nodes_dict():
-        # print("Node is not in the graph")
         raise ValueError("Node is not in the graph")
 
     subgraph = CreateGraph()
@@ -429,30 +430,26 @@ def namesInGraph(graph: Graph):
     return list(name_set)
 
 
-def ShortestPath(
-    source: Node, target: Node, graph: Graph = None, net: nx = None
-) -> list:
+def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
     # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    net = Networkx(graph)
     sp = nx.shortest_path(net, source=source.id, target=target.id)
 
-    if graph:
-        node_sp = []
+    node_sp = []
 
-        for id in sp:
-            if id in graph.nodes:
-                node_sp.append(graph.nodes[id])
-            else:
-                raise ValueError("Networkx object and Graph object are not equivalent")
+    for id in sp:
+        if id in graph.nodes:
+            node_sp.append(graph.nodes[id])
+        else:
+            raise ValueError("Networkx object and Graph object are not equivalent")
 
-        return node_sp
-    else:
-        return sp
+    return node_sp
 
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
-def Vis(ntx: nx.Graph):
-    if not isinstance(ntx, nx.Graph):
-        raise ValueError("Passed parameter is not of type Networkx.Graph")
+def Vis(graph: Graph):
+
+    ntx = Networkx(graph)
 
     nt = Network("500px", "500px")
 
@@ -495,11 +492,26 @@ def Networkx(graph):
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
         edge_relationships = list(graph.edges[edge_id].relationships.keys())
-        color = graph.colors[edge_relationships[0]]
+
+        # Ranking of graph relationships
+        if "DIRECTED" in edge_relationships:
+            color = graph.colors["DIRECTED"]
+        elif "COAUTHOR" in edge_relationships:
+            color = graph.colors["COAUTHOR"]
+        else:
+            color = graph.colors[edge_relationships[0]]
 
         ntx.add_edge(node1_id, node2_id, title=title, color=color)
 
     return ntx
+
+
+def NodeCentrality(graph, node):
+    ntx = Networkx(graph)
+
+    cent_dict = nx.degree_centrality(ntx)
+
+    return cent_dict[node.id]
 
 
 def titelize(attributes: dict) -> str:
@@ -522,3 +534,60 @@ def paper_string(papers) -> str:
         title += paper.title + ": " + str(paper.year) + "\n"
 
     return title
+
+
+def saveData(nodes, filePath):
+    names = list()
+    attributes = list()
+    authors = list()
+
+    # Gets all information out of the list of nodes, and sorts into authors and non authors
+    for node in nodes:
+        if type(node) is author.AuthorNode:
+            authors.append(node)
+        else:
+            names.append(node.getName())
+            attributes.append(node.getAttributes())
+
+    # Formats non author data in the correct way
+    data = dict()
+    ks = list()
+    vs = list()
+    for x in attributes:
+
+        keyslist = list(x.keys())
+        valuelist = list(x.values())
+        values_to_save = list()
+        keys_to_save = list()
+
+        # Unpacks list of lists into values
+        for y in range(len(valuelist)):
+            for z in range(len(valuelist[y])):
+                keys_to_save.append(keyslist[y])
+                values_to_save.append(valuelist[y][z])
+
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
+
+    for x in authors:
+        keys_to_save = list()
+        values_to_save = list()
+        keys_to_save.append("AUTHORID")
+        values_to_save.append(x.authorId)
+        for i in range(len(x.papers)):
+            keys_to_save.append("PAPER")
+            values_to_save.append(x.papers[i].title)
+
+        names.append(x.getName())
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
+
+    # Puts all data into a dictionary
+    data["Person 1"] = names
+    data["Relationship"] = ks
+    data["Relationship Value"] = vs
+
+    # Saves dictionary to csv
+    pandas_df = pandas.DataFrame(data)
+    df = dd.from_pandas(pandas_df, npartitions=1)
+    df.compute().to_csv(filePath, index=False)
