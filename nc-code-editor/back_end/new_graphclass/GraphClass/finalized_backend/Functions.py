@@ -7,6 +7,7 @@ import networkx as nx
 from SemanticScholarFuncs import *
 from pyvis.network import Network
 import pandas
+import dask.dataframe as dd
 
 # from SemanticScholarFuncs import generate_author_dict
 
@@ -543,7 +544,7 @@ def saveData(nodes, filePath):
 
     # Gets all information out of the list of nodes, and sorts into authors and non authors
     for node in nodes:
-        if type(node) is author.AuthorNode:
+        if type(node) is AuthorNode:
             authors.append(node)
         else:
             names.append(node.getName())
