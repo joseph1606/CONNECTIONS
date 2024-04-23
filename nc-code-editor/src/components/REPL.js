@@ -43,14 +43,22 @@ const REPL = () => {
     const editor = () => {
         document.getElementById('terminal-loader').style.visibility = 'visible';
         document.getElementById('terminal-loader').style.display = '';
-        document.getElementById('terminal-loader').style.visibility = 'visible';
-        document.getElementById('terminal-loader').style.display = '';
+        document.getElementById('dataviewer').style.visibility = 'collpase';
+        document.getElementById('dataviewer').style.display = 'none';
     }
     const viewData = () => {
-        console.log(document.getElementById('terminal-loader').style.display)
         document.getElementById('terminal-loader').style.visibility = 'collpase';
         document.getElementById('terminal-loader').style.display = 'none';
-
+        document.getElementById('dataviewer').style.visibility = 'visible';
+        document.getElementById('dataviewer').style.display = '';
+    }
+    const viewOutput = () => {
+        document.getElementById('terminal-loader').style.visibility = 'collpase';
+        document.getElementById('terminal-loader').style.display = 'none';
+        document.getElementById('dataviewer').style.visibility = 'collpase';
+        document.getElementById('dataviewer').style.display = 'none';
+        document.getElementById('outputviewer').style.visibility = 'visible';
+        document.getElementById('outputviewer').style.display = '';
     }
 
     const read = () => {
@@ -105,7 +113,7 @@ const REPL = () => {
 
 
     /* for creating a session id */
-    
+
     useEffect(() => {
         // Make a request to the server to initiate a session
         axios.get('http://127.0.0.1:5000/initiate')
@@ -119,11 +127,11 @@ const REPL = () => {
                 console.error('Error initiating session:', error);
             });
     }, []); // Only run once on component mount
-    
+
     /**/
 
     // Axios interceptor to add session ID to request headers
-    
+
     axios.interceptors.request.use(config => {
         if (sessionId) {
             config.headers['session'] = sessionId;
@@ -502,7 +510,7 @@ const REPL = () => {
                     }}>
                         <button onClick={editor}>Editor</button>
                         <button onClick={viewData}>View File Data</button>
-                        <button>Output</button>
+                        <button onClick={viewOutput}>Output</button>
                     </div>
                     <div id="terminal-loader">
                         <div className="terminal-header">
@@ -604,6 +612,9 @@ const REPL = () => {
                             }
                         </tbody>
                     </table>
+                    <div id='outputviewer'>
+
+                    </div>
                 </div>
             </div>
             <div id='inputbox' style={{ width: '15vw', height: '92.5vh', padding: '10px' }}>
