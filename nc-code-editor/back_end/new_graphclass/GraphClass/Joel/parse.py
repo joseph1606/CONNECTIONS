@@ -84,14 +84,32 @@ def parseData(csv):
             if key == 'DIRECTED':
                 rel = value.split("/")
 
-                # Error if too many or too little '/'s are used
-                if len(rel) != 2:
-                    raise ValueError("Error: Incorrect directed relationship format")
-                # Error if either side of the '/' is empty
-                if (not rel[0] or not rel[1]):
-                    raise ValueError("Error: Incorrect directed relationship format")
-                value = (rel[0], rel[1])
-            
+                # name1,name2,DIRECTED,mentor/mentee
+                if offset == 1:                
+                    # Error if too many or too little '/'s are used
+                    if len(rel) != 2:
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    # Error if either side of the '/' is empty
+                    if (not rel[0] or not rel[1]):
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    value = (rel[0].lower(), rel[1].lower())
+                # name1,DIRECTED,name2/mentor/mentee
+                elif offset == 0:
+                    # Error if too many or too little '/'s are used
+                    if len(rel) != 3:
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    
+                    # Error if any part is empty
+                    if (not rel[0] or not rel[1] or not rel[2]):
+                        raise ValueError("Error: Incorrect directed relationship format")
+                    
+                    # returns (name2,mentor,mentee) such that name1 -> name2, mentor/mentee
+                    value = (rel[0].title(), rel[1].lower(), rel[2].lower())
+
+            # Change all non author info to lower case
+            elif not (key == 'AUTHORID' or key == 'PAPER'):
+                key = key.lower()
+                value = value.lower()
             # Saves the key,value pair to the dictionary
             if key in pairing:
                 pairing[key].append(value)  # If key already exists, append value to existing list
