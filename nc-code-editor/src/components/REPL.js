@@ -93,7 +93,7 @@ const REPL = () => {
                 setTableData([[], ...table])
                 setFormat(1)
             } else {
-                document.getElementById('format').textContent = 'Incorrect Format';
+ //               document.getElementById('format').textContent = 'Incorrect Format';
                 setTableData([[], []])
                 setFormat(0)
             }

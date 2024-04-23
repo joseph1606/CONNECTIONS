@@ -5,7 +5,9 @@ from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
 from SemanticScholarFuncs import *
+from pyvis.network import Network
 import os
+import inspect
 import global_vars
 
 # from SemanticScholarFuncs import generate_author_dict
@@ -386,7 +388,7 @@ def ShortestPath(
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
 def Vis(ntx):
-    nt = Network("500px", "500px")
+    nt = Network("1000px", "1000px")
     # fancy rendering here
 
     for node_id in ntx.nodes():
@@ -404,8 +406,10 @@ def Vis(ntx):
 
     # nt.from_nx(ntx)
     nt.toggle_physics(True)
+    caller_frame = inspect.currentframe().f_back
+    obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is ntx][0]
     nt.show(
-        "ntx.html", notebook=False
+        f"{obj_name}.html", notebook=False
     )  # something between frontend/backend happens here for rendering, but this is the basics
 
 
