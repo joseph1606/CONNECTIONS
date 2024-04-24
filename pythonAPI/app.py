@@ -70,7 +70,7 @@ def upload_file():
     if 'file' not in request.files:
         return {'error': 'No file part'}, 400
     file = request.files['file']
-    csv_name = request.form['csvName']
+    csv_name = request.form['csvName'].lower()
     # get session id from header
     session_id = request.headers.get('session')
     # if path does not exist for csv and session, make it

@@ -19,6 +19,7 @@ def CreateGraph(csv: str = None):
 
     # case when we need to create nodes from a csv file
     if csv:
+        csv = csv.lower()
         file_path = f'{os.getcwd()}/csv_list/{global_vars.session_id}/{csv}'
 
         if not os.path.exists(file_path):
@@ -473,7 +474,7 @@ def Vis(graph: Graph):
     # nt.from_nx(ntx)
     nt.toggle_physics(True)
     caller_frame = inspect.currentframe().f_back
-    obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is ntx][0]
+    obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
     nt.show(
         f"{obj_name}.html", notebook=False
     )  # something between frontend/backend happens here for rendering, but this is the basics
