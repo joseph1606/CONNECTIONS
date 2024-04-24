@@ -131,56 +131,66 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
-def FilterGraph(graph: Graph, attributes: dict = None):
+def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
-    if not dict:
-        raise ValueError("Desired filter is not in dictionary wrapper")
+    # lambda's will take a node and return True or False. If False, node will be filtered out
+    if lamb:
+        filter_graph = CreateGraph()
+        future_nodes = []
 
-    filter_graph = CreateGraph()
-    attributes = format_dict(attributes)
+        for node_id, node in graph.nodes.items():
+            if lamb(node):
+                future_nodes.append(node)
 
-    future_nodes = []
+    else:
+        if not dict:
+            raise ValueError("Desired filter is not in dictionary wrapper")
 
-    # get all nodes with relationships and relationship values desired in attributes parameter
-    for attr, attr_list in attributes.items():  # "age": "21"
-        attr = attr.title()
+        filter_graph = CreateGraph()
+        attributes = format_dict(attributes)
 
-        if attr in graph.relationships:
+        future_nodes = []
 
-            for value, value_list in graph.relationships[attr].items():
-                value = value.title()
-                if (attr_list and value in attr_list) or not attr_list:
-                    for node in value_list:
-                        if node not in future_nodes:
-                            future_nodes.append(node)
-
-    # get rid of unwanted filter attributes
-    for node in future_nodes:
-        new_attr = {}
-
-        # go through current node's attributes' keys and values
-        for attr, values in node.attributes.items():
-            # if relationship in desired filter
+        # get all nodes with relationships and relationship values desired in attributes parameter
+        for attr, attr_list in attributes.items():  # "age": "21"
             attr = attr.title()
-            if attr in attributes:
-                # if desired filter has desired values get values that exist
-                if attributes[attr] != [] and attributes[attr] != None:
-                    new_values = []
-                    for v in values:
-                        if isinstance(v, str):
-                            v = v.title()
-                        # this means that the passed in filter dictionary has to be following .title() format
-                        if v in attributes[attr]:
-                            new_values.append(v)
 
-                    # if there was a desired value in the nodes existing values
-                    if new_values != []:
+            if attr in graph.relationships:
+
+                for value, value_list in graph.relationships[attr].items():
+                    value = value.title()
+                    if (attr_list and value in attr_list) or not attr_list:
+                        for node in value_list:
+                            if node not in future_nodes:
+                                future_nodes.append(node)
+
+        # get rid of unwanted filter attributes
+        for node in future_nodes:
+            new_attr = {}
+
+            # go through current node's attributes' keys and values
+            for attr, values in node.attributes.items():
+                # if relationship in desired filter
+                attr = attr.title()
+                if attr in attributes:
+                    # if desired filter has desired values get values that exist
+                    if attributes[attr] != [] and attributes[attr] != None:
+                        new_values = []
+                        for v in values:
+                            if isinstance(v, str):
+                                v = v.title()
+                            # this means that the passed in filter dictionary has to be following .title() format
+                            if v in attributes[attr]:
+                                new_values.append(v)
+
+                        # if there was a desired value in the nodes existing values
+                        if new_values != []:
+                            new_attr[attr] = values
+                    # no specified desired values, take all values
+                    else:
                         new_attr[attr] = values
-                # no specified desired values, take all values
-                else:
-                    new_attr[attr] = values
 
-        node.attributes = new_attr
+            node.attributes = new_attr
 
     AddNodes(filter_graph, future_nodes)
     return filter_graph
