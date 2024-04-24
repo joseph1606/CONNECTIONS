@@ -14,7 +14,7 @@ from EdgeClass import *
 from Functions import *
 from GraphClass import *
 from NodeClass import *
-from parse import parseData, Save
+from parse import parseData
 from SemanticScholarFuncs import *
 
 app = Flask(__name__, static_url_path='/lib/bindings')

@@ -1,9 +1,4 @@
 import dask.dataframe as dd
-import pandas
-import os
-import inspect
-import global_vars
-from GraphClass import Graph
 
 """
 Mine (Joel's) comments
@@ -107,49 +102,3 @@ def parseData(csv):
         three.append(pairing)
 
     return (one, two, three)
-
-# to do: cannot save graphs with directed edges
-def Save(graph: Graph):
-    if type(graph) != Graph:
-        raise ValueError("Parameter received is not a valid graph.")
-    nodes = graph.get_nodes()
-    names = list()
-    attributes = list()
-
-    # Gets all information out of the list of nodes
-    for node in nodes:
-        names.append(node.getName())
-        attributes.append(node.getAttributes())
-
-    # Formats data in the correct way
-    data = dict()
-    ks = list()
-    vs = list()
-    for x in attributes:
-        keyslist = list(x.keys())
-        valuelist = list(x.values())
-        values_to_save = list()
-        keys_to_save = list()
-
-        # Unpacks list of lists into values
-        for y in range(len(valuelist)):
-            for z in range(len(valuelist[y])):
-                values_to_save.append(valuelist[y][z])
-                keys_to_save.append(keyslist[y])
-
-        vs.append(','.join(values_to_save))
-        ks.append(','.join(keys_to_save))
-
-
-    # Puts all data into a dictionary
-    data["Person 1"] = names
-    data['Relationship'] = ks
-    data['Relationship Value'] = vs
-
-    # Saves dictionary to csv
-    pandas_df = pandas.DataFrame(data)
-    df = dd.from_pandas(pandas_df, npartitions=1)
-    caller_frame = inspect.currentframe().f_back
-    obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
-    print(f"{obj_name}.csv")
-    df.compute().to_csv(f"{os.getcwd()}/csv_list/{global_vars.session_id}/{obj_name}.csv", index=False)
