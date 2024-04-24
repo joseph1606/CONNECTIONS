@@ -36,11 +36,15 @@ class Graph:
      
         }
         
-        self.directed = {
+             self.directed = {
+                       
+               currently stored as :-                              
+               (Purtilo,Ely): [(mentor,mentee)]               
+               (Purtilo,Joel): [(mentor,mentee)]
+               
+            }
+  
         
-               "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
-
-        }
         """
 
     def return_nxGraph(self):
@@ -86,25 +90,29 @@ class Graph:
     def add_directed(self,node1:Node,node2:Node,directed_rel:tuple):
         """
           self.directed = {
-        
+                       
+               currently stored as :-                              
+               (Purtilo_node,Ely_node): [(mentor,mentee)]               
+               (Purtilo_node,Joel_node): [(mentor,mentee)]
+               
+               could be stored as :-               
                "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
 
         }
         """
-        # instead of storing two separate things like (mentor,mentee) and (mentee,mentor) 
-        # im trying to keep it only one thing (for now)  
-        directed_rel_rev = (directed_rel[1],directed_rel[0])
-        
-        if directed_rel in self.directed and (node1,node2) not in self.directed[directed_rel]:
-            self.directed[directed_rel].append((node1,node2))
+
+        directed_rel_rev = (directed_rel[1], directed_rel[0]) 
+        directed_tuple = (node1,node2)
+        directed_tuple_rev = (node2,node1)
             
-        elif directed_rel_rev in self.directed and (node2,node1) not in self.directed[directed_rel_rev]:
-            self.directed[directed_rel_rev].append((node2,node1))
+        if directed_tuple in self.directed and directed_rel not in self.directed[directed_tuple]:
+            self.directed[directed_tuple].append(directed_rel)
             
-        elif (directed_rel_rev not in self.directed and directed_rel not in self.directed):
-            self.directed[directed_rel] = [(node1,node2)]
+        elif directed_tuple_rev in self.directed and directed_rel not in self.directed[directed_tuple_rev]:
+            self.directed[directed_tuple_rev].append(directed_rel_rev)
         
-        
+        else:
+            self.directed[directed_tuple] = [directed_rel]
         
     # returns list of nodes ids that have the same attribute type and corresponding value -> which is use to create/update edges
     # also updates relationships dict
@@ -239,13 +247,13 @@ class Graph:
                 
                 
     def print_directed(self):
+        
         for key,value in self.directed.items():
-            print(key)
-            for node_tuple in value:
-                for node in node_tuple:
-                    print(node.name)
-                    print(node.attributes)
-                print()     
+            print("node names are: ")
+            print(key[0].name)
+            print(key[1].name)
+            print("directed relationships")
+            print(value)
             print("----------------------")
 
     def generateColors(self):

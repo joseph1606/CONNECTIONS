@@ -33,7 +33,13 @@ class Edge:
                 self.relationships[key] = value
 
     def addDirected(self,directed_rel:tuple):
-        self.directed.append(directed_rel)
+        if directed_rel not in self.directed:
+            self.directed.append(directed_rel)
 
                     
+                    
+    def print_directed(self):
+        print(self.node1.name)
+        print(self.node2.name)
+        print(self.directed)        
         

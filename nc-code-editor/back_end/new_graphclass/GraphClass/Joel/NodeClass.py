@@ -10,14 +10,17 @@ class Node:
         
         """
         for joel node,
-        self.directed["mentor"] = [Purtilo_node]
+        self.directed[Purtilo_node] = ["mentor"]
         
         for purtilo node,
-        self.directed["mentee"] = [Joel_node]
+        self.directed[joel_node] = ["mentee"]
         """
 
     def __eq__(self, other):
         return isinstance(other, Node) and self.id == other.id
+    
+    def __hash__(self):
+        return hash(self.id)
 
     def getID(self):
         return self.id
@@ -43,7 +46,22 @@ class Node:
                 
     #def updateDirected(self,other_node:Node, directed_rel:str):
     def addDirected(self,other_node, directed_rel:str):
-        if directed_rel in self.directed:
-           self.directed[directed_rel].append(other_node)
+        
+        if other_node in self.directed and directed_rel not in self.directed[other_node]:
+            self.directed[other_node].append(directed_rel)
+            
         else:
-            self.directed[directed_rel] = [other_node] 
+            self.directed[other_node] = [directed_rel]
+            
+            
+            
+    def print_directed(self):
+        print("===================")
+        print("Node name is: ")
+        print(self.name)
+        print()
+        for node, rel_value in self.directed.items():
+            print("Other node and its values are: ")
+            print(node.name)
+            print(rel_value)
+            print()
