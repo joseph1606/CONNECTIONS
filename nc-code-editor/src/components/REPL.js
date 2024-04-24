@@ -210,7 +210,7 @@ const REPL = () => {
                 const lastIndex = file.name.lastIndexOf('.');
                 const base = file.name.substring(0, lastIndex);
                 const ext = file.name.substring(lastIndex + 1);
-                let fileName = file.name;
+                let fileName = file.name.toLowerCase();
                 let counter = 1;
                 while (uploadedFiles.includes(fileName)) {
                     fileName = `${base} (${counter}).${ext}`;
