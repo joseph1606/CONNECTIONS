@@ -117,7 +117,7 @@ const REPL = () => {
                     });
                 }
                 console.log(files)
-                setfiles({ ...files, fileName: { format: 2, data: table } })
+                setfiles({ ...files, [fileName]: { format: 2, data: table } })
                 setTableData([[], ...table])
                 setFormat(2)
 
