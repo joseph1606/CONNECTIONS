@@ -100,6 +100,8 @@ def parse_author_data(author_data, numpapers):
                             authorIds.append(coauthor.get("authorId"))
                     papers.append(PaperNode(title, year, authors, authorIds))
                     paper_count += 1
+                    
+                    
             author_node = AuthorNode(name, None, aliases, authorId, url, papers)
             author_nodes.append(author_node)
     return author_nodes
