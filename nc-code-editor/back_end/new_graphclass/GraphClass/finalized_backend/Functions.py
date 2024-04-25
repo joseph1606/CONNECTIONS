@@ -153,6 +153,9 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
         # get all nodes with relationships and relationship values desired in attributes parameter
         for attr, attr_list in attributes.items():  # "age": "21"
+            if not isinstance(attr, int):
+                attr = str(attr)
+
             attr = attr.title()
 
             if attr in graph.relationships:
