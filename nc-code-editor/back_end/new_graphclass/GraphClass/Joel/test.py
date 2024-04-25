@@ -11,27 +11,27 @@ Purtilo, Ely, DIRECTED, "Mentor/Mentee" -> {DIRECTED: (Mentor,Mentee)} ->
 """  
 
 
-x = CreateGraph("connections3.csv")
+g = CreateGraph("connections3.csv")
 
-#x.print_directed()
+b = GetNodes(g)
 
-y = GetNodes(x)
+subg = SubGraph(g,b[0])
+y = GetNodes(subg)
+    
+print("printing graph.directed")    
+subg.print_directed()
+    
+print("Directed nodes")
+for node in y:
+    node.print_directed()
+    print()
 
-node = y[0]
-
-z = SubGraph(x,node)
-
-
-print("*****************************")
-
-
-#z.print_nodes()
-
-z.print_directed()
-
-print("-----------------------------")
+print("Directed edges: ========================")
+for edge_id,edge in subg.edges.items():
+    edge.print_directed()
+    print()
+        
 
 
 
 
-#z.print_nodes()

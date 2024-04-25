@@ -19,7 +19,7 @@ input {
 }
 
 #flexbox {
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: flex-end;
     height: 100%;
@@ -30,7 +30,19 @@ input {
     padding: 10px;
 }
 
-.terminal-loader {
+#tabselect {
+    visibility: visible;
+}
+
+#tabselect button {
+    height: 4vh;
+    min-height: 30px;
+    margin-right: 1vw;
+    padding: 2px;
+    font-size: 20px;
+}
+
+#terminal-loader {
     border: 0.1em solid #333;
     background-color: #1a1a1a;
     color: #0f0;
@@ -38,6 +50,7 @@ input {
     font-size: 1em;
     padding: 1.5em 0.5em;
     margin: 40px auto;
+    margin-top: 1vh;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 4px;
     position: relative;
@@ -67,4 +80,11 @@ input {
     float: left;
     line-height: 1.5em;
     color: #eee;
+}
+
+#filetogglebtn {
+    color: rgb(95, 158, 160);
+    border-radius: 80% / 60%;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 }

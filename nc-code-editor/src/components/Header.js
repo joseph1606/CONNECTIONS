@@ -4,16 +4,17 @@ import logo from "./media/download.png"
 
 function popup() {
   document.getElementById('functions').style.visibility = 'visible'
+  document.getElementById('functions').style.display = ''
 
 };
 function cheerdown() {
   document.getElementById('functions').style.visibility = 'hidden'
+  document.getElementById('functions').style.display = 'none'
   document.getElementById('funcname').textContent = '';
   document.getElementById('desciption').textContent = '';
   document.getElementById('parameterslistedout').textContent = '';
   document.getElementById('parametertitle').textContent = '';
   document.getElementById('desctitle').textContent = '';
-
 };
 
 function funcpopup() {
@@ -35,20 +36,17 @@ function Header() {
         <img src={logo} alt="logo" style={{ padding: '5px', height: '6vh' }} />
         <h1 id='title' style={{ color: 'black', width: '9.5vw', height: '2.5vh', fontSize: '2.5vh' }}>Connections</h1>
       </div>
-      <div id="info" style={{ border: '0px', position: 'absolute', zIndex: 1, width: '25vw', maxWidth: '25vw', right: 0 }}>
+      <div id="info" style={{ border: '0px', position: 'absolute', zIndex: 3, width: '25vw', maxWidth: '25vw', right: 0 }}>
         <img id='i' src={i} alt="Info" onMouseOver={popup} onMouseLeave={cheerdown} />
-        <div id="functions" style={{ visibility: 'hidden' }} onMouseOver={popup} onMouseLeave={cheerdown}>
+        <div id="functions" style={{ visibility: 'hidden', display: 'none' }} onMouseOver={popup} onMouseLeave={cheerdown}>
           <h1>Functions</h1>
           <br />
           <div style={{ height: 'fit-content' }} onMouseLeave={funccheerdown}>
             <h4 onMouseOver={funcpopup} id='select' style={{ outline: '2px solid grey', marginLeft: '10%', marginRight: '10%', backgroundColor: 'white' }}>Select Function:</h4>
-            <div id="funclist" onMouseOver={funcpopup} style={{ visibility: 'hidden', backgroundColor: 'whitesmoke', border: '1px solid grey', padding: '2px', height: '100%', position: 'absolute', width: '98%', left: '1%' }}>
+            <div id="funclist" onMouseOver={funcpopup} style={{ visibility: 'hidden', backgroundColor: 'whitesmoke', border: '1px solid grey', padding: '2px', height: '150%', position: 'absolute', width: '98%', left: '1%' }}>
               <div className="funclistitem">
                 <h5 onClick={() => fillinfo(addnodes)}>AddNodes():</h5>
-                {/*<h5 onClick={() => fillinfo(addnodehelper)}>AddNodeHelper():</h5>*/}
                 <h5 onClick={() => fillinfo(graphdesc)}>CreateGraph():</h5> </div>
-              <h5 onClick={() => fillinfo(semanticgraphdesc)}>SemanticGraph():</h5>
-              <h5 onClick={() => fillinfo(subgraphdesc)}>SubGraph():</h5>
               <h5 onClick={() => fillinfo(collisiondesc)}>Collision():</h5>
               <h5 onClick={() => fillinfo(mergedesc)}>MergeGraph():</h5>
               <h5 onClick={() => fillinfo(filterdesc)}>FilterGraph():</h5>
@@ -57,6 +55,8 @@ function Header() {
               <h5 onClick={() => fillinfo(visdesc)}>Vis():</h5>
               <h5 onClick={() => fillinfo(savedesc)}>Save():</h5>
               <h5 onClick={() => fillinfo(networkx)}>Networkx():</h5>
+              <h5 onClick={() => fillinfo(subgraphdesc)}>SubGraph():</h5>
+              <h5 onClick={() => fillinfo(semanticgraphdesc)}>SemanticGraph():</h5>
             </div>
           </div>
           <div id='funcinfo' style={{ borderRadius: '10%', margin: '5px' }}>
@@ -95,7 +95,7 @@ const semanticgraphdesc = ['SemanticGraph()', [
   "author name",
   "choice",
   "number of papers"
-],   "The semantic graph function initializes a new graph variable representing the constructed graph structure. If a name is specified, the function accesses Semantic Scholar data associated with the provided name and constructs a graph centered around it, incorporating co-authors as additional nodes. Disambiguation will be applied to ensure accurate retrieval of the targeted person's information. In the case of a CSV file, the function parses it to generate one or more node objects based on the entries. Data originates exclusively from the file itself. If an error arises during graph creation, specific error messages are provided to identify the nature of the issue, whether it's due to an invalid input or difficulties in parsing the CSV file."]
+], "The semantic graph function initializes a new graph variable representing the constructed graph structure. If a name is specified, the function accesses Semantic Scholar data associated with the provided name and constructs a graph centered around it, incorporating co-authors as additional nodes. Disambiguation will be applied to ensure accurate retrieval of the targeted person's information. In the case of a CSV file, the function parses it to generate one or more node objects based on the entries. Data originates exclusively from the file itself. If an error arises during graph creation, specific error messages are provided to identify the nature of the issue, whether it's due to an invalid input or difficulties in parsing the CSV file."]
 const subgraphdesc = ['SubGraph()', [
   "graph",
   "node"
@@ -129,10 +129,6 @@ const mergedesc = [
 const addnodes = [
   'AddNodes()', ['graph', 'csv'],
   "The addnodes function expands a previously existing graph by incorporating additional nodes retrieved from a CSV file. It doesn't create a new graph but augments an existing one with new nodes. If the specified graph variable is invalid or of an incorrect type, the function remains inactive and notifies the user with an error message on the REPL."
-]
-const addnodehelper = [
-  'AddNodeHelper()', ['graph', 'node'],
-  "This function accepts a graph, single node, and attribute of type dictionary and appends the node to the graph with the appropriate relationship, then returns the graph."
 ]
 const networkx = [
   'Networkx()', ['graph'],

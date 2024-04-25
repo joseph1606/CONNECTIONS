@@ -5,6 +5,7 @@ from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
 from SemanticScholarFuncs import *
+import copy
 from pyvis.network import Network
 
 # from SemanticScholarFuncs import generate_author_dict
@@ -29,21 +30,18 @@ def CreateGraph(csv: str = None):
                 directed_dict = {}
                 
                 if 'DIRECTED' in attribute:
-                    # stores the tuple of relationship values (like Men
-                    # tor,Mentee)
+                    # stores the tuple of relationship values (like Mentor,Mentee)
                     directed_dict['DIRECTED'] = attribute.pop('DIRECTED')
                                 
                 node1 = create_graph_helper(graph, name1, attribute)
                 node2 = create_graph_helper(graph, name2, attribute)
                 
-                # popping out directed will cause an issue if there are at least one new node (from the csv file) that only has a directed relationship with another node
+                # popping out directed will cause an issue if there is at least one new node (from the csv file) that only has a directed relationship with another node
                 # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
                 # as such we will need to create an edge between two said nodes
-                
-                # if there was no edge created because the only relationship between two ndoes is directed, we ll need to create the edge
+
                 if directed_dict:
                     edge_list = graph.search_edge(node1,node2)
-                    
                     
                     if not edge_list:
                         edge = graph.add_edge(node1,node2,"")
@@ -68,7 +66,7 @@ def CreateGraph(csv: str = None):
                         else:
                             tuple_list_rev = (tuple_list[1],tuple_list[0])
                             graph.edges[edge_id].addDirected(tuple_list_rev)
-
+                            
     graph.generateColors()
     return graph
 
@@ -124,46 +122,47 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             new_node = graph.add_ssnode(name, attribute, aliases, authorId, url, papers)
             link_nodes(graph, new_node, attribute)
                             
-
         else:
             name = node.getName()
             attribute = node.getAttributes()
             new_node = graph.add_node(name, attribute)
             link_nodes(graph, new_node, attribute)
             
+        #print(node.print_directed())
         new_node_list.append(new_node)
-        
-    
-        
-    # handling directed nodes
-    for node in nodes_list:
-        #print("hello")
-        old_index = nodes_list.index(node)
-        new_node = new_node_list[old_index]
-        # iterating through each node again
-        for directed_rel, directed_nodes in node.directed.items():
-            
-            for directed_node in directed_nodes:
-                # iterating through each node directed; we need to see if the node directed is in the list
-                if directed_node in nodes_list:
-                    #print("hello")
-                    directed_index = nodes_list.index(directed_node)
-                    directed_node = new_node_list[directed_index]
-                    
-                    # creating the new node connection
-                    #print(new_node_list[old_index].name)
-                    new_node.addDirected(directed_node,directed_rel)
-                    
-                    # key = rel, value = list of nodes
-                    #for key,value in directed_node.directed.items():
-                        
-                            
-                    
-                    # directed_rel rn is just a str (like mentor) but it should be a tuple like (mentor,mentee)
-                    graph.add_directed(new_node,directed_node,directed_rel)
-                    
+
+     # for handling directed nodes
+    for node,new_node in zip(nodes_list,new_node_list):
+        if node.directed:
+            for other_node in node.directed:
+                new_tuple_list = None
                 
-    
+                index = nodes_list.index(other_node)
+                new_other_node = new_node_list[index]
+                
+                rel = copy.deepcopy(node.directed[other_node])
+                other_rel = copy.deepcopy(other_node.directed[node])
+                
+                
+                for single_rel in other_rel:
+                    new_node.addDirected(new_other_node,single_rel) 
+                    
+                for single_rel in rel:           
+                    new_other_node.addDirected(new_node,single_rel)
+        
+                new_edge = graph.search_edge(new_node,new_other_node)
+                
+                if not new_edge: 
+                    new_edge = graph.add_edge(new_node,new_other_node,"")
+                    new_tuple_list = list(zip(rel,other_rel))  
+                else:
+                    new_edge = new_edge[0]
+                    new_tuple_list = list(zip(other_rel,rel))  
+                    
+                for single_rel in new_tuple_list:
+                    graph.add_directed(new_node,new_other_node,single_rel)
+                    new_edge.addDirected(single_rel)
+
     graph.generateColors()
     return graph
 
