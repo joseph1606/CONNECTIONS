@@ -463,6 +463,8 @@ def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
 def Vis(graph: Graph):
+    if type(graph) != Graph:
+        raise ValueError("Vis expects a parameter of type: Graph")
 
     ntx = Networkx(graph)
 

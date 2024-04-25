@@ -3,6 +3,7 @@ import time
 import sys
 import os
 import uuid
+import re
 import global_vars
 from io import StringIO
 from flask_cors import CORS
@@ -20,13 +21,28 @@ from SemanticScholarFuncs import *
 app = Flask(__name__, static_url_path='/lib/bindings')
 CORS(app, origins=['http://localhost:3000'], methods=['GET', 'POST'], expose_headers='Access-Control-Allow-Origin')
 
+blacklisted_cmds = {"os.", "with open", ".system", "subprocess", "builtins", "__import__", "getattr(", "setattr("}
 
 # It will contain the current command run and all the previous commands ran for that instance of the site
 @app.route('/compile', methods=['POST'])
 def compile_code():
     code = request.json['code']
 
-    #parts = code.strip().split('\n')
+    parts = code.strip().split('\n')
+
+    #input validation and sanitization
+    allowed_pattern = r'^[a-zA-Z0-9\'"(),:. \t>=<\[\]{}+-/*%^&|~!=]+$'
+
+    for line in parts:
+        if line.startswith("#"):
+            continue
+        for cmd in blacklisted_cmds:
+            if cmd in line:
+                err = f"{line}: This line may contain malicious input and will not be executed."
+                return jsonify({'output': None, 'error': err})
+            elif not re.match(allowed_pattern, line):
+                err = f"{line}: This line contains a character or characters that the program is not expecting."
+                return jsonify({'output': None, 'error': err})
     
     output = StringIO()  # Create StringIO object to capture output
     sys.stdout = output   # Redirect stdout to StringIO object
