@@ -7,7 +7,9 @@ class Edge:
         self.node1 = node1
         self.node2 = node2
         self.relationships = attributes  # {relationship : [relationship_values]}
-        self.directed = []
+        self.directed = (
+            []
+        )  # [("mentor/mentee")] where first element in tuple is referring to first node
 
     def getID(self):
         return self.id

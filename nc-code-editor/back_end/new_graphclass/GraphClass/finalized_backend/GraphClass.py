@@ -4,6 +4,7 @@ from EdgeClass import Edge
 from AuthorNode import AuthorNode
 import copy
 import colorsys
+from keys import *
 
 
 class Graph:
@@ -41,7 +42,8 @@ class Graph:
         
         self.directed = {
         
-               "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
+               (Purtilo_node,Ely_node):[(mentor,mentee)]
+               (pjr_node,Purtilo_node): [(son,father), (mentee,mentor)]
 
         }
         """

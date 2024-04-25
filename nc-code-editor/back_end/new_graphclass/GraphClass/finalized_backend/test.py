@@ -4,9 +4,9 @@ from Functions import *
 from parse import *
 from SemanticScholarFuncs import *
 
-graph = CreateGraph("joel.csv")
+graph = CreateGraph("connections3.csv")
 
-f = FilterGraph(graph, {"Age": [21, 22]})
-
-lamb = lambda node: True if "Connections" in node.attributes else False
+# Vis(graph)
+graph.print_directed()
+# lamb = lambda node: True if "Connections" in node.attributes else False
 # fg = FilterGraph(graph, None, lamb)

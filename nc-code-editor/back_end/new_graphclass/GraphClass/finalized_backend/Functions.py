@@ -9,6 +9,7 @@ import copy
 from pyvis.network import Network
 import pandas
 import dask.dataframe as dd
+from keys import *
 
 # from SemanticScholarFuncs import generate_author_dict
 
@@ -586,7 +587,7 @@ def Networkx(graph):
     # add nodes to networkx object
     for node_id, node in graph.nodes.items():
 
-        title = titelize(node.attributes)
+        title = titelize_node(node)
 
         if isinstance(node, AuthorNode):
             aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
@@ -597,14 +598,14 @@ def Networkx(graph):
 
     # add edges to networkx object
     for (node1_id, node2_id), edge_id in graph.connections.items():
-        title = titelize(graph.edges[edge_id].relationships)
+        title += titelize_edge(graph.edges[edge_id])
         edge_relationships = list(graph.edges[edge_id].relationships.keys())
 
         # Ranking of graph relationships
-        if "DIRECTED" in edge_relationships:
-            color = graph.colors["DIRECTED"]
+        if graph.edges[edge_id].directed != []:
+            color = DIRECTED_COLOR
         elif "COAUTHOR" in edge_relationships:
-            color = graph.colors["COAUTHOR"]
+            color = COAUTHOR_COLOR
         else:
             color = graph.colors[edge_relationships[0]]
 
@@ -629,11 +630,49 @@ def NodeCentrality(graph, node):
     return cent_dict[node.id]
 
 
-def titelize(attributes: dict) -> str:
+def titelize_node(node) -> str:
     title = ""
+    print(node.directed)
+    title += "DIRECTED Relationships:\n"
+
+    for person, value_list in node.directed.items():
+        title += person.name + ":\n"
+        for value in value_list:
+            title += "value\n"
+
+    if title == "DIRECTED Relationships:\n":
+        title = ""
 
     # k should be String, v should be List
-    for k, v in attributes.items():
+    for k, v in node.attributes.items():
+        if k != "COAUTHOR".title():
+            title += k + ": " + ", ".join(v) + "\n"
+        else:
+            title += k.title()
+
+    # print(title)
+    return title
+
+
+def titelize_edge(edge: Edge) -> str:
+    title = ""
+
+    if edge.directed != []:
+        title += "DIRECTED Relationships:\n"
+        for front, back in edge.directed:
+            title += (
+                front.title()
+                + ": "
+                + edge.node1.name.title()
+                + ", "
+                + back.title()
+                + ": "
+                + edge.node2.name.title
+                + "\n"
+            )
+
+    # k should be String, v should be List
+    for k, v in edge.relationships.items():
         if k != "COAUTHOR".title():
             title += k + ": " + ", ".join(v) + "\n"
         else:
