@@ -263,6 +263,7 @@ def Collision(graph1: Graph, graph2: Graph):
 """
 
 
+# directed?
 def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
     merge_graph = CreateGraph()
