@@ -88,3 +88,8 @@ input {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
+
+.file:hover {
+    cursor: pointer;
+    color: gray;
+}

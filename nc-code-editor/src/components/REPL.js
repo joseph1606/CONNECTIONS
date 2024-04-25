@@ -669,7 +669,7 @@ const REPL = () => {
                     <br />
                     <h4>Files (click to view):</h4>
                     {uploadedFiles.map((line, index) => (
-                        <div id={index} key={index}><p onClick={() => viewFile({ line })}>{line}</p></div>
+                        <div id={index} key={index}><p className='file' onClick={() => viewFile({ line })}>{line}</p></div>
                     ))}
                 </div>
             </div>
