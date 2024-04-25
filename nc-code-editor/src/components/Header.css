@@ -1,8 +1,9 @@
 #mainheader {
     height: 7.5vh;
     width: 100vw;
-    background-color: rgb(138, 154, 91);
-    display: flex
+    background-color: rgb(95, 158, 160);
+    display: flex;
+    border-bottom: 2px solid grey;
 }
 
 #i {

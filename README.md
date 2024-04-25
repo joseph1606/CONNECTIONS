@@ -75,7 +75,7 @@ $ sed -i 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write
 ```
 #### MacOS
 ```console
-$ sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebook=False)/g' /venv/lib/python3.12/site-packages/pyvis/network.py
+$ sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebook=False)/g' venv/lib/python3.12/site-packages/pyvis/network.py
 ```
 
 ### Step 4
