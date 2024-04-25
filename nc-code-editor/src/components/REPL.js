@@ -17,7 +17,20 @@ const REPL = () => {
     const [skipConditions, setSkipConditions] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [format, setFormat] = useState(0);
+    const [outputhtml, setOutputhtml] = useState(0);
+    const [files, setfiles] = useState({});
     var filecollapsed = false;
+
+    const viewFile = (file) => {
+        console.log()
+        console.log(files)
+        console.log(files[file['line']])
+        if (files[file['line']]) {
+            setTableData([[], ...files[file['line']]['data']])
+            setFormat(files[file['line']]['format'])
+        }
+        viewData()
+    }
 
     const filecollapse = () => {
         if (filecollapsed) {
@@ -43,14 +56,30 @@ const REPL = () => {
     const editor = () => {
         document.getElementById('terminal-loader').style.visibility = 'visible';
         document.getElementById('terminal-loader').style.display = '';
+        document.getElementById('outputviewer').style.visibility = 'collpase';
+        document.getElementById('outputviewer').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'collpase';
         document.getElementById('dataviewer').style.display = 'none';
+        document.getElementById('outputbtn').style.backgroundColor = '';
+        document.getElementById('databtn').style.backgroundColor = '';
+        document.getElementById('editorbtn').style.backgroundColor = 'darkgrey';
+        document.getElementById('outputbtn').style.borderRadius = '';
+        document.getElementById('databtn').style.borderRadius = '';
+        document.getElementById('editorbtn').style.borderRadius = '5%';
     }
     const viewData = () => {
         document.getElementById('terminal-loader').style.visibility = 'collpase';
         document.getElementById('terminal-loader').style.display = 'none';
+        document.getElementById('outputviewer').style.visibility = 'collpase';
+        document.getElementById('outputviewer').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'visible';
         document.getElementById('dataviewer').style.display = '';
+        document.getElementById('outputbtn').style.backgroundColor = '';
+        document.getElementById('editorbtn').style.backgroundColor = '';
+        document.getElementById('databtn').style.backgroundColor = 'darkgrey';
+        document.getElementById('outputbtn').style.borderRadius = '';
+        document.getElementById('editorbtn').style.borderRadius = '';
+        document.getElementById('databtn').style.borderRadius = '5%';
     }
     const viewOutput = () => {
         document.getElementById('terminal-loader').style.visibility = 'collpase';
@@ -59,12 +88,18 @@ const REPL = () => {
         document.getElementById('dataviewer').style.display = 'none';
         document.getElementById('outputviewer').style.visibility = 'visible';
         document.getElementById('outputviewer').style.display = '';
+        document.getElementById('databtn').style.backgroundColor = '';
+        document.getElementById('editorbtn').style.backgroundColor = '';
+        document.getElementById('outputbtn').style.backgroundColor = 'darkgrey';
+        document.getElementById('databtn').style.borderRadius = '';
+        document.getElementById('editorbtn').style.borderRadius = '';
+        document.getElementById('outputbtn').style.borderRadius = '5%';
     }
 
-    const read = () => {
+    const read = (fileName) => {
         var fr = new FileReader();
         fr.onload = function () {
-            let lines = fr.result.split('\r\n')
+            let lines = fr.result.split('\n')
             lines.forEach(myFunction);
 
             function myFunction(value, index, array) {
@@ -81,7 +116,8 @@ const REPL = () => {
                         relatv: lines[i][2],
                     });
                 }
-
+                console.log(files)
+                setfiles({ ...files, [fileName]: { format: 2, data: table } })
                 setTableData([[], ...table])
                 setFormat(2)
 
@@ -97,11 +133,13 @@ const REPL = () => {
                         relatv: lines[i][3],
                     });
                 }
-
+                setfiles({ ...files, [fileName]: { format: 1, data: table } })
                 setTableData([[], ...table])
                 setFormat(1)
             } else {
- //               document.getElementById('format').textContent = 'Incorrect Format';
+                //               document.getElementById('format').textContent = 'Incorrect Format';
+                console.log(lines[0])
+                console.log(lines[0].length)
                 setTableData([[], []])
                 setFormat(0)
             }
@@ -144,9 +182,12 @@ const REPL = () => {
     const openPopup = (htmlData, graphName) => {
         // opens a new window
         const newWindow = window.open('', '_blank', 'width=1000,height=1000');
+        console.log(htmlData)
+        setOutputhtml(htmlData)
         // adds a title of the graph name on the window
         const i = htmlData.indexOf("<head>");
         htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
+        viewOutput()
 
         // writes html content to window
         if (newWindow) {
@@ -198,7 +239,6 @@ const REPL = () => {
         const formData = new FormData();
         formData.set('file', file);
         formData.set('csvName', file.name);
-        read();
 
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
@@ -217,6 +257,7 @@ const REPL = () => {
                     counter += 1
                 }
                 setUploadedFiles([...uploadedFiles, fileName]);
+                read(fileName);
             }
         } catch (error) {
             console.error('Error uploading file:', error);
@@ -508,9 +549,9 @@ const REPL = () => {
                     <div id='tabselect' style={{
                         marginLeft: '35px'
                     }}>
-                        <button onClick={editor}>Editor</button>
-                        <button onClick={viewData}>View File Data</button>
-                        <button onClick={viewOutput}>Output</button>
+                        <button id='editorbtn' onClick={editor} style={{ backgroundColor: 'darkgray', borderRadius: '5%' }}>Editor</button>
+                        <button id='databtn' onClick={viewData}>View File Data</button>
+                        <button id='outputbtn' onClick={viewOutput}>Output</button>
                     </div>
                     <div id="terminal-loader">
                         <div className="terminal-header">
@@ -612,7 +653,7 @@ const REPL = () => {
                             }
                         </tbody>
                     </table>
-                    <div id='outputviewer'>
+                    <div id='outputviewer' dangerouslySetInnerHTML={{ __html: outputhtml }}>
 
                     </div>
                 </div>
@@ -626,9 +667,9 @@ const REPL = () => {
                     <input id='csvreader' type="file" accept=".csv" onChange={handleFileUpload} />
                     <br />
                     <br />
-                    <h4>Files:</h4>
+                    <h4>Files (click to view):</h4>
                     {uploadedFiles.map((line, index) => (
-                        <div id={index} key={index}><p>{line}</p></div>
+                        <div id={index} key={index}><p className='file' onClick={() => viewFile({ line })}>{line}</p></div>
                     ))}
                 </div>
             </div>

@@ -38,7 +38,7 @@ function Header() {
       </div>
       <div id="info" style={{ border: '0px', position: 'absolute', zIndex: 3, width: '25vw', maxWidth: '25vw', right: 0 }}>
         <img id='i' src={i} alt="Info" onMouseOver={popup} onMouseLeave={cheerdown} />
-        <div id="functions" style={{ visibility: 'hidden' }} onMouseOver={popup} onMouseLeave={cheerdown}>
+        <div id="functions" style={{ visibility: 'hidden', display: 'none' }} onMouseOver={popup} onMouseLeave={cheerdown}>
           <h1>Functions</h1>
           <br />
           <div style={{ height: 'fit-content' }} onMouseLeave={funccheerdown}>
