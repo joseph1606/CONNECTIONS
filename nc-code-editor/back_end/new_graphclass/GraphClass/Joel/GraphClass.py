@@ -101,16 +101,11 @@ class Graph:
         }
         """
 
-        directed_rel_rev = (directed_rel[1], directed_rel[0]) 
         directed_tuple = (node1,node2)
-        directed_tuple_rev = (node2,node1)
-            
+  
         if directed_tuple in self.directed and directed_rel not in self.directed[directed_tuple]:
             self.directed[directed_tuple].append(directed_rel)
             
-        elif directed_tuple_rev in self.directed and directed_rel not in self.directed[directed_tuple_rev]:
-            self.directed[directed_tuple_rev].append(directed_rel_rev)
-        
         else:
             self.directed[directed_tuple] = [directed_rel]
         
@@ -181,12 +176,12 @@ class Graph:
                     
         else:
             # If two nodes are provided, search for the edge between those nodes
-            if (node1.getID(),node2.getID()) in self.connections:
-                edge_id = self.connections[(node1.getID(),node2.getID())]
+            if (node1.id,node2.id) in self.connections:
+                edge_id = self.connections[(node1.id,node2.id)]
                 edge_objects.append(self.edges[edge_id])
                 
-            elif (node2.getID(),node1.getID()) in self.connections:
-                edge_id = self.connections[(node2.getID(),node1.getID())]
+            elif (node2.id,node1.id) in self.connections:
+                edge_id = self.connections[(node2.id,node1.id)]
                 edge_objects.append(self.edges[edge_id])
                 
 

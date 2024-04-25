@@ -1,9 +1,8 @@
 Person1, Person2, Relationship, Relationship Value
 pjr, Purtilo, DIRECTED, Mentee/Mentor
-Purtilo, pjr, DIRECTED, father/son
+pjr, pjr, DIRECTED, son/father
 joel, ely, class, CMSC435
 ElY, Rev, age,21
 pjr, paul,age,22
-
 
 
