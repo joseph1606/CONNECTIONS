@@ -7,20 +7,14 @@ from Functions import *
 from parse import parseData
 
 
+def switch_tuple_elements(lst):
+    return [(t[1], t[0]) for t in lst]
 
-x = CreateGraph("connections3.csv")
-list_of_nodes = x.get_nodes()
+# Example usage:
+my_list = [('apple', 'banana'), ('cat', 'dog'), ('sun', 'moon')]
+result = switch_tuple_elements(my_list)
+print(result)
 
-y = CreateGraph()
-y = CreateGraph("connections4.csv")
-#x.print_edges()
-print("print node -------------------------------")
-AddNodes(y,list_of_nodes)
-z = SubGraph(x,list_of_nodes[0])
-#z.print_nodes()
-#print("print edges -------------------------------")
-z.print_edges()
-print("print relationships -------------------------------")
-#y.print_relationships()
+
 
 

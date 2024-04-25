@@ -6,6 +6,8 @@ from parse import parseData
 import networkx as nx
 from SemanticScholarFuncs import *
 from pyvis.network import Network
+import pandas
+import dask.dataframe as dd
 
 # from SemanticScholarFuncs import generate_author_dict
 
@@ -92,6 +94,7 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             node = graph.add_node(name, attribute)
             link_nodes(graph, node, attribute)
 
+    graph.generateColors()
     return graph
 
 
@@ -100,7 +103,6 @@ def SubGraph(graph: Graph, chosen_node: Node):
 
     # is the chosen node even in the graph?
     if chosen_node.getID() not in graph.get_nodes_dict():
-        # print("Node is not in the graph")
         raise ValueError("Node is not in the graph")
 
     subgraph = CreateGraph()
@@ -123,66 +125,77 @@ def SubGraph(graph: Graph, chosen_node: Node):
 
     # adding connected nodes to subgraph
     AddNodes(subgraph, connected_nodes)
-    subgraph.generateColors()
     return subgraph
 
 
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
-def FilterGraph(graph: Graph, attributes: dict = None):
+def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
-    if not dict:
-        raise ValueError("Desired filter is not in dictionary wrapper")
+    # lambda's will take a node and return True or False. If False, node will be filtered out
+    if lamb:
+        filter_graph = CreateGraph()
+        future_nodes = []
 
-    filter_graph = CreateGraph()
-    attributes = format_dict(attributes)
+        for node_id, node in graph.nodes.items():
+            if lamb(node):
+                future_nodes.append(node)
 
-    future_nodes = []
+    else:
+        if not dict:
+            raise ValueError("Desired filter is not in dictionary wrapper")
 
-    # get all nodes with relationships and relationship values desired in attributes parameter
-    for attr, attr_list in attributes.items():  # "age": "21"
-        attr = attr.title()
+        filter_graph = CreateGraph()
+        attributes = format_dict(attributes)
 
-        if attr in graph.relationships:
+        future_nodes = []
 
-            for value, value_list in graph.relationships[attr].items():
-                value = value.title()
-                if (attr_list and value in attr_list) or not attr_list:
-                    for node in value_list:
-                        if node not in future_nodes:
-                            future_nodes.append(node)
+        # get all nodes with relationships and relationship values desired in attributes parameter
+        for attr, attr_list in attributes.items():  # "age": "21"
+            if not isinstance(attr, int):
+                attr = str(attr)
 
-    # get rid of unwanted filter attributes
-    for node in future_nodes:
-        new_attr = {}
-
-        # go through current node's attributes' keys and values
-        for attr, values in node.attributes.items():
-            # if relationship in desired filter
             attr = attr.title()
-            if attr in attributes:
-                # if desired filter has desired values get values that exist
-                if attributes[attr] != [] and attributes[attr] != None:
-                    new_values = []
-                    for v in values:
-                        if isinstance(v, str):
-                            v = v.title()
-                        # this means that the passed in filter dictionary has to be following .title() format
-                        if v in attributes[attr]:
-                            new_values.append(v)
 
-                    # if there was a desired value in the nodes existing values
-                    if new_values != []:
+            if attr in graph.relationships:
+
+                for value, value_list in graph.relationships[attr].items():
+                    value = value.title()
+                    if (attr_list and value in attr_list) or not attr_list:
+                        for node in value_list:
+                            if node not in future_nodes:
+                                future_nodes.append(node)
+
+        # get rid of unwanted filter attributes
+        for node in future_nodes:
+            new_attr = {}
+
+            # go through current node's attributes' keys and values
+            for attr, values in node.attributes.items():
+                # if relationship in desired filter
+                attr = attr.title()
+                if attr in attributes:
+                    # if desired filter has desired values get values that exist
+                    if attributes[attr] != [] and attributes[attr] != None:
+                        new_values = []
+                        for v in values:
+                            if isinstance(v, str):
+                                v = v.title()
+                            # this means that the passed in filter dictionary has to be following .title() format
+                            if v in attributes[attr]:
+                                new_values.append(v)
+
+                        # if there was a desired value in the nodes existing values
+                        if new_values != []:
+                            new_attr[attr] = values
+                    # no specified desired values, take all values
+                    else:
                         new_attr[attr] = values
-                # no specified desired values, take all values
-                else:
-                    new_attr[attr] = values
 
-        node.attributes = new_attr
+            node.attributes = new_attr
 
     AddNodes(filter_graph, future_nodes)
-    filter_graph.generateColors()
     return filter_graph
 
 
@@ -250,6 +263,7 @@ def Collision(graph1: Graph, graph2: Graph):
 """
 
 
+# directed?
 def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
     merge_graph = CreateGraph()
@@ -329,7 +343,6 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
         AddNodes(merge_graph, nodes_list)
 
-    merge_graph.generateColors()
     return merge_graph
 
 
@@ -429,30 +442,26 @@ def namesInGraph(graph: Graph):
     return list(name_set)
 
 
-def ShortestPath(
-    source: Node, target: Node, graph: Graph = None, net: nx = None
-) -> list:
+def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
     # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    net = Networkx(graph)
     sp = nx.shortest_path(net, source=source.id, target=target.id)
 
-    if graph:
-        node_sp = []
+    node_sp = []
 
-        for id in sp:
-            if id in graph.nodes:
-                node_sp.append(graph.nodes[id])
-            else:
-                raise ValueError("Networkx object and Graph object are not equivalent")
+    for id in sp:
+        if id in graph.nodes:
+            node_sp.append(graph.nodes[id])
+        else:
+            raise ValueError("Networkx object and Graph object are not equivalent")
 
-        return node_sp
-    else:
-        return sp
+    return node_sp
 
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
-def Vis(ntx: nx.Graph):
-    if not isinstance(ntx, nx.Graph):
-        raise ValueError("Passed parameter is not of type Networkx.Graph")
+def Vis(graph: Graph):
+
+    ntx = Networkx(graph)
 
     nt = Network("500px", "500px")
 
@@ -495,11 +504,26 @@ def Networkx(graph):
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
         edge_relationships = list(graph.edges[edge_id].relationships.keys())
-        color = graph.colors[edge_relationships[0]]
+
+        # Ranking of graph relationships
+        if "DIRECTED" in edge_relationships:
+            color = graph.colors["DIRECTED"]
+        elif "COAUTHOR" in edge_relationships:
+            color = graph.colors["COAUTHOR"]
+        else:
+            color = graph.colors[edge_relationships[0]]
 
         ntx.add_edge(node1_id, node2_id, title=title, color=color)
 
     return ntx
+
+
+def NodeCentrality(graph, node):
+    ntx = Networkx(graph)
+
+    cent_dict = nx.degree_centrality(ntx)
+
+    return cent_dict[node.id]
 
 
 def titelize(attributes: dict) -> str:
@@ -522,3 +546,60 @@ def paper_string(papers) -> str:
         title += paper.title + ": " + str(paper.year) + "\n"
 
     return title
+
+
+def saveData(nodes, filePath):
+    names = list()
+    attributes = list()
+    authors = list()
+
+    # Gets all information out of the list of nodes, and sorts into authors and non authors
+    for node in nodes:
+        if type(node) is AuthorNode:
+            authors.append(node)
+        else:
+            names.append(node.getName())
+            attributes.append(node.getAttributes())
+
+    # Formats non author data in the correct way
+    data = dict()
+    ks = list()
+    vs = list()
+    for x in attributes:
+
+        keyslist = list(x.keys())
+        valuelist = list(x.values())
+        values_to_save = list()
+        keys_to_save = list()
+
+        # Unpacks list of lists into values
+        for y in range(len(valuelist)):
+            for z in range(len(valuelist[y])):
+                keys_to_save.append(keyslist[y])
+                values_to_save.append(valuelist[y][z])
+
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
+
+    for x in authors:
+        keys_to_save = list()
+        values_to_save = list()
+        keys_to_save.append("AUTHORID")
+        values_to_save.append(x.authorId)
+        for i in range(len(x.papers)):
+            keys_to_save.append("PAPER")
+            values_to_save.append(x.papers[i].title)
+
+        names.append(x.getName())
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
+
+    # Puts all data into a dictionary
+    data["Person 1"] = names
+    data["Relationship"] = ks
+    data["Relationship Value"] = vs
+
+    # Saves dictionary to csv
+    pandas_df = pandas.DataFrame(data)
+    df = dd.from_pandas(pandas_df, npartitions=1)
+    df.compute().to_csv(filePath, index=False)
