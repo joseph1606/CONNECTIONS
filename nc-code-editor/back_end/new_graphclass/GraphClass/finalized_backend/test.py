@@ -6,7 +6,6 @@ from SemanticScholarFuncs import *
 
 graph = CreateGraph("connections3.csv")
 
-# Vis(graph)
-graph.print_directed()
+Vis(graph)
 # lamb = lambda node: True if "Connections" in node.attributes else False
 # fg = FilterGraph(graph, None, lamb)

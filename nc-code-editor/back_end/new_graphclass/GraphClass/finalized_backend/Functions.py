@@ -33,9 +33,9 @@ def CreateGraph(csv: str = None):
 
                 directed_dict = []
 
-                if "DIRECTED" in attribute:
+                if DIRECTED in attribute:
                     # stores the tuple of relationship values (like Mentor,Mentee)
-                    directed_dict = attribute.pop("DIRECTED")
+                    directed_dict = attribute.pop(DIRECTED)
 
                 node1 = create_graph_helper(graph, name1, attribute)
                 node2 = create_graph_helper(graph, name2, attribute)
@@ -45,11 +45,10 @@ def CreateGraph(csv: str = None):
                 # as such we will need to create an edge between two said nodes
 
                 if directed_dict:  # and (node1 != node2):
-                    # print(directed_dict)
                     edge_list = graph.search_edge(node1, node2)
 
                     if not edge_list:
-                        edge = graph.add_edge(node1, node2, "")
+                        edge = graph.add_edge(node1, node2, {})
 
                     else:
                         edge = edge_list[0]
@@ -57,8 +56,7 @@ def CreateGraph(csv: str = None):
                     for tuple_rel in directed_dict:
                         # update node1.directed
                         node1.addDirected(node2, tuple_rel[1])
-                        print(node1.directed)
-                        print()
+
                         # update node2.directed
                         node2.addDirected(node1, tuple_rel[0])
 
@@ -100,7 +98,7 @@ def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
 
     for author in coauthor_list:
         author.attributes = {}
-        author.attributes["COAUTHOR".title()] = author.papers
+        author.attributes[COAUTHOR] = author.papers
         ssgraph.nodes[author.getID()] = author
 
         link_nodes(ssgraph, author, author.getAttributes())
@@ -139,7 +137,6 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             new_node = graph.add_node(name, attribute)
             link_nodes(graph, new_node, attribute)
 
-        # print(node.print_directed())
         new_node_list.append(new_node)
 
     # for handling directed nodes
@@ -167,7 +164,7 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
                 new_edge = graph.search_edge(new_node, new_other_node)
 
                 if not new_edge:
-                    new_edge = graph.add_edge(new_node, new_other_node, "")
+                    new_edge = graph.add_edge(new_node, new_other_node, {})
 
                 else:
                     new_edge = new_edge[0]
@@ -298,7 +295,7 @@ def format_dict(attributes: dict):
         attribute_type = attribute_type.title()
         formatted[attribute_type] = []
 
-        if attribute_values and attribute_type != "COAUTHOR".title():
+        if attribute_values and attribute_type != COAUTHOR:
             for attribute_value in attribute_values:
                 if not isinstance(attribute_value, str):
                     attribute_value = str(attribute_value)
@@ -598,13 +595,13 @@ def Networkx(graph):
 
     # add edges to networkx object
     for (node1_id, node2_id), edge_id in graph.connections.items():
-        title += titelize_edge(graph.edges[edge_id])
+        title = titelize_edge(graph.edges[edge_id])
         edge_relationships = list(graph.edges[edge_id].relationships.keys())
 
         # Ranking of graph relationships
         if graph.edges[edge_id].directed != []:
             color = DIRECTED_COLOR
-        elif "COAUTHOR" in edge_relationships:
+        elif COAUTHOR in edge_relationships:
             color = COAUTHOR_COLOR
         else:
             color = graph.colors[edge_relationships[0]]
@@ -631,54 +628,73 @@ def NodeCentrality(graph, node):
 
 
 def titelize_node(node) -> str:
-    title = ""
-    print(node.directed)
-    title += "DIRECTED Relationships:\n"
+    directed_title = "--DIRECTED RELATIONSHIPS--\n"
+    attribute_title = "--ATTRIBUTES--\n"
 
     for person, value_list in node.directed.items():
-        title += person.name + ":\n"
-        for value in value_list:
-            title += "value\n"
+        directed_title += person.name + ": "
+        counter = 0
 
-    if title == "DIRECTED Relationships:\n":
-        title = ""
+        for value in value_list:
+            counter += 1
+            if counter != len(value_list):
+                directed_title += value + ", "
+            else:
+                directed_title += value
 
     # k should be String, v should be List
     for k, v in node.attributes.items():
-        if k != "COAUTHOR".title():
-            title += k + ": " + ", ".join(v) + "\n"
+        if k != COAUTHOR:
+            attribute_title += k + ": " + ", ".join(v) + "\n"
         else:
-            title += k.title()
+            attribute_title += k.title()
 
-    # print(title)
-    return title
+    if (
+        directed_title != "--DIRECTED RELATIONSHIPS--\n"
+        and attribute_title != "--ATTRIBUTES--\n"
+    ):
+        return directed_title + "\n\n" + attribute_title
+    elif directed_title != "--DIRECTED RELATIONSHIPS--\n":
+        return directed_title
+    else:
+        return attribute_title
 
 
 def titelize_edge(edge: Edge) -> str:
-    title = ""
+    directed_title = ""
+    attribute_title = ""
 
     if edge.directed != []:
-        title += "DIRECTED Relationships:\n"
+        if len(edge.directed) == 1:
+            directed_title += "--DIRECTED RELATIONSHIP--\n"
+        else:
+            directed_title += "--DIRECTED RELATIONSHIPS--\n"
         for front, back in edge.directed:
-            title += (
-                front.title()
+            directed_title += (
+                front
                 + ": "
-                + edge.node1.name.title()
-                + ", "
-                + back.title()
+                + edge.node1.name
+                + " --> "
+                + back
                 + ": "
-                + edge.node2.name.title
+                + edge.node2.name
                 + "\n"
             )
 
     # k should be String, v should be List
     for k, v in edge.relationships.items():
-        if k != "COAUTHOR".title():
-            title += k + ": " + ", ".join(v) + "\n"
+        attribute_title = "--SHARED ATTRIBUTES--\n"
+        if k != COAUTHOR:
+            attribute_title += k + ": " + ", ".join(v) + "\n"
         else:
-            title += k.title()
+            attribute_title += k.title()
 
-    return title
+    if len(directed_title) != 0 and len(attribute_title) != 0:
+        return directed_title + "\n\n" + attribute_title
+    elif len(directed_title) != 0:
+        return directed_title
+    else:
+        return attribute_title
 
 
 def paper_string(papers) -> str:
