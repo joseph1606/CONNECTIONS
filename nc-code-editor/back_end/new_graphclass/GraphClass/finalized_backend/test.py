@@ -6,8 +6,7 @@ from SemanticScholarFuncs import *
 
 graph = CreateGraph("joel.csv")
 
-for node_id, node in graph.nodes.items():
-    print(node.name, node.attributes)
+f = FilterGraph(graph, {"Age": [21, 22]})
 
 lamb = lambda node: True if "Connections" in node.attributes else False
 # fg = FilterGraph(graph, None, lamb)

@@ -85,6 +85,28 @@ class Graph:
         edge.updateRelationships(attributes)
         return edge
 
+    def add_directed(self, node1: Node, node2: Node, directed_rel: tuple):
+        """
+          self.directed = {
+
+               currently stored as :-
+               (Purtilo_node,Ely_node): [(mentor,mentee)]
+               (Purtilo_node,Joel_node): [(mentor,mentee)]
+
+               could be stored as :-
+               "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
+
+        }
+        """
+
+        directed_tuple = (node1, node2)
+
+        if directed_tuple in self.directed:
+            if directed_rel not in self.directed[directed_tuple]:
+                self.directed[directed_tuple].append(directed_rel)
+        else:
+            self.directed[directed_tuple] = [directed_rel]
+
     # returns list of nodes ids that have the same attribute type and corresponding value -> which is use to create/update edges
     # also updates relationships dict
     def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
@@ -153,12 +175,13 @@ class Graph:
                     edge_objects.append(self.edges[edge_id])
         else:
             # If two nodes are provided, search for the edge between those nodes
-            for (n1_id, n2_id), edge_id in self.connections.items():
-                if (n1_id == node1.getID() and n2_id == node2.getID()) or (
-                    n1_id == node2.getID() and n2_id == node1.getID()
-                ):
-                    edge_objects.append(self.edges[edge_id])
-                    break
+            if (node1.id, node2.id) in self.connections:
+                edge_id = self.connections[(node1.id, node2.id)]
+                edge_objects.append(self.edges[edge_id])
+
+            elif (node2.id, node1.id) in self.connections:
+                edge_id = self.connections[(node2.id, node1.id)]
+                edge_objects.append(self.edges[edge_id])
 
         return edge_objects
 
@@ -214,6 +237,16 @@ class Graph:
                     # print(f"{node_id}")
                     print(f"{node.getName()}")
                 print()
+
+    def print_directed(self):
+
+        for key, value in self.directed.items():
+            print("node names are: ")
+            print(key[0].name)
+            print(key[1].name)
+            print("directed relationships")
+            print(value)
+            print("----------------------")
 
     def generateColors(self):
         hue = 0

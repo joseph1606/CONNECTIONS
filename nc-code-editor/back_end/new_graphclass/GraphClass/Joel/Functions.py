@@ -7,8 +7,11 @@ import networkx as nx
 from SemanticScholarFuncs import *
 import copy
 from pyvis.network import Network
+import pandas
+import dask.dataframe as dd
 
 # from SemanticScholarFuncs import generate_author_dict
+
 
 # if a csv was inputted, it will create nodes based off the csv
 # else (in the case of no input) it will just create an empty graph -> user can use AddNodes to add nodes to it
@@ -28,80 +31,83 @@ def CreateGraph(csv: str = None):
             for name1, name2, attribute in zip(names1, names2, attributes):
 
                 directed_dict = []
-                
-                if 'DIRECTED' in attribute:
+
+                if "DIRECTED" in attribute:
                     # stores the tuple of relationship values (like Mentor,Mentee)
-                    directed_dict = attribute.pop('DIRECTED')
-                                
+                    directed_dict = attribute.pop("DIRECTED")
+
                 node1 = create_graph_helper(graph, name1, attribute)
                 node2 = create_graph_helper(graph, name2, attribute)
-             
+
                 # popping out directed will cause an issue if there is at least one new node (from the csv file) that only has a directed relationship with another node
                 # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
                 # as such we will need to create an edge between two said nodes
 
-                if directed_dict: #and (node1 != node2):
-                    #print(directed_dict)
-                    edge_list = graph.search_edge(node1,node2)
-                    
+                if directed_dict:  # and (node1 != node2):
+                    # print(directed_dict)
+                    edge_list = graph.search_edge(node1, node2)
+
                     if not edge_list:
-                        edge = graph.add_edge(node1,node2,"")
-                        
+                        edge = graph.add_edge(node1, node2, "")
+
                     else:
                         edge = edge_list[0]
-                    
-                    for tuple_rel in directed_dict:                        
+
+                    for tuple_rel in directed_dict:
                         # update node1.directed
-                        node1.addDirected(node2,tuple_rel[1])
+                        node1.addDirected(node2, tuple_rel[1])
                         print(node1.directed)
                         print()
                         # update node2.directed
-                        node2.addDirected(node1,tuple_rel[0])
-                        
+                        node2.addDirected(node1, tuple_rel[0])
+
                         # need to consider the case when the edge has already been created and the nodes were switched
                         if edge.node1 == node1:
                             edge.addDirected(tuple_rel)
-                            graph.add_directed(node1,node2,tuple_rel)
-                            
+                            graph.add_directed(node1, node2, tuple_rel)
+
                         else:
-                            tuple_list_rev = (tuple_rel[1],tuple_rel[0])
+                            tuple_list_rev = (tuple_rel[1], tuple_rel[0])
                             edge.addDirected(tuple_list_rev)
-                            graph.add_directed(node2,node1,tuple_list_rev)
-                            
+                            graph.add_directed(node2, node1, tuple_list_rev)
     graph.generateColors()
     return graph
 
 
-def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
+def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
     """
     coauthors_dict:
     PaperNode1: [list of AuthorNodes]
     PaperNode2: [list of AuthorNodes]
     .....
-    
+
     coauthor_mapping:
     AuthorNode.id : AuthorNode
-    
+
     coauthor_list = [list of AuthorNodes]
-    
+
     papers_list = [list of Unique PaperNodes]
     """
-    
-    (coauthors_dict, coauthor_mapping) = generate_author_dict(author_name,choice, numpapers)
+
+    (coauthors_dict, coauthor_mapping) = generate_author_dict(
+        author_name, choice, numpapers
+    )
     coauthor_list = list(coauthor_mapping.values())
-    #papers_list = list(coauthors_dict.keys())
-    
-    ssgraph = Graph()
-      
-    for author in coauthor_list:  
+    # papers_list = list(coauthors_dict.keys())
+
+    ssgraph = CreateGraph()
+
+    for author in coauthor_list:
         author.attributes = {}
-        author.attributes["COAUTHOR"] = author.papers
+        author.attributes["COAUTHOR".title()] = author.papers
         ssgraph.nodes[author.getID()] = author
-        
+
         link_nodes(ssgraph, author, author.getAttributes())
-    
+
+    # creates redunant AuthorNodes but for now (CDR) this will do
+    # AddNodes(ssgraph,coauthor_list)
+    ssgraph.generateColors()
     return ssgraph
-    
 
 
 # add nodes to a previously defined graph
@@ -109,10 +115,12 @@ def SSCreateGraph(author_name:str,choice:int=1, numpapers:int=5):
 # will automatically creates a new node even if a node with the same name already exists -> will not update any exisiting node in the graph
 # otherwise the user can use MergeGraph
 def AddNodes(graph: Graph, nodes_list: list[Node]):
-    new_node_list = []
+    new_node_list = (
+        []
+    )  # if node from one graph is added to another graph, keeps the data objects separate
     new_node = None
     update_directed = []
-    
+
     for node in nodes_list:
         if isinstance(node, AuthorNode):
             name = node.getName()
@@ -123,59 +131,55 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             papers = node.papers
             new_node = graph.add_ssnode(name, attribute, aliases, authorId, url, papers)
             link_nodes(graph, new_node, attribute)
-                            
+
         else:
             name = node.getName()
             attribute = node.getAttributes()
             new_node = graph.add_node(name, attribute)
             link_nodes(graph, new_node, attribute)
-            
-        #print(node.print_directed())
+
+        # print(node.print_directed())
         new_node_list.append(new_node)
 
     # for handling directed nodes
-    for node,new_node in zip(nodes_list,new_node_list):
+    for node, new_node in zip(nodes_list, new_node_list):
         update_directed.append(node)
-        
+
         for other_node in node.directed:
-            
+
             # for efficiency purposes
             if other_node not in update_directed:
-                
+
                 new_tuple_list = None
                 index = nodes_list.index(other_node)
                 new_other_node = new_node_list[index]
-                
+
                 rel = copy.deepcopy(node.directed[other_node])
                 other_rel = copy.deepcopy(other_node.directed[node])
-                
+
                 for single_rel in rel:
-                    new_node.addDirected(new_other_node,single_rel) 
-                    
-                for single_rel in other_rel:           
-                    new_other_node.addDirected(new_node,single_rel)
-        
-                new_edge = graph.search_edge(new_node,new_other_node)
-                
-                if not new_edge: 
-                    new_edge = graph.add_edge(new_node,new_other_node,"")
-                    
+                    new_node.addDirected(new_other_node, single_rel)
+
+                for single_rel in other_rel:
+                    new_other_node.addDirected(new_node, single_rel)
+
+                new_edge = graph.search_edge(new_node, new_other_node)
+
+                if not new_edge:
+                    new_edge = graph.add_edge(new_node, new_other_node, "")
+
                 else:
                     new_edge = new_edge[0]
 
                 if new_edge.node1 == new_node:
-                    new_tuple_list = list(zip(rel,other_rel))  
-                    for single_rel in new_tuple_list:
-                        graph.add_directed(new_node,new_other_node,single_rel)
+                    for single_rel in zip(rel, other_rel):
+                        graph.add_directed(new_node, new_other_node, single_rel)
                         new_edge.addDirected(single_rel)
-                        
+
                 else:
-                    new_tuple_list = list(zip(other_rel,rel))  
-                    for single_rel in new_tuple_list:
-                        graph.add_directed(new_other_node,new_node,single_rel)
+                    for single_rel in zip(other_rel, rel):
+                        graph.add_directed(new_other_node, new_node, single_rel)
                         new_edge.addDirected(single_rel)
-                
-            
 
     graph.generateColors()
     return graph
@@ -184,9 +188,11 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
 # creates a new graph centered around chosen_node and other nodes connected to it from the inputted graph
 def SubGraph(graph: Graph, chosen_node: Node):
 
+    if not isinstance(chosen_node, Node):
+        raise ValueError("Non-Node object passed as base of subgraph.")
+
     # is the chosen node even in the graph?
     if chosen_node.getID() not in graph.get_nodes_dict():
-        # print("Node is not in the graph")
         raise ValueError("Node is not in the graph")
 
     subgraph = CreateGraph()
@@ -209,66 +215,76 @@ def SubGraph(graph: Graph, chosen_node: Node):
 
     # adding connected nodes to subgraph
     AddNodes(subgraph, connected_nodes)
-    subgraph.generateColors()
     return subgraph
 
 
 # returns a Graph of nodes that have the passed attributes
 # if anything is empty/None, it will return everything
 # attributes should be a dict like {str:[str]}
-def FilterGraph(graph: Graph, attributes: dict = None):
+def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
-    if not dict:
-        raise ValueError("Desired filter is not in dictionary wrapper")
+    # lambda's will take a node and return True or False. If False, node will be filtered out
+    if lamb:
+        filter_graph = CreateGraph()
+        future_nodes = []
 
-    filter_graph = CreateGraph()
-    attributes = format_dict(attributes)
+        for node_id, node in graph.nodes.items():
+            if lamb(node):
+                future_nodes.append(node)
 
-    future_nodes = []
+    else:
+        if not dict:
+            raise ValueError("Desired filter is not in dictionary wrapper")
 
-    # get all nodes with relationships and relationship values desired in attributes parameter
-    for attr, attr_list in attributes.items():  # "age": "21"
-        attr = attr.title()
+        filter_graph = CreateGraph()
+        attributes = format_dict(attributes)
 
-        if attr in graph.relationships:
+        future_nodes = []
 
-            for value, value_list in graph.relationships[attr].items():
-                value = value.title()
-                if (attr_list and value in attr_list) or not attr_list:
-                    for node in value_list:
-                        if node not in future_nodes:
-                            future_nodes.append(node)
+        # get all nodes with relationships and relationship values desired in attributes parameter
+        for attr, attr_list in attributes.items():  # "age": "21"
 
-    # get rid of unwanted filter attributes
-    for node in future_nodes:
-        new_attr = {}
-
-        # go through current node's attributes' keys and values
-        for attr, values in node.attributes.items():
-            # if relationship in desired filter
             attr = attr.title()
-            if attr in attributes:
-                # if desired filter has desired values get values that exist
-                if attributes[attr] != [] and attributes[attr] != None:
-                    new_values = []
-                    for v in values:
-                        if isinstance(v, str):
-                            v = v.title()
-                        # this means that the passed in filter dictionary has to be following .title() format
-                        if v in attributes[attr]:
-                            new_values.append(v)
 
-                    # if there was a desired value in the nodes existing values
-                    if new_values != []:
+            if attr in graph.relationships:
+
+                for value, value_list in graph.relationships[attr].items():
+
+                    value = value.title()
+                    if (attr_list and value in attr_list) or not attr_list:
+                        for node in value_list:
+                            if node not in future_nodes:
+                                future_nodes.append(node)
+
+        # get rid of unwanted filter attributes
+        for node in future_nodes:
+            new_attr = {}
+
+            # go through current node's attributes' keys and values
+            for attr, values in node.attributes.items():
+                # if relationship in desired filter
+                attr = attr.title()
+                if attr in attributes:
+                    # if desired filter has desired values get values that exist
+                    if attributes[attr] != [] and attributes[attr] != None:
+                        new_values = []
+                        for v in values:
+                            if isinstance(v, str):
+                                v = v.title()
+                            # this means that the passed in filter dictionary has to be following .title() format
+                            if v in attributes[attr]:
+                                new_values.append(v)
+
+                        # if there was a desired value in the nodes existing values
+                        if new_values != []:
+                            new_attr[attr] = values
+                    # no specified desired values, take all values
+                    else:
                         new_attr[attr] = values
-                # no specified desired values, take all values
-                else:
-                    new_attr[attr] = values
 
-        node.attributes = new_attr
+            node.attributes = new_attr
 
     AddNodes(filter_graph, future_nodes)
-    filter_graph.generateColors()
     return filter_graph
 
 
@@ -277,11 +293,15 @@ def format_dict(attributes: dict):
     formatted = {}
 
     for attribute_type, attribute_values in attributes.items():
+
         attribute_type = attribute_type.title()
         formatted[attribute_type] = []
 
         if attribute_values and attribute_type != "COAUTHOR".title():
             for attribute_value in attribute_values:
+                if not isinstance(attribute_value, str):
+                    attribute_value = str(attribute_value)
+
                 formatted[attribute_type].append(attribute_value.title())
         else:
             formatted[attribute_type] = attribute_values
@@ -336,6 +356,7 @@ def Collision(graph1: Graph, graph2: Graph):
 """
 
 
+# directed?
 def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
     merge_graph = CreateGraph()
@@ -415,13 +436,13 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
         AddNodes(merge_graph, nodes_list)
 
-    merge_graph.generateColors()
     return merge_graph
 
 
 # returns a list of Nodes in a Graph
 def GetNodes(graph: Graph):
     return graph.get_nodes()
+
 
 # helper function for filter
 def common_ids(list_of_lists):
@@ -455,7 +476,7 @@ def create_graph_helper(graph: Graph, name: str, attribute: dict):
         node = graph.update_node(named_nodes[0], attribute)
 
     link_nodes(graph, node, attribute)
-    
+
     return node
 
 
@@ -496,7 +517,7 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
                             graph.update_edge(edge[0], temp_dict)
 
 
-def nodeFromGraph(graph: Graph, name: str):
+def NodeFromGraph(graph: Graph, name: str):
     name = name.title()
     node_list = []
 
@@ -516,24 +537,20 @@ def namesInGraph(graph: Graph):
     return list(name_set)
 
 
-def ShortestPath(
-    source: Node, target: Node, graph: Graph = None, net: nx = None
-) -> list:
+def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
     # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    net = Networkx(graph)
     sp = nx.shortest_path(net, source=source.id, target=target.id)
 
-    if graph:
-        node_sp = []
+    node_sp = []
 
-        for id in sp:
-            if id in graph.nodes:
-                node_sp.append(graph.nodes[id])
-            else:
-                raise ValueError("Networkx object and Graph object are not equivalent")
+    for id in sp:
+        if id in graph.nodes:
+            node_sp.append(graph.nodes[id])
+        else:
+            raise ValueError("Networkx object and Graph object are not equivalent")
 
-        return node_sp
-    else:
-        return sp
+    return node_sp
 
 
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
@@ -582,19 +599,45 @@ def Networkx(graph):
     for (node1_id, node2_id), edge_id in graph.connections.items():
         title = titelize(graph.edges[edge_id].relationships)
         edge_relationships = list(graph.edges[edge_id].relationships.keys())
-        color = graph.colors[edge_relationships[0]]
+
+        # Ranking of graph relationships
+        if "DIRECTED" in edge_relationships:
+            color = graph.colors["DIRECTED"]
+        elif "COAUTHOR" in edge_relationships:
+            color = graph.colors["COAUTHOR"]
+        else:
+            color = graph.colors[edge_relationships[0]]
 
         ntx.add_edge(node1_id, node2_id, title=title, color=color)
 
     return ntx
+
+
+def UpdateNodeAttributes(graph, node, attributes: dict):
+    if node.id not in graph.nodes:
+        raise ValueError("Node passed does not belong to graph passed.")
+
+    node.updateAttributes(attributes)
+    link_nodes(graph, node, attributes)
+
+
+def NodeCentrality(graph, node):
+    ntx = Networkx(graph)
+
+    cent_dict = nx.degree_centrality(ntx)
+
+    return cent_dict[node.id]
+
 
 def titelize(attributes: dict) -> str:
     title = ""
 
     # k should be String, v should be List
     for k, v in attributes.items():
-        if k != "COAUTHOR":
+        if k != "COAUTHOR".title():
             title += k + ": " + ", ".join(v) + "\n"
+        else:
+            title += k.title()
 
     return title
 
@@ -606,3 +649,60 @@ def paper_string(papers) -> str:
         title += paper.title + ": " + str(paper.year) + "\n"
 
     return title
+
+
+def saveData(nodes, filePath):
+    names = list()
+    attributes = list()
+    authors = list()
+
+    # Gets all information out of the list of nodes, and sorts into authors and non authors
+    for node in nodes:
+        if type(node) is AuthorNode:
+            authors.append(node)
+        else:
+            names.append(node.getName())
+            attributes.append(node.getAttributes())
+
+    # Formats non author data in the correct way
+    data = dict()
+    ks = list()
+    vs = list()
+    for x in attributes:
+
+        keyslist = list(x.keys())
+        valuelist = list(x.values())
+        values_to_save = list()
+        keys_to_save = list()
+
+        # Unpacks list of lists into values
+        for y in range(len(valuelist)):
+            for z in range(len(valuelist[y])):
+                keys_to_save.append(keyslist[y])
+                values_to_save.append(valuelist[y][z])
+
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
+
+    for x in authors:
+        keys_to_save = list()
+        values_to_save = list()
+        keys_to_save.append("AUTHORID")
+        values_to_save.append(x.authorId)
+        for i in range(len(x.papers)):
+            keys_to_save.append("PAPER")
+            values_to_save.append(x.papers[i].title)
+
+        names.append(x.getName())
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
+
+    # Puts all data into a dictionary
+    data["Person 1"] = names
+    data["Relationship"] = ks
+    data["Relationship Value"] = vs
+
+    # Saves dictionary to csv
+    pandas_df = pandas.DataFrame(data)
+    df = dd.from_pandas(pandas_df, npartitions=1)
+    df.compute().to_csv(filePath, index=False)

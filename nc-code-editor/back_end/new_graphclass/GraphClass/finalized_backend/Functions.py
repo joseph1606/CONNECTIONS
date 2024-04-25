@@ -5,6 +5,7 @@ from AuthorNode import AuthorNode
 from parse import parseData
 import networkx as nx
 from SemanticScholarFuncs import *
+import copy
 from pyvis.network import Network
 import pandas
 import dask.dataframe as dd
@@ -28,9 +29,47 @@ def CreateGraph(csv: str = None):
 
         else:
             for name1, name2, attribute in zip(names1, names2, attributes):
-                create_graph_helper(graph, name1, attribute)
 
-                create_graph_helper(graph, name2, attribute)
+                directed_dict = []
+
+                if "DIRECTED" in attribute:
+                    # stores the tuple of relationship values (like Mentor,Mentee)
+                    directed_dict = attribute.pop("DIRECTED")
+
+                node1 = create_graph_helper(graph, name1, attribute)
+                node2 = create_graph_helper(graph, name2, attribute)
+
+                # popping out directed will cause an issue if there is at least one new node (from the csv file) that only has a directed relationship with another node
+                # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
+                # as such we will need to create an edge between two said nodes
+
+                if directed_dict:  # and (node1 != node2):
+                    # print(directed_dict)
+                    edge_list = graph.search_edge(node1, node2)
+
+                    if not edge_list:
+                        edge = graph.add_edge(node1, node2, "")
+
+                    else:
+                        edge = edge_list[0]
+
+                    for tuple_rel in directed_dict:
+                        # update node1.directed
+                        node1.addDirected(node2, tuple_rel[1])
+                        print(node1.directed)
+                        print()
+                        # update node2.directed
+                        node2.addDirected(node1, tuple_rel[0])
+
+                        # need to consider the case when the edge has already been created and the nodes were switched
+                        if edge.node1 == node1:
+                            edge.addDirected(tuple_rel)
+                            graph.add_directed(node1, node2, tuple_rel)
+
+                        else:
+                            tuple_list_rev = (tuple_rel[1], tuple_rel[0])
+                            edge.addDirected(tuple_list_rev)
+                            graph.add_directed(node2, node1, tuple_list_rev)
     graph.generateColors()
     return graph
 
@@ -76,6 +115,11 @@ def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
 # will automatically creates a new node even if a node with the same name already exists -> will not update any exisiting node in the graph
 # otherwise the user can use MergeGraph
 def AddNodes(graph: Graph, nodes_list: list[Node]):
+    new_node_list = (
+        []
+    )  # if node from one graph is added to another graph, keeps the data objects separate
+    new_node = None
+    update_directed = []
 
     for node in nodes_list:
         if isinstance(node, AuthorNode):
@@ -85,14 +129,57 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             authorId = node.authorId
             url = node.url
             papers = node.papers
-            node = graph.add_ssnode(name, attribute, aliases, authorId, url, papers)
-            link_nodes(graph, node, attribute)
+            new_node = graph.add_ssnode(name, attribute, aliases, authorId, url, papers)
+            link_nodes(graph, new_node, attribute)
 
         else:
             name = node.getName()
             attribute = node.getAttributes()
-            node = graph.add_node(name, attribute)
-            link_nodes(graph, node, attribute)
+            new_node = graph.add_node(name, attribute)
+            link_nodes(graph, new_node, attribute)
+
+        # print(node.print_directed())
+        new_node_list.append(new_node)
+
+    # for handling directed nodes
+    for node, new_node in zip(nodes_list, new_node_list):
+        update_directed.append(node)
+
+        for other_node in node.directed:
+
+            # for efficiency purposes
+            if other_node not in update_directed:
+
+                new_tuple_list = None
+                index = nodes_list.index(other_node)
+                new_other_node = new_node_list[index]
+
+                rel = copy.deepcopy(node.directed[other_node])
+                other_rel = copy.deepcopy(other_node.directed[node])
+
+                for single_rel in rel:
+                    new_node.addDirected(new_other_node, single_rel)
+
+                for single_rel in other_rel:
+                    new_other_node.addDirected(new_node, single_rel)
+
+                new_edge = graph.search_edge(new_node, new_other_node)
+
+                if not new_edge:
+                    new_edge = graph.add_edge(new_node, new_other_node, "")
+
+                else:
+                    new_edge = new_edge[0]
+
+                if new_edge.node1 == new_node:
+                    for single_rel in zip(rel, other_rel):
+                        graph.add_directed(new_node, new_other_node, single_rel)
+                        new_edge.addDirected(single_rel)
+
+                else:
+                    for single_rel in zip(other_rel, rel):
+                        graph.add_directed(new_other_node, new_node, single_rel)
+                        new_edge.addDirected(single_rel)
 
     graph.generateColors()
     return graph
@@ -379,7 +466,7 @@ def common_ids(list_of_lists):
 def create_graph_helper(graph: Graph, name: str, attribute: dict):
 
     named_nodes = graph.search_named_nodes(name)
-
+    node = None
     # if empty -> no node with the name was found
     if not named_nodes:
         node = graph.add_node(name, attribute)
@@ -389,6 +476,8 @@ def create_graph_helper(graph: Graph, name: str, attribute: dict):
         node = graph.update_node(named_nodes[0], attribute)
 
     link_nodes(graph, node, attribute)
+
+    return node
 
 
 # essentially updates relationships dict and edge information
@@ -428,7 +517,7 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
                             graph.update_edge(edge[0], temp_dict)
 
 
-def nodeFromGraph(graph: Graph, name: str):
+def NodeFromGraph(graph: Graph, name: str):
     name = name.title()
     node_list = []
 
@@ -522,6 +611,14 @@ def Networkx(graph):
         ntx.add_edge(node1_id, node2_id, title=title, color=color)
 
     return ntx
+
+
+def UpdateNodeAttributes(graph, node, attributes: dict):
+    if node.id not in graph.nodes:
+        raise ValueError("Node passed does not belong to graph passed.")
+
+    node.updateAttributes(attributes)
+    link_nodes(graph, node, attributes)
 
 
 def NodeCentrality(graph, node):
