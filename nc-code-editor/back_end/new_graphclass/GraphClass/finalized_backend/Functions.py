@@ -153,14 +153,13 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
         # get all nodes with relationships and relationship values desired in attributes parameter
         for attr, attr_list in attributes.items():  # "age": "21"
-            if not isinstance(attr, int):
-                attr = str(attr)
 
             attr = attr.title()
 
             if attr in graph.relationships:
 
                 for value, value_list in graph.relationships[attr].items():
+
                     value = value.title()
                     if (attr_list and value in attr_list) or not attr_list:
                         for node in value_list:
@@ -204,11 +203,15 @@ def format_dict(attributes: dict):
     formatted = {}
 
     for attribute_type, attribute_values in attributes.items():
+
         attribute_type = attribute_type.title()
         formatted[attribute_type] = []
 
         if attribute_values and attribute_type != "COAUTHOR".title():
             for attribute_value in attribute_values:
+                if not isinstance(attribute_value, str):
+                    attribute_value = str(attribute_value)
+
                 formatted[attribute_type].append(attribute_value.title())
         else:
             formatted[attribute_type] = attribute_values
