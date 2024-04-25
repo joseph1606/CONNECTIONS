@@ -47,6 +47,8 @@ def compile_code():
     output = StringIO()  # Create StringIO object to capture output
     sys.stdout = output   # Redirect stdout to StringIO object
     
+    session_id = request.headers.get('session')
+    global_vars.session_id = session_id
     start_time = time.time()
     try:
         # Execute code with custom function

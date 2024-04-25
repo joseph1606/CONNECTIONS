@@ -41,7 +41,6 @@ def CreateGraph(csv: str = None):
     return graph
 
 
-
 def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
     """
     coauthors_dict:
@@ -160,6 +159,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
         # get all nodes with relationships and relationship values desired in attributes parameter
         for attr, attr_list in attributes.items():  # "age": "21"
+
             attr = attr.title()
 
             if attr in graph.relationships:
@@ -213,6 +213,9 @@ def format_dict(attributes: dict):
 
         if attribute_values and attribute_type != "COAUTHOR".title():
             for attribute_value in attribute_values:
+                if not isinstance(attribute_value, str):
+                    attribute_value = str(attribute_value)
+                    
                 formatted[attribute_type].append(attribute_value.title())
         else:
             formatted[attribute_type] = attribute_values
@@ -434,6 +437,7 @@ def nodeFromGraph(graph: Graph, name: str):
             node_list.append(node)
 
     return node_list
+    #return node_list[0] if len(node_list) == 1 else node_list
 
 
 def namesInGraph(graph: Graph):
