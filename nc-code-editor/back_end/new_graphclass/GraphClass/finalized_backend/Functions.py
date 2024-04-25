@@ -101,6 +101,9 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
 # creates a new graph centered around chosen_node and other nodes connected to it from the inputted graph
 def SubGraph(graph: Graph, chosen_node: Node):
 
+    if not isinstance(chosen_node, Node):
+        raise ValueError("Non-Node object passed as base of subgraph.")
+
     # is the chosen node even in the graph?
     if chosen_node.getID() not in graph.get_nodes_dict():
         raise ValueError("Node is not in the graph")
