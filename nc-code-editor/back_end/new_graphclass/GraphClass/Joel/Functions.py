@@ -40,7 +40,7 @@ def CreateGraph(csv: str = None):
                 # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
                 # as such we will need to create an edge between two said nodes
 
-                if directed_dict:
+                if directed_dict: #and (node1 != node2):
                     #print(directed_dict)
                     edge_list = graph.search_edge(node1,node2)
                     

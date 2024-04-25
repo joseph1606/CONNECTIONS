@@ -9,6 +9,20 @@ Purtilo, Ely, DIRECTED, "Mentor/Mentee" -> {DIRECTED: (Mentor,Mentee)} ->
 
 
 
+
+    
+        
+
+"""  
+
+g = CreateGraph("connections3.csv")
+
+b = GetNodes(g)
+
+subg = SubGraph(g,b[0])
+y = GetNodes(subg)
+    
+    
 print("printing graph.directed")    
 g.print_directed()
 
@@ -24,22 +38,6 @@ print("Directed edges: ========================")
 for edge_id,edge in g.edges.items():
     edge.print_directed()
     print()
-
-
-    
-        
-
-"""  
-
-g = CreateGraph("connections3.csv")
-
-b = GetNodes(g)
-
-subg = SubGraph(g,b[0])
-y = GetNodes(subg)
-    
-    
-g.print_edges()
 
 
     

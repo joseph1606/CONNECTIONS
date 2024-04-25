@@ -47,8 +47,9 @@ class Node:
     #def updateDirected(self,other_node:Node, directed_rel:str):
     def addDirected(self,other_node, directed_rel:str):
         
-        if other_node in self.directed and directed_rel not in self.directed[other_node]:
-            self.directed[other_node].append(directed_rel)
+        if other_node in self.directed: 
+            if directed_rel not in self.directed[other_node]:
+                self.directed[other_node].append(directed_rel)
             
         else:
             self.directed[other_node] = [directed_rel]
