@@ -221,10 +221,11 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # attributes should be a dict like {str:[str]}
 def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
+    filter_graph = CreateGraph()
+    future_nodes = []
+
     # lambda's will take a node and return True or False. If False, node will be filtered out
     if lamb:
-        filter_graph = CreateGraph()
-        future_nodes = []
 
         for node_id, node in graph.nodes.items():
             if lamb(node):
@@ -234,10 +235,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
         if not dict:
             raise ValueError("Desired filter is not in dictionary wrapper")
 
-        filter_graph = CreateGraph()
         attributes = format_dict(attributes)
-
-        future_nodes = []
 
         # get all nodes with relationships and relationship values desired in attributes parameter
         for attr, attr_list in attributes.items():  # "age": "21"
