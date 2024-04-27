@@ -68,8 +68,12 @@ class Graph:
     def add_ssnode(
         self, name: str, attributes: dict, aliases, authorId, url, papers=None
     ):
-        attributes = copy.deepcopy(attributes)
-        ssnode = AuthorNode(name, attributes, aliases, authorId, url, papers)
+        papers = attributes[COAUTHOR]
+        new_attributes = copy.deepcopy(attributes)
+        new_attributes[COAUTHOR] = (
+            papers  # so original memory address of PaperNode doesn't change
+        )
+        ssnode = AuthorNode(name, new_attributes, aliases, authorId, url, papers)
         self.nodes[ssnode.id] = ssnode
         return ssnode
 
@@ -126,7 +130,6 @@ class Graph:
 
         # eg check to see if institution is present
         if attribute_type in self.relationships:
-            print(attribute_type, "HERE", node.name)
 
             # eg check to see if UMD is present
             if attribute_value in self.relationships[attribute_type]:
@@ -154,9 +157,6 @@ class Graph:
             # before adding institution we need to add umd
             temp_dict[attribute_value] = [node]
             self.relationships[attribute_type] = temp_dict
-
-        # print("****************************************")
-        # print(relationship_nodes)
         return relationship_nodes
 
     # returns a list of nodes that have the inputted name

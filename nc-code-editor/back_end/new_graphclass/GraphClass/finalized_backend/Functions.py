@@ -486,10 +486,6 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
         temp_dict = {}
         temp_dict[attribute_type] = attribute_value
 
-        if node.name in ["Edward D. Lazowska", "Maya Rodrig", "David Wetherall"]:
-            print("ATTRIUBTE TYPE  ATTRIBUTE VALUE", node.name)
-            print(attribute_type, attribute_value)
-
         # returns list of nodes id with the same attribute type and value that isnt the inputted node
         # note -> do i need to iterate through attribute value or will it always only haev one element
         #      -> i will prob need to iterate cuz of something like college:[umd,umbc]
@@ -497,10 +493,6 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
             relationship_nodes = graph.relationship_nodes(
                 node, attribute_type, single_attribute_value
             )
-
-            if node.name in ["Edward D. Lazowska", "Maya Rodrig", "David Wetherall"]:
-                print("RELATIONSHIP NODES")
-                print(relationship_nodes)
 
             # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
             # if not empty then we need to create edges
