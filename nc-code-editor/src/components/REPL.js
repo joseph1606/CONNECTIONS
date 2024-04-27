@@ -17,14 +17,13 @@ const REPL = () => {
     const [skipConditions, setSkipConditions] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [format, setFormat] = useState(0);
-    const [outputhtml, setOutputhtml] = useState(0);
+    const [outputhtml, setOutputhtml] = useState("<p>Your output will appear here</p>");
     const [files, setfiles] = useState({});
     var filecollapsed = false;
+    var fileinput = false;
+
 
     const viewFile = (file) => {
-        console.log()
-        console.log(files)
-        console.log(files[file['line']])
         if (files[file['line']]) {
             setTableData([[], ...files[file['line']]['data']])
             setFormat(files[file['line']]['format'])
@@ -52,7 +51,6 @@ const REPL = () => {
         }
         console.log(filecollapsed)
     }
-
     const editor = () => {
         document.getElementById('terminal-loader').style.visibility = 'visible';
         document.getElementById('terminal-loader').style.display = '';
@@ -116,7 +114,6 @@ const REPL = () => {
                         relatv: lines[i][2],
                     });
                 }
-                console.log(files)
                 setfiles({ ...files, [fileName]: { format: 2, data: table } })
                 setTableData([[], ...table])
                 setFormat(2)
@@ -181,15 +178,20 @@ const REPL = () => {
 
     const openPopup = (htmlData, graphName) => {
         // opens a new window
-        const newWindow = window.open('', '_blank', 'width=1000,height=1000');
-        console.log(htmlData)
-        setOutputhtml(htmlData)
         // adds a title of the graph name on the window
+
         const i = htmlData.indexOf("<head>");
         htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
         viewOutput()
+        const htmlContent = `
+        <!DOCTYPE html>
+        ${htmlData}`;
+        setOutputhtml(htmlContent)
+        //console.log(htmlContent)
+        document.getElementById('outholder').scrollTop = '322';
+        document.getElementById('outholder').scrollLeft = '100';
 
-        // writes html content to window
+        /*//writes html content to window
         if (newWindow) {
             const htmlContent = `
             <!DOCTYPE html>
@@ -200,7 +202,7 @@ const REPL = () => {
             newWindow.document.close();
         } else {
             alert('Popup blocked by the browser. Please enable popups for this site.');
-        }
+        }*/
     };
 
     /**/
@@ -239,7 +241,6 @@ const REPL = () => {
         const formData = new FormData();
         formData.set('file', file);
         formData.set('csvName', file.name);
-
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
             if (response.data.error) {
@@ -258,6 +259,11 @@ const REPL = () => {
                 }
                 setUploadedFiles([...uploadedFiles, fileName]);
                 read(fileName);
+                if (!fileinput) {
+                    document.getElementById('blankinput').style.visibility = 'collpase';
+                    document.getElementById('blankinput').style.display = 'none';
+                    fileinput = true;
+                }
             }
         } catch (error) {
             console.error('Error uploading file:', error);
@@ -603,58 +609,63 @@ const REPL = () => {
                             </form>
                         </div>
                     </div>
-                    <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh' }}>
-                        <thead>
-                            {(() => {
-                                if (format == 1) {
-                                    return (
-                                        <tr>
-                                            <th>Person 1</th>
-                                            <th>Person 2</th>
-                                            <th>Relationship</th>
-                                            <th>Relationship Value</th>
-                                        </tr>
-                                    );
-                                } else if (format == 2) {
-                                    return (
-                                        <tr>
-                                            <th>Person</th>
-                                            <th>Relationship</th>
-                                            <th>Relationship Value</th>
-                                        </tr>
-                                    );
-                                } else {
-                                    return null; // or return an appropriate default header
-                                }
-                            })()}
-                        </thead>
-                        <tbody>
-                            {
-                                tableData.map((obj) => {
-                                    if (Object.keys(obj).length == 4) {
-                                        return (
-                                            <tr >
-                                                <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.personb}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
-                                            </tr>
-                                        );
-                                    } else if (Object.keys(obj).length == 3) {
+                    <div>
+                        <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh' }}>
+                            <p id='blankinput' style={{ margin: 'auto', fontSize: '30px' }}>Files you input will appear here</p>
+                            <thead>
+                                {(() => {
+                                    if (format == 1) {
                                         return (
                                             <tr>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                                <th>Person 1</th>
+                                                <th>Person 2</th>
+                                                <th>Relationship</th>
+                                                <th>Relationship Value</th>
                                             </tr>
                                         );
+                                    } else if (format == 2) {
+                                        return (
+                                            <tr>
+                                                <th>Person</th>
+                                                <th>Relationship</th>
+                                                <th>Relationship Value</th>
+                                            </tr>
+                                        );
+                                    } else {
+                                        return null; // or return an appropriate default header
                                     }
-                                })
-                            }
-                        </tbody>
-                    </table>
-                    <div id='outputviewer' dangerouslySetInnerHTML={{ __html: outputhtml }}>
+                                })()}
+                            </thead>
+                            <tbody>
+                                {
+                                    tableData.map((obj) => {
+                                        if (Object.keys(obj).length == 4) {
+                                            return (
+                                                <tr >
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.personb}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                                </tr>
+                                            );
+                                        } else if (Object.keys(obj).length == 3) {
+                                            return (
+                                                <tr>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                                </tr>
+                                            );
+                                        }
+                                    })
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'scroll', border: '2px solid black' }}>
+                        <iframe id='outputviewer' style={{ position: 'relative', width: '966px', height: '966px' }} srcDoc={outputhtml} title="my-iframe">
 
+                        </iframe>
                     </div>
                 </div>
             </div>
@@ -673,7 +684,7 @@ const REPL = () => {
                     ))}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
