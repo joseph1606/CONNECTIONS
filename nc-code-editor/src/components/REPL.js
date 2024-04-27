@@ -187,8 +187,9 @@ const REPL = () => {
         <!DOCTYPE html>
         ${htmlData}`;
         setOutputhtml(htmlContent)
-        console.log(htmlContent)
-
+        //console.log(htmlContent)
+        document.getElementById('outholder').scrollTop = '322';
+        document.getElementById('outholder').scrollLeft = '100';
 
         /*//writes html content to window
         if (newWindow) {
@@ -661,10 +662,11 @@ const REPL = () => {
                             </tbody>
                         </table>
                     </div>
+                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'scroll', border: '2px solid black' }}>
+                        <iframe id='outputviewer' style={{ position: 'relative', width: '966px', height: '966px' }} srcDoc={outputhtml} title="my-iframe">
 
-                    <iframe id='outputviewer' style={{ width: '90%', height: '90%' }} srcDoc={outputhtml} title="my-iframe">
-
-                    </iframe>
+                        </iframe>
+                    </div>
                 </div>
             </div>
             <div id='inputbox' style={{ width: '15vw', height: '92.5vh', padding: '10px' }}>
@@ -682,7 +684,7 @@ const REPL = () => {
                     ))}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
