@@ -31,7 +31,7 @@ def compile_code():
     parts = code.strip().split('\n')
 
     #input validation and sanitization
-    allowed_pattern = r'^[a-zA-Z0-9\'"(),:. \t>=<\[\]{}+-/*%^&|~!=]+$'
+    allowed_pattern = r'^[a-zA-Z0-9\'"(),:. \t>=<\[\]{}+-/*%^&|~!=_]+$'
 
     for line in parts:
         if line.startswith("#"):

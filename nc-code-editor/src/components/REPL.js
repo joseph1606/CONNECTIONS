@@ -419,7 +419,7 @@ const REPL = () => {
                 setBlockCode([...blockCode, input]);
             }
         } else {
-            if (input === ":{") {
+            if (input.trim() === ":{") {
                 setMultiLine(true);
                 setSkipConditions([...skipConditions, input]);
                 setBlockCode([]);
