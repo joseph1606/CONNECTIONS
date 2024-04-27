@@ -93,3 +93,7 @@ input {
     cursor: pointer;
     color: gray;
 }
+
+#blankoutput {
+    font-size: '30px';
+}
