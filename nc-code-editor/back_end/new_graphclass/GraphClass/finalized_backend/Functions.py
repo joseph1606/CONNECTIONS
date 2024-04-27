@@ -122,8 +122,8 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
 
     for node in nodes_list:
         if isinstance(node, AuthorNode):
-            name = node.getName()
-            attribute = node.getAttributes()
+            name = node.name
+            attribute = node.attributes
             aliases = node.aliases
             authorId = node.authorId
             url = node.url
@@ -132,8 +132,8 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             link_nodes(graph, new_node, attribute)
 
         else:
-            name = node.getName()
-            attribute = node.getAttributes()
+            name = node.name
+            attribute = node.attributes
             new_node = graph.add_node(name, attribute)
             link_nodes(graph, new_node, attribute)
 
@@ -146,7 +146,7 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
         for other_node in node.directed:
 
             # for efficiency purposes
-            if other_node not in update_directed:
+            if other_node not in update_directed and other_node in nodes_list:
 
                 new_tuple_list = None
                 index = nodes_list.index(other_node)
@@ -251,7 +251,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
                         for node in value_list:
                             if node not in future_nodes:
                                 future_nodes.append(node)
-
+        """
         # get rid of unwanted filter attributes
         for node in future_nodes:
             new_attr = {}
@@ -279,6 +279,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
                         new_attr[attr] = values
 
             node.attributes = new_attr
+        """
 
     AddNodes(filter_graph, future_nodes)
     return filter_graph
@@ -485,6 +486,10 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
         temp_dict = {}
         temp_dict[attribute_type] = attribute_value
 
+        if node.name in ["Edward D. Lazowska", "Maya Rodrig", "David Wetherall"]:
+            print("ATTRIUBTE TYPE  ATTRIBUTE VALUE", node.name)
+            print(attribute_type, attribute_value)
+
         # returns list of nodes id with the same attribute type and value that isnt the inputted node
         # note -> do i need to iterate through attribute value or will it always only haev one element
         #      -> i will prob need to iterate cuz of something like college:[umd,umbc]
@@ -492,6 +497,10 @@ def link_nodes(graph: Graph, node: Node, attribute: dict):
             relationship_nodes = graph.relationship_nodes(
                 node, attribute_type, single_attribute_value
             )
+
+            if node.name in ["Edward D. Lazowska", "Maya Rodrig", "David Wetherall"]:
+                print("RELATIONSHIP NODES")
+                print(relationship_nodes)
 
             # if empty then there are currently no other nodes with that attribute type and value -> no need to create edges
             # if not empty then we need to create edges
@@ -585,7 +594,10 @@ def Networkx(graph):
         title = titelize_node(node)
 
         if isinstance(node, AuthorNode):
-            aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
+            if len(node.aliases) != 0:
+                aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
+            else:
+                aliases = ""
             papers = paper_string(node.papers)
             title = aliases + papers + title
 
@@ -645,7 +657,7 @@ def titelize_node(node) -> str:
         if k != COAUTHOR:
             attribute_title += k + ": " + ", ".join(v) + "\n"
         else:
-            attribute_title += k.title()
+            attribute_title += k.title() + "\n"
 
     if (
         directed_title != "--DIRECTED RELATIONSHIPS--\n"
@@ -699,7 +711,7 @@ def paper_string(papers) -> str:
     title = ""
 
     for paper in papers:
-        title += paper.title + ": " + str(paper.year) + "\n"
+        title += "Paper: " + paper.title + ": " + str(paper.year) + "\n"
 
     return title
 

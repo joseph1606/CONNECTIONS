@@ -55,7 +55,7 @@ class Graph:
     def add_node(self, name: str, attributes: dict):
         attributes = copy.deepcopy(attributes)
         node = Node(name, attributes)
-        self.nodes[node.getID()] = node
+        self.nodes[node.id] = node
         return node
 
     # updates a existing node
@@ -70,7 +70,7 @@ class Graph:
     ):
         attributes = copy.deepcopy(attributes)
         ssnode = AuthorNode(name, attributes, aliases, authorId, url, papers)
-        self.nodes[ssnode.getID()] = ssnode
+        self.nodes[ssnode.id] = ssnode
         return ssnode
 
     # adds a new edge
@@ -126,6 +126,7 @@ class Graph:
 
         # eg check to see if institution is present
         if attribute_type in self.relationships:
+            print(attribute_type, "HERE", node.name)
 
             # eg check to see if UMD is present
             if attribute_value in self.relationships[attribute_type]:
