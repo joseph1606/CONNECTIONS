@@ -79,7 +79,6 @@ def CreateGraph(csv: str = None):
     return graph
 
 
-
 def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
     """
     coauthors_dict:
@@ -94,7 +93,6 @@ def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
 
     papers_list = [list of Unique PaperNodes]
     """
-
     (coauthors_dict, coauthor_mapping) = generate_author_dict(
         author_name, choice, numpapers
     )
@@ -129,8 +127,8 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
 
     for node in nodes_list:
         if isinstance(node, AuthorNode):
-            name = node.getName()
-            attribute = node.getAttributes()
+            name = node.name
+            attribute = node.attributes
             aliases = node.aliases
             authorId = node.authorId
             url = node.url
@@ -139,8 +137,8 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
             link_nodes(graph, new_node, attribute)
 
         else:
-            name = node.getName()
-            attribute = node.getAttributes()
+            name = node.name
+            attribute = node.attributes
             new_node = graph.add_node(name, attribute)
             link_nodes(graph, new_node, attribute)
 
@@ -153,7 +151,7 @@ def AddNodes(graph: Graph, nodes_list: list[Node]):
         for other_node in node.directed:
 
             # for efficiency purposes
-            if other_node not in update_directed:
+            if other_node not in update_directed and other_node in nodes_list:
 
                 new_tuple_list = None
                 index = nodes_list.index(other_node)
@@ -209,11 +207,11 @@ def SubGraph(graph: Graph, chosen_node: Node):
     # iterates to find other nodes in the edge
     for edge in connected_edges:
 
-        node1 = edge.getNode1()
-        node2 = edge.getNode2()
+        node1 = edge.node1
+        node2 = edge.node2
 
         # second node is the chosen node; first node is the other connected node in that edge
-        if node1.getID() != chosen_node.getID():
+        if node1.id != chosen_node.id:
             connected_nodes.append(node1)
         else:
             connected_nodes.append(node2)
@@ -228,10 +226,11 @@ def SubGraph(graph: Graph, chosen_node: Node):
 # attributes should be a dict like {str:[str]}
 def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
+    filter_graph = CreateGraph()
+    future_nodes = []
+
     # lambda's will take a node and return True or False. If False, node will be filtered out
     if lamb:
-        filter_graph = CreateGraph()
-        future_nodes = []
 
         for node_id, node in graph.nodes.items():
             if lamb(node):
@@ -241,10 +240,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
         if not dict:
             raise ValueError("Desired filter is not in dictionary wrapper")
 
-        filter_graph = CreateGraph()
         attributes = format_dict(attributes)
-
-        future_nodes = []
 
         # get all nodes with relationships and relationship values desired in attributes parameter
         for attr, attr_list in attributes.items():  # "age": "21"
@@ -260,7 +256,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
                         for node in value_list:
                             if node not in future_nodes:
                                 future_nodes.append(node)
-
+        """
         # get rid of unwanted filter attributes
         for node in future_nodes:
             new_attr = {}
@@ -288,6 +284,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
                         new_attr[attr] = values
 
             node.attributes = new_attr
+        """
 
     AddNodes(filter_graph, future_nodes)
     return filter_graph
@@ -317,36 +314,95 @@ def format_dict(attributes: dict):
 # returns a dict
 # key is the name
 # value is a list of nodes with that name
-def Collision(graph1: Graph, graph2: Graph):
+def Collision(graph1: Graph, graph2: Graph, list_return=False):
     nodes1 = graph1.get_nodes()
     nodes2 = graph2.get_nodes()
     collision_dict = {}
 
     for node in nodes1:
-        node_name = node.getName()
-        if node_name in collision_dict:
-            collision_dict[node_name].append(node)
-
+        if isinstance(node, AuthorNode):
+            names = [node.name] + node.aliases
+            for name in names:
+                if name in collision_dict:
+                    collision_dict[name].append(node)
+                else:
+                    collision_dict[name] = [node]
         else:
-            collision_dict[node_name] = [node]
+            node_name = node.getName()
+            if node_name in collision_dict:
+                collision_dict[node_name].append(node)
+
+            else:
+                collision_dict[node_name] = [node]
 
     for node in nodes2:
-        node_name = node.getName()
-        if node_name in collision_dict:
-            collision_dict[node_name].append(node)
-
+        if isinstance(node, AuthorNode):
+            names = [node.name] + node.aliases
+            for name in names:
+                if name in collision_dict:
+                    collision_dict[name].append(node)
+                else:
+                    collision_dict[name] = [node]
         else:
-            collision_dict[node_name] = [node]
+            node_name = node.getName()
+            if node_name in collision_dict:
+                collision_dict[node_name].append(node)
 
-    remove = []
+            else:
+                collision_dict[node_name] = [node]
+
+    final_dict = {}
+
+    # if an AuthorNode from Semantic Scholar, hypothetically even if they have the same name, they all have the same aliases
+    # therefore, the above code would put all nodes with different names but the same aliases in every alias-key pairing.
+
     for key, value in collision_dict.items():
-        if len(value) <= 1:
-            remove.append(key)
+        if len(value) > 1:
+            check_node = value[0]
+            if isinstance(check_node, AuthorNode):
+                replace_k = ""
+                for k_copy, v_copy in final_dict.items():
+                    if check_node in v_copy:
+                        # AuthorNodes with this alias have already been added to final_dict
+                        if len(k_copy) < len(key):
+                            # take longest name descriptor from aliases
+                            replace_k = k_copy
+                            break
+                        else:
+                            # this list of nodes with same names/aliases has already been added to final_dict
+                            replace_k = "ALREADY EXISTS"
+                            break
 
-    for key in remove:
-        del collision_dict[key]
+                if len(replace_k) != 0:
+                    "THIS IS WHERE DELETING HAPPENS"
+                    if replace_k != "ALREADY EXISTS":
+                        del final_dict[replace_k]
+                        final_dict[key] = value
+                else:
+                    final_dict[key] = value
 
-    return collision_dict
+            else:
+                # don't need to worry about aliases
+                final_dict[key] = value
+
+    # Reset name of nodes when merge occurs with this collision list
+    for k, v in final_dict.items():
+        for node in v:
+            node.name = k
+
+    if not list_return:
+        return final_dict
+    else:
+        return CollisionList(final_dict)
+
+
+def CollisionList(col_dict):
+    col = []
+
+    for name, pair in col_dict.items():
+        col.append(pair)
+
+    return col
 
 
 """def clean_graphs(graph1: Graph, graph2: Graph, merge_list: list):
@@ -533,7 +589,7 @@ def NodeFromGraph(graph: Graph, name: str):
     return node_list
 
 
-def namesInGraph(graph: Graph):
+def NamesInGraph(graph: Graph):
     name_set = set()
 
     for node_id, node in graph.nodes.items():
@@ -564,24 +620,48 @@ def Vis(graph: Graph):
         raise ValueError("Vis expects a parameter of type: Graph")
 
     ntx = Networkx(graph)
+    pos = nx.kamada_kawai_layout(ntx, scale=1000)
 
-    nt = Network("625px", "1159px")
+    #nt = Network("625px", "1159px")
+    nt = Network("500px", "500px", select_menu=True)
 
     for node_id in ntx.nodes():
-        nt.add_node(
-            node_id,
-            label=ntx.nodes[node_id]["label"],
-            title=ntx.nodes[node_id]["title"],
-            size=22,
-        )
+        if isinstance(graph.nodes[node_id], AuthorNode):
+            nt.add_node(
+                node_id,
+                label=ntx.nodes[node_id]["label"],
+                title=ntx.nodes[node_id]["title"],
+                x=pos[node_id][0],
+                y=pos[node_id][1],
+                physics=False,
+                font="55px arial black",
+            )
+        elif len(graph.nodes[node_id].directed) > 0:
+            nt.add_node(
+                node_id,
+                label=ntx.nodes[node_id]["label"],
+                title=ntx.nodes[node_id]["title"],
+                x=pos[node_id][0],
+                y=pos[node_id][1],
+                physics=False,
+                font="55px arial red",
+            )
+        else:
+            nt.add_node(
+                node_id,
+                label=ntx.nodes[node_id]["label"],
+                title=ntx.nodes[node_id]["title"],
+                x=pos[node_id][0],
+                y=pos[node_id][1],
+                physics=False,
+                font="55px arial blue",
+            )
 
     for u, v, data in ntx.edges(data=True):
         nt.add_edge(
             u, v, title=data["title"], color="rgb{}".format(data["color"]), width=3.6
         )
 
-    # nt.from_nx(ntx)
-    nt.toggle_physics(True)
     caller_frame = inspect.currentframe().f_back
     obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
     nt.show(
@@ -590,6 +670,7 @@ def Vis(graph: Graph):
 
 
 def Networkx(graph):
+    # potentially show who person is connected to as well
     ntx = nx.Graph()
 
     # add nodes to networkx object
@@ -598,9 +679,21 @@ def Networkx(graph):
         title = titelize_node(node)
 
         if isinstance(node, AuthorNode):
-            aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
+            if len(node.aliases) != 0:
+                aliases = "Alisases: " + ", ".join(node.aliases) + "\n"
+            else:
+                aliases = ""
             papers = paper_string(node.papers)
-            title = aliases + papers + title
+            title = (
+                "Name: "
+                + node.name
+                + "\nID: "
+                + str(node_id)
+                + "\n"
+                + aliases
+                + papers
+                + title
+            )
 
         ntx.add_node(node_id, title=title, label=node.name)
 
@@ -658,7 +751,7 @@ def titelize_node(node) -> str:
         if k != COAUTHOR:
             attribute_title += k + ": " + ", ".join(v) + "\n"
         else:
-            attribute_title += k.title()
+            attribute_title += k.title() + "\n"
 
     if (
         directed_title != "--DIRECTED RELATIONSHIPS--\n"
@@ -697,8 +790,16 @@ def titelize_edge(edge: Edge) -> str:
         attribute_title = "--SHARED ATTRIBUTES--\n"
         if k != COAUTHOR:
             attribute_title += k + ": " + ", ".join(v) + "\n"
-        else:
-            attribute_title += k.title()
+
+        if COAUTHOR in edge.relationships:
+            if attribute_title == "--SHARED ATTRIBUTES--\n":
+                attribute_title = "--SHARED PAPERS--\n"
+                for paper in v:
+                    attribute_title += paper.title + "\n"
+            else:
+                attribute_title += "--SHARED PAPERS--\n"
+                for paper in v:
+                    attribute_title += paper.title + "\n"
 
     if len(directed_title) != 0 and len(attribute_title) != 0:
         return directed_title + "\n\n" + attribute_title
@@ -709,7 +810,7 @@ def titelize_edge(edge: Edge) -> str:
 
 
 def paper_string(papers) -> str:
-    title = ""
+    title = "--PAPERS--\n"
 
     for paper in papers:
         title += paper.title + ": " + str(paper.year) + "\n"

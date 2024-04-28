@@ -329,7 +329,9 @@ const REPL = () => {
                     for (let i = 0; i < skipConditions.length; i++) {
                         const skipMe = skipConditions[i];
                         if (inputCopy.includes(skipMe)) {
-                            inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
+                            // Count the number of tabs at the beginning of the string
+                            let tabCount = (skipMe.match(/^\t*/)[0] || "").length;
+                            inputCopy[inputCopy.indexOf(skipMe)] = "\t".repeat(tabCount) + `pass`;
                         }
                     }
                     payload['code'] = inputCopy.join('\n') + '\n';
@@ -343,11 +345,6 @@ const REPL = () => {
                     const compiledResult = resp.data.output;
                     const functionNameStart = input.indexOf("(");
 
-                    for (const prev of prevInputs) {
-                        if (prev.includes("print")) {
-                            setSkipConditions([...skipConditions, prev]);
-                        }
-                    }
                     // if there is an error returned
                     if (compiledError) {
                         setErr([...err, compiledError]);
@@ -409,6 +406,11 @@ const REPL = () => {
                                 } else {
                                     // removes the .html or .csv from being added to compiledOutput
                                     keepThese.push(str)
+                                    for (const line of blockCode) {
+                                        if (line.includes("print")){
+                                            setSkipConditions([...skipConditions, line]);
+                                        }
+                                    }
                                 }
                             }
                             setOutput([...output, input, ...keepThese]);
@@ -440,7 +442,9 @@ const REPL = () => {
                     for (let i = 0; i < skipConditions.length; i++) {
                         const skipMe = skipConditions[i];
                         if (inputCopy.includes(skipMe)) {
-                            inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
+                            // Count the number of tabs at the beginning of the string
+                            let tabCount = (skipMe.match(/^\t*/)[0] || "").length;
+                            inputCopy[inputCopy.indexOf(skipMe)] = "\t".repeat(tabCount) + `pass`;
                         }
                     }
                     payload['code'] = inputCopy.join('\n') + '\n' + input;
