@@ -565,7 +565,7 @@ def Vis(graph: Graph):
 
     ntx = Networkx(graph)
 
-    nt = Network("1000px", "1000px")
+    nt = Network("625px", "1159px")
 
     for node_id in ntx.nodes():
         nt.add_node(
