@@ -797,7 +797,7 @@ def paper_string(papers) -> str:
     title = ""
 
     for paper in papers:
-        title += "Paper: " + paper.title + ": " + str(paper.year) + "\n"
+        title += "PAPERS: " + paper.title + ": " + str(paper.year) + "\n"
 
     return title
 
