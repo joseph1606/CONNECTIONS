@@ -583,7 +583,7 @@ def NodeFromGraph(graph: Graph, name: str):
     return node_list
 
 
-def namesInGraph(graph: Graph):
+def NamesInGraph(graph: Graph):
     name_set = set()
 
     for node_id, node in graph.nodes.items():
@@ -676,7 +676,16 @@ def Networkx(graph):
             else:
                 aliases = ""
             papers = paper_string(node.papers)
-            title = aliases + papers + title
+            title = (
+                "Name: "
+                + node.name
+                + "\nID: "
+                + str(node_id)
+                + "\n"
+                + aliases
+                + papers
+                + title
+            )
 
         ntx.add_node(node_id, title=title, label=node.name)
 
