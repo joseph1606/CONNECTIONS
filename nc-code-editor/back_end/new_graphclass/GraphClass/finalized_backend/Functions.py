@@ -411,6 +411,17 @@ def CollisionList(col_dict):
 """
 
 
+def takecare_directed(merged_node: Node, old_nodes: dict):
+    directed = merged_node.directed
+
+    for buddy, list in directed.items():
+        for old_node in old_nodes:
+            if old_node in buddy.directed:
+                old_props = buddy.directed[old_node]
+                del buddy.directed[old_node]
+                buddy.directed[merged_node] = old_props
+
+
 # directed?
 def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
@@ -436,6 +447,10 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
         nodes_list = []
 
         for merge_nodes in merge_list:
+
+            # merged_nodes = [paul1, paul2, paul3]
+
+            new_directed_set = []
             # iterating through tuple
             name = None
             attribute = {}
@@ -449,6 +464,11 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
             # for merged nodes
             for node in merge_nodes:
+                # for directed people in paul1.directed
+                for bud, descrip in node.directed.items():
+                    if (bud, descrip) not in new_directed_set:
+                        new_directed_set.append((bud, descrip))
+
                 name = node.name
                 merge.append(node.getID())
 
@@ -482,6 +502,24 @@ def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
             # update self.nodes
             nodes_list.append(merged_node)
+
+            if len(new_directed_set) > 0:
+                # make a new directed dictionary for new node from all merged nodes
+                direc_dict = {}
+                # put person and associated list in new directed dictionary
+                for person, l in new_directed_set:
+                    # if person already in new directed dictionary
+                    if person in direc_dict:
+                        for prop in l:
+                            # if new type of directed relationship, add
+                            if prop not in direc_dict[person]:
+                                direc_dict[person].append(prop)
+                    else:
+                        direc_dict[person] = l
+
+                merged_node.directed = direc_dict
+                # new_paul.directed = [paul1, paul2, paul3]
+                takecare_directed(merged_node, merge_nodes)
 
         all_nodes = list(graph1.nodes.values()) + list(graph2.nodes.values())
         # for unmerged nodes
@@ -727,6 +765,7 @@ def titelize_node(node) -> str:
     directed_title = "--DIRECTED RELATIONSHIPS--\n"
     attribute_title = "--ATTRIBUTES--\n"
 
+    direc_count = 0
     for person, value_list in node.directed.items():
         directed_title += person.name + ": "
         counter = 0
@@ -737,6 +776,9 @@ def titelize_node(node) -> str:
                 directed_title += value + ", "
             else:
                 directed_title += value
+
+        if direc_count != len(node.directed):
+            directed_title += "\n"
 
     # k should be String, v should be List
     for k, v in node.attributes.items():

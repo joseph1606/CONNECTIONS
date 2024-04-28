@@ -4,5 +4,6 @@ from Functions import *
 from parse import *
 from SemanticScholarFuncs import *
 
-graph = SemanticSearch("Purtilo", 2)
+graph = CreateGraph("practice.csv")
+
 Vis(graph)

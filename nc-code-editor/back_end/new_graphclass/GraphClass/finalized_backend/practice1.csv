@@ -1,0 +1,6 @@
+Person1,Person2,Relationship,RelationshipValue
+Ely,Joel,DIRECTED, fee/fi
+Ely,Paul, DIRECTED, boo/bop
+Ely,Walter,College, UMD
+Joel,Rev,Age, 21
+Paul,Joel,Person, bot

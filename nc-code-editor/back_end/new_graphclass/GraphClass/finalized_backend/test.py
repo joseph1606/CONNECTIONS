@@ -8,7 +8,7 @@ ed_g = SemanticSearch("Ed Lazowska", 1)
 
 dav = SemanticSearch("John Zahorjan")
 
-n = NodeFromGraph(ed_g, "John Zahorjan")
+# n = NodeFromGraph(ed_g, "John Zahorjan")
 
 
 pur_g = SemanticSearch("Purtilo", 2)
@@ -43,8 +43,7 @@ Vis(g)
 """
 c = Collision(ed_g, dav)
 
-
-m = MergeGraph(ed_g, pur_g)
-
-d = CreateGraph("practice.csv")
+m = MergeGraph(ed_g, dav, CollisionList(c))
+c = Collision(m, pur_g)
+m = MergeGraph(m, pur_g, CollisionList(c))
 Vis(m)
