@@ -783,14 +783,15 @@ def titelize_edge(edge: Edge) -> str:
         if k != COAUTHOR:
             attribute_title += k + ": " + ", ".join(v) + "\n"
 
-        if attribute_title == "--SHARED ATTRIBUTES--\n":
-            attribute_title = "--SHARED PAPERS--\n"
-            for paper in v:
-                attribute_title += paper.title + "\n"
-        else:
-            attribute_title += "--SHARED PAPERS--\n"
-            for paper in v:
-                attribute_title += paper.title + "\n"
+        if COAUTHOR in edge.relationships:
+            if attribute_title == "--SHARED ATTRIBUTES--\n":
+                attribute_title = "--SHARED PAPERS--\n"
+                for paper in v:
+                    attribute_title += paper.title + "\n"
+            else:
+                attribute_title += "--SHARED PAPERS--\n"
+                for paper in v:
+                    attribute_title += paper.title + "\n"
 
     if len(directed_title) != 0 and len(attribute_title) != 0:
         return directed_title + "\n\n" + attribute_title
