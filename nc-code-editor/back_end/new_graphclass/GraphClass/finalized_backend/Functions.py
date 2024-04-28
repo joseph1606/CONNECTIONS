@@ -98,7 +98,7 @@ def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
     for author in coauthor_list:
         author.attributes = {}
         author.attributes[COAUTHOR] = author.papers
-        ssgraph.nodes[author.getID()] = author
+        ssgraph.nodes[author.id] = author
 
         link_nodes(ssgraph, author, author.getAttributes())
 
@@ -782,8 +782,15 @@ def titelize_edge(edge: Edge) -> str:
         attribute_title = "--SHARED ATTRIBUTES--\n"
         if k != COAUTHOR:
             attribute_title += k + ": " + ", ".join(v) + "\n"
+
+        if attribute_title == "--SHARED ATTRIBUTES--\n":
+            attribute_title = "--SHARED PAPERS--\n"
+            for paper in v:
+                attribute_title += paper.title + "\n"
         else:
-            attribute_title += k.title()
+            attribute_title += "--SHARED PAPERS--\n"
+            for paper in v:
+                attribute_title += paper.title + "\n"
 
     if len(directed_title) != 0 and len(attribute_title) != 0:
         return directed_title + "\n\n" + attribute_title
@@ -794,10 +801,10 @@ def titelize_edge(edge: Edge) -> str:
 
 
 def paper_string(papers) -> str:
-    title = ""
+    title = "--PAPERS--\n"
 
     for paper in papers:
-        title += "Papers: " + paper.title + ": " + str(paper.year) + "\n"
+        title += paper.title + ": " + str(paper.year) + "\n"
 
     return title
 
