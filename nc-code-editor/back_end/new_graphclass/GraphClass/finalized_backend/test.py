@@ -5,10 +5,14 @@ from parse import *
 from SemanticScholarFuncs import *
 
 ed_g = SemanticSearch("Ed Lazowska", 1)
+
 dav = SemanticSearch("John Zahorjan")
 
-"""
+n = NodeFromGraph(ed_g, "John Zahorjan")
+
+
 pur_g = SemanticSearch("Purtilo", 2)
+"""
 # lamb = lambda node: True if "Connections" in node.attributes else False
 # fg = FilterGraph(graph, None, lamb)
 length = len(pur_g.nodes)
@@ -38,13 +42,9 @@ g = FilterGraph(pur_g, None, fun)
 Vis(g)
 """
 c = Collision(ed_g, dav)
-col = []
 
 
-for name, pair in c.items():
-    col.append(pair)
+m = MergeGraph(ed_g, pur_g)
 
-
-m = MergeGraph(ed_g, dav, col)
-
+d = CreateGraph("practice.csv")
 Vis(m)

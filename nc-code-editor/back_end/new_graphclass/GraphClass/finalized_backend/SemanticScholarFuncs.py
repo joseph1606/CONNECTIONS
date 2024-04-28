@@ -11,7 +11,7 @@ dict1 = generate_author_dict()
 dict2 = generate_author_dict(6) 
 numpaper is a numeric value that the user can enter and corresponds to the number of papers of the author to be processed.
 If numpaper is missing, default value is 5
-choice is the choice of author from using searchAuthor. the user will have to remember and input the choice.
+choice is the choice of author from using AuthorSearch. the user will have to remember and input the choice.
 If choice is missing, default value is 1
 
 generate_author_dict() returns a dictionary where each key is a PaperNode object corresponding to each paper of the initial
@@ -47,6 +47,7 @@ def display_author_options(aliases):
 
     return list_of_aliases
 
+
 # Function to retrieve all author options
 def get_author_options(author_name):
     list_of_aliases = []
@@ -57,9 +58,11 @@ def get_author_options(author_name):
             list_of_aliases.append((name, url))
     return list_of_aliases
 
+
 def print_author_options(list_of_aliases):
     for i, (name, url) in enumerate(list_of_aliases, start=1):
         print(f"{i}. {name} ({url})")
+
 
 # Function to select an author from the displayed options
 def select_author_from_list(list_of_aliases, choice):
@@ -104,10 +107,12 @@ def parse_author_data(author_data, numpapers):
             author_nodes.append(author_node)
     return author_nodes
 
-def searchAuthor(name):
+
+def AuthorSearch(name):
     disamb = fetch_author(name)
     list_of_aliases = get_author_options(disamb)
     print_author_options(list_of_aliases)
+
 
 # Function to make an AuthorNode object based on user input
 def makeAuthor(name, choice, numpapers):
@@ -132,10 +137,11 @@ def makeAuthor(name, choice, numpapers):
     else:
         print("No data found. Try again")
 
+
 # Function to create coauthor nodes for a given author node
 def create_coauthor_nodes(author_node):
     coauthors_dict = {}  # Dictionary to store coauthor nodes for each paper
-    #coauthor_mapping = {}  # Dictionary to map coauthor authorIds to nodes
+    # coauthor_mapping = {}  # Dictionary to map coauthor authorIds to nodes
     coauthor_mapping = {author_node.authorId: author_node}
     # Iterate through each paper of the author
     for paper in author_node.papers:
@@ -182,14 +188,14 @@ def create_coauthor_nodes(author_node):
 
 
 # Function to generate a dictionary containing coauthors for a given author
-def generate_author_dict(author_name:str, choice:int, numpapers:int):
+def generate_author_dict(author_name: str, choice: int, numpapers: int):
     author = makeAuthor(author_name, choice, numpapers)
     if author:
-        coauthors_dict,coauthors_map = create_coauthor_nodes(author)
-        #print_coauthor_info(coauthors_dict)  # printing each author for checking
-        return (coauthors_dict,coauthors_map)
+        coauthors_dict, coauthors_map = create_coauthor_nodes(author)
+        # print_coauthor_info(coauthors_dict)  # printing each author for checking
+        return (coauthors_dict, coauthors_map)
     else:
-        print("Author not found. Please try again:") #->   CHANGE TO ERROR MESSAGE
+        print("Author not found. Please try again:")  # ->   CHANGE TO ERROR MESSAGE
         generate_author_dict()
 
 
