@@ -4,6 +4,8 @@ from Functions import *
 from parse import *
 from SemanticScholarFuncs import *
 
-graph = CreateGraph("practice.csv")
+graph = SemanticSearch("Lisa Kern", 3)
 
-Vis(graph)
+l = NodeFromGraph(graph, "Lissa Griffin")[0]
+f = FilterGraph(graph, {"Coauthor": [l.papers[2]]})
+Vis(f)

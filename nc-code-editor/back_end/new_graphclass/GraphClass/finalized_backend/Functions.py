@@ -241,7 +241,7 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
             attr = attr.title()
 
-            if attr in graph.relationships:
+            if attr in graph.relationships and attr != COAUTHOR:
 
                 for value, value_list in graph.relationships[attr].items():
 
@@ -250,6 +250,17 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
                         for node in value_list:
                             if node not in future_nodes:
                                 future_nodes.append(node)
+            else:
+                # if COAUTHOR was passed, means paper list is the corresponding value_list
+                for value, value_list in graph.relationships[attr].items():
+                    # COAUTHOR: [author1, author2]
+                    for author in value_list:
+                        # author1
+                        for paper in attr_list:
+                            # paper1
+                            if paper in author.papers and author not in future_nodes:
+                                future_nodes.append(author)
+
         """
         # get rid of unwanted filter attributes
         for node in future_nodes:
@@ -422,7 +433,6 @@ def takecare_directed(merged_node: Node, old_nodes: dict):
                 buddy.directed[merged_node] = old_props
 
 
-# directed?
 def MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None):
 
     merge_graph = CreateGraph()
@@ -618,7 +628,7 @@ def NodeFromGraph(graph: Graph, name: str):
         if node.name == name:
             node_list.append(node)
 
-    return node_list
+    return node_list[0] if len(node_list) == 1 else node_list
 
 
 def NamesInGraph(graph: Graph):
@@ -627,7 +637,7 @@ def NamesInGraph(graph: Graph):
     for node_id, node in graph.nodes.items():
         name_set.add(node.name)
 
-    return list(name_set)
+    return sorted(list(name_set))
 
 
 def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
