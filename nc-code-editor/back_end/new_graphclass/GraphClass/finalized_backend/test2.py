@@ -6,4 +6,4 @@ from SemanticScholarFuncs import *
 
 graph = CreateGraph("practice1.csv")
 nba = CreateGraph("nba.csv")
-Vis(nba)
+Vis(graph)
