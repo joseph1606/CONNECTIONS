@@ -176,33 +176,36 @@ const REPL = () => {
 
     /* for popup graph display window */
 
-    const openPopup = (htmlData, graphName) => {
-        // opens a new window
+    const openPopup = async (htmlData, graphName) => {
         // adds a title of the graph name on the window
 
         const i = htmlData.indexOf("<head>");
         htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
-        viewOutput()
+
+        // Fetch script content using Axios
+        const utilsScript = await axios.get('http://127.0.0.1:5000/scripts/bindings/utils.js');
+        const tomSelectCSS = await axios.get('http://127.0.0.1:5000/scripts/tom-select/tom-select.css');
+        const tomSelectScript = `<script 
+                                    src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/js/tom-select.complete.min.js" 
+                                    integrity="sha512-/ThRxlSqzRzFRVNByE+IzvT7iZTAtrAr5Xkk9As+xsDRYvsnPBQbYjG5z4vaJFNaWjBEnSRxICQw5t/mUmJ6Kw==" 
+                                    crossorigin="anonymous" 
+                                    referrerpolicy="no-referrer"></script>`;
+
+        htmlData = htmlData.replace('<script src="lib/bindings/utils.js"></script>', `<script>${utilsScript.data}</script>`);
+        htmlData = htmlData.replace('<link href="lib/tom-select/tom-select.css" rel="stylesheet">', `<style>${tomSelectCSS.data}</style>`);
+        htmlData = htmlData.replace('<script src="lib/tom-select/tom-select.complete.min.js"></script>', `${tomSelectScript}`);
+
+        viewOutput();
+
         const htmlContent = `
         <!DOCTYPE html>
         ${htmlData}`;
-        setOutputhtml(htmlContent)
-        //console.log(htmlContent)
+        console.log(htmlContent);
+
+        setOutputhtml(htmlContent);
         document.getElementById('outholder').scrollTop = '322';
         document.getElementById('outholder').scrollLeft = '100';
 
-        /*//writes html content to window
-        if (newWindow) {
-            const htmlContent = `
-            <!DOCTYPE html>
-            ${htmlData}
-        `;
-            newWindow.document.open();
-            newWindow.document.write(htmlContent);
-            newWindow.document.close();
-        } else {
-            alert('Popup blocked by the browser. Please enable popups for this site.');
-        }*/
     };
 
     /**/
@@ -237,7 +240,6 @@ const REPL = () => {
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
-        // WALTER: file.name will give you all the file names
         const formData = new FormData();
         formData.set('file', file);
         formData.set('csvName', file.name);
@@ -407,7 +409,7 @@ const REPL = () => {
                                     // removes the .html or .csv from being added to compiledOutput
                                     keepThese.push(str)
                                     for (const line of blockCode) {
-                                        if (line.includes("print")){
+                                        if (line.includes("print")) {
                                             setSkipConditions([...skipConditions, line]);
                                         }
                                     }
@@ -667,7 +669,7 @@ const REPL = () => {
                         </table>
                     </div>
                     <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
-                        <iframe id='outputviewer' style={{ position: 'relative', width: '1164px', height: '646px', overflowX: 'hidden'}} srcDoc={outputhtml} title="my-iframe">
+                        <iframe id='outputviewer' style={{ position: 'relative', width: '1164px', height: '646px', overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
 
                         </iframe>
                     </div>

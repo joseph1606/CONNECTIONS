@@ -622,8 +622,7 @@ def Vis(graph: Graph):
     ntx = Networkx(graph)
     pos = nx.kamada_kawai_layout(ntx, scale=1000)
 
-    #nt = Network("625px", "1159px")
-    nt = Network("500px", "500px", select_menu=True)
+    nt = Network("557px", "1159px", select_menu=True)
 
     for node_id in ntx.nodes():
         if isinstance(graph.nodes[node_id], AuthorNode):

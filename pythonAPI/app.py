@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 import time
 import sys
 import os
@@ -109,6 +109,10 @@ def upload_file():
     except Exception as e:
         return jsonify({'output': None, 'error': str(e)})
     return {'message': 'File uploaded successfully'}, 200
+
+@app.route('/scripts/<path:path>')
+def send_scripts(path):
+    return send_from_directory(f'{os.getcwd()}/lib', path)
 
 @app.route('/initiate', methods=['GET'])
 def initiate():
