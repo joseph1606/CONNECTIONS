@@ -5,4 +5,5 @@ from parse import *
 from SemanticScholarFuncs import *
 
 graph = CreateGraph("practice1.csv")
-Vis(graph)
+nba = CreateGraph("nba.csv")
+Vis(nba)

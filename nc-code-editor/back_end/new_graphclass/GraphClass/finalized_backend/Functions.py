@@ -810,7 +810,6 @@ def titelize_node(node) -> str:
 
 def titelize_edge(edge: Edge) -> str:
     directed_title = ""
-    attribute_title = ""
 
     if edge.directed != []:
         if len(edge.directed) == 1:
@@ -830,13 +829,15 @@ def titelize_edge(edge: Edge) -> str:
             )
 
     # k should be String, v should be List
+    attribute_title = "--SHARED ATTRIBUTES--\n"
     for k, v in edge.relationships.items():
-        attribute_title = "--SHARED ATTRIBUTES--\n"
         if k != COAUTHOR:
             attribute_title += k + ": " + ", ".join(v) + "\n"
-
-        if COAUTHOR in edge.relationships:
-            if attribute_title == "--SHARED ATTRIBUTES--\n":
+        else:
+            if (
+                attribute_title == "--SHARED ATTRIBUTES--\n"
+                and len(edge.relationships) == 1
+            ):
                 attribute_title = "--SHARED PAPERS--\n"
                 for paper in v:
                     attribute_title += paper.title + "\n"
