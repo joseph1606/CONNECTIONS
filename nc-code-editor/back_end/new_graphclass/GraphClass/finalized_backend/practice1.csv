@@ -1,6 +1,9 @@
 Person1,Person2,Relationship,RelationshipValue
-Ely,Joel,DIRECTED, fee/fi
-Ely,Paul, DIRECTED, boo/bop
-Ely,Walter,College, UMD
-Joel,Rev,Age, 21
-Paul,Joel,Person, bot
+Microsoft, M1, DIRECTED, Owner/Subsidiary
+Alphabet, Google, DIRECTED, Owner/Subsidiary
+Amazon, AWS, DIRECTED, Owner/Subsidiary
+Palantir, M1, DIRECTED, Owner/Subsidiary
+Google, AWS, "Shared Product", "Internet"
+Alphabet, Palantir, "Shared Product", "Internet"
+FBI, NSA, "Operation Area", "Online"
+Alphabet, DOJ, "Operation Area", "Online"

@@ -50,4 +50,7 @@ m = MergeGraph(m, pur_g, CollisionList(c))
 laz = NodeFromGraph(m, "Edward D. Lazowska")
 
 f = FilterGraph(m, {"Coauthor": [laz.papers[1]]})
-Vis(f)
+
+pur = NodeFromGraph(m, "Purtilo")
+print(pur.id)
+# Vis(m)
