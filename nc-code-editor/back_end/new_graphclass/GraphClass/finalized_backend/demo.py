@@ -12,14 +12,14 @@ col_list = Collision(ed_g, pur_g, True)
 
 merged = MergeGraph(ed_g, pur_g, col_list)
 
-Vis(merged)
+# Vis(merged)
 # THIS IS NEW FOR DEMO
 demo_g = CreateGraph("demo.csv")
 col_list = Collision(demo_g, merged, True)
 
 merged = MergeGraph(demo_g, merged, col_list)
 
-# Vis(merged)
+Vis(merged)
 ed = NodeFromGraph(merged, "Edward D. Lazowska")
 fbi = NodeFromGraph(merged, "FBI")
 
