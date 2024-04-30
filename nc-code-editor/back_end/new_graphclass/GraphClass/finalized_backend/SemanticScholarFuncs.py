@@ -158,8 +158,10 @@ def create_coauthor_nodes(author_node):
             params={"fields": "name,aliases,authorId,url"},
             json={"ids": paper.authorIds},
         )
+        
         coauthors_data = r.json()
         for coauthor_data in coauthors_data:
+            # ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> sometimes the post request fails; need to throw an error when such happens
             coauthor_id = coauthor_data["authorId"]
             if coauthor_id != author_node.authorId:
                 if coauthor_id not in coauthor_mapping:
