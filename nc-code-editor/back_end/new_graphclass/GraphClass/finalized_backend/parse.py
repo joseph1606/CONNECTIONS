@@ -1,4 +1,5 @@
 import dask.dataframe as dd
+from keys import *
 
 def parseData(csv):
     df = dd.read_csv(csv, skipinitialspace=True).compute()
@@ -50,18 +51,18 @@ def parseData(csv):
 
         # Error if not a relationships have a corresponding value, or vice versa
         if len(currkey) != len(currvalue):
-            raise ValueError("Error: All relationships must have corresponding value")
+            raise ValueError(ERR_UNEVEN_VALUES)
             
         # Loops through all relationships given in current cell
         x = 0
         while x < len(currkey):
             key = currkey[x].strip()
             if key.isspace() or not key: #if the key is empty or whitespace an error occurs
-                raise ValueError("Error: All relationships must have corresponding value")
+                raise ValueError(ERR_UNEVEN_VALUES)
             
             value = currvalue[x].strip()
             if value.isspace() or not value: #if the value is empty or whitespace an error occurs
-                raise ValueError("Error: All relationships must have corresponding value")
+                raise ValueError(ERR_UNEVEN_VALUES)
             
             # Handles author nodes
             if key == 'AUTHORID' and offset == 0:
@@ -75,7 +76,7 @@ def parseData(csv):
                 key = currkey[x]
                 value = currvalue[x]
                 if key != 'AUTHORURL':
-                    raise ValueError("Error: Incorrect author node format")
+                    raise ValueError(ERR_AUTHOR_FORMAT)
                 author_info[key] = value
 
                 # Gets author aliases
@@ -83,7 +84,7 @@ def parseData(csv):
                 key = currkey[x]
                 value = currvalue[x]
                 if key != 'AUTHORALIASES':
-                    raise ValueError("Error: Incorrect author node format")
+                    raise ValueError(ERR_AUTHOR_FORMAT)
                 if value == 'None':
                     author_info[key] = []
                 else:
@@ -141,17 +142,17 @@ def parseData(csv):
 
             # If the current key marks a directed graph, adjusts value to the correct format
             # Correct format is 'example1/example2'
-            elif key == 'DIRECTED':
+            elif key == DIRECTED:
                 rel = value.split("/")
 
                 # name1,name2,DIRECTED,mentor/mentee
                 if offset == 1:                
                     # Error if too many or too little '/'s are used
                     if len(rel) != 2:
-                        raise ValueError("Error: Incorrect directed relationship format")
+                        raise ValueError(ERR_DIRECTED_FORMAT)
                     # Error if either side of the '/' is empty
                     if (not rel[0] or not rel[1]):
-                        raise ValueError("Error: Incorrect directed relationship format")
+                        raise ValueError(ERR_DIRECTED_FORMAT)
                     value = (rel[0].lower(), rel[1].lower())
 
                     if key in pairing:
@@ -163,11 +164,11 @@ def parseData(csv):
                 elif offset == 0:
                     # Error if too many or too little '/'s are used
                     if len(rel) != 3:
-                        raise ValueError("Error: Incorrect directed relationship format")
+                        raise ValueError(ERR_DIRECTED_FORMAT)
                     
                     # Error if any part is empty
                     if (not rel[0] or not rel[1] or not rel[2]):
-                        raise ValueError("Error: Incorrect directed relationship format")
+                        raise ValueError(ERR_DIRECTED_FORMAT)
                     
                     # returns {name2: [(mentor,mentee)]} such that name1 -> name2, mentor/mentee
                     value1 = rel[0].title()

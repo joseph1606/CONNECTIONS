@@ -991,7 +991,7 @@ def saveData(nodes, directed, filePath):
         valuelist = list(x.getAttributes().values())
         for y in range(len(valuelist)):
             for z in range(len(valuelist[y])):
-                if(keyslist[y] != "Coauthor"):
+                if(keyslist[y] != COAUTHOR):
                     keys_to_save.append(keyslist[y])
                     values_to_save.append(valuelist[y][z])
 
@@ -1009,7 +1009,7 @@ def saveData(nodes, directed, filePath):
         values_to_save = []
         for rel1,rel2 in rel:
             values_to_save.append(node2.name + "/" + rel1 + "/" + rel2)
-            keys_to_save.append("DIRECTED")
+            keys_to_save.append(DIRECTED)
 
         ks.append(','.join(keys_to_save))
         vs.append(','.join(values_to_save))
