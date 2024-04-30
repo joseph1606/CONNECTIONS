@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 import time
 import sys
 import os
@@ -31,7 +31,7 @@ def compile_code():
     parts = code.strip().split('\n')
 
     #input validation and sanitization
-    allowed_pattern = r'^[a-zA-Z0-9\'"(),:. \t>=<\[\]{}+-/*%^&|~!=]+$'
+    allowed_pattern = r'^[a-zA-Z0-9\'"(),:. \t>=<\[\]{}+-/*%^&|~!=_]*$'
 
     for line in parts:
         if line.startswith("#"):
@@ -47,6 +47,8 @@ def compile_code():
     output = StringIO()  # Create StringIO object to capture output
     sys.stdout = output   # Redirect stdout to StringIO object
     
+    session_id = request.headers.get('session')
+    global_vars.session_id = session_id
     start_time = time.time()
     try:
         # Execute code with custom function
@@ -107,6 +109,10 @@ def upload_file():
     except Exception as e:
         return jsonify({'output': None, 'error': str(e)})
     return {'message': 'File uploaded successfully'}, 200
+
+@app.route('/scripts/<path:path>')
+def send_scripts(path):
+    return send_from_directory(f'{os.getcwd()}/lib', path)
 
 @app.route('/initiate', methods=['GET'])
 def initiate():

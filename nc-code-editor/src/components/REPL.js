@@ -17,14 +17,13 @@ const REPL = () => {
     const [skipConditions, setSkipConditions] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [format, setFormat] = useState(0);
-    const [outputhtml, setOutputhtml] = useState(0);
+    const [outputhtml, setOutputhtml] = useState("<p>Your output will appear here</p>");
     const [files, setfiles] = useState({});
     var filecollapsed = false;
+    var fileinput = false;
+
 
     const viewFile = (file) => {
-        console.log()
-        console.log(files)
-        console.log(files[file['line']])
         if (files[file['line']]) {
             setTableData([[], ...files[file['line']]['data']])
             setFormat(files[file['line']]['format'])
@@ -52,7 +51,6 @@ const REPL = () => {
         }
         console.log(filecollapsed)
     }
-
     const editor = () => {
         document.getElementById('terminal-loader').style.visibility = 'visible';
         document.getElementById('terminal-loader').style.display = '';
@@ -116,8 +114,7 @@ const REPL = () => {
                         relatv: lines[i][2],
                     });
                 }
-                console.log(files)
-                setfiles({ ...files, fileName: { format: 2, data: table } })
+                setfiles({ ...files, [fileName]: { format: 2, data: table } })
                 setTableData([[], ...table])
                 setFormat(2)
 
@@ -179,28 +176,35 @@ const REPL = () => {
 
     /* for popup graph display window */
 
-    const openPopup = (htmlData, graphName) => {
-        // opens a new window
-        const newWindow = window.open('', '_blank', 'width=1000,height=1000');
-        console.log(htmlData)
-        setOutputhtml(htmlData)
+    const openPopup = async (htmlData, graphName) => {
         // adds a title of the graph name on the window
+
         const i = htmlData.indexOf("<head>");
         htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
-        viewOutput()
 
-        // writes html content to window
-        if (newWindow) {
-            const htmlContent = `
-            <!DOCTYPE html>
-            ${htmlData}
-        `;
-            newWindow.document.open();
-            newWindow.document.write(htmlContent);
-            newWindow.document.close();
-        } else {
-            alert('Popup blocked by the browser. Please enable popups for this site.');
-        }
+        // Fetch script content using Axios
+        const utilsScript = await axios.get('http://127.0.0.1:5000/scripts/bindings/utils.js');
+        const tomSelectCSS = await axios.get('http://127.0.0.1:5000/scripts/tom-select/tom-select.css');
+        const tomSelectScript = `<script 
+                                    src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/js/tom-select.complete.min.js" 
+                                    integrity="sha512-/ThRxlSqzRzFRVNByE+IzvT7iZTAtrAr5Xkk9As+xsDRYvsnPBQbYjG5z4vaJFNaWjBEnSRxICQw5t/mUmJ6Kw==" 
+                                    crossorigin="anonymous" 
+                                    referrerpolicy="no-referrer"></script>`;
+
+        htmlData = htmlData.replace('<script src="lib/bindings/utils.js"></script>', `<script>${utilsScript.data}</script>`);
+        htmlData = htmlData.replace('<link href="lib/tom-select/tom-select.css" rel="stylesheet">', `<style>${tomSelectCSS.data}</style>`);
+        htmlData = htmlData.replace('<script src="lib/tom-select/tom-select.complete.min.js"></script>', `${tomSelectScript}`);
+
+        viewOutput();
+
+        const htmlContent = `
+        <!DOCTYPE html>
+        ${htmlData}`;
+
+        setOutputhtml(htmlContent);
+        document.getElementById('outholder').scrollTop = '322';
+        document.getElementById('outholder').scrollLeft = '100';
+
     };
 
     /**/
@@ -235,11 +239,9 @@ const REPL = () => {
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
-        // WALTER: file.name will give you all the file names
         const formData = new FormData();
         formData.set('file', file);
         formData.set('csvName', file.name);
-
         try {
             const response = await axios.post('http://127.0.0.1:5000/upload', formData);
             if (response.data.error) {
@@ -258,6 +260,11 @@ const REPL = () => {
                 }
                 setUploadedFiles([...uploadedFiles, fileName]);
                 read(fileName);
+                if (!fileinput) {
+                    document.getElementById('blankinput').style.visibility = 'collpase';
+                    document.getElementById('blankinput').style.display = 'none';
+                    fileinput = true;
+                }
             }
         } catch (error) {
             console.error('Error uploading file:', error);
@@ -305,7 +312,18 @@ const REPL = () => {
         // if the input is a string and is not the block code toggler, add it to prevInputs
         if ((input)) {
             if ((input.trim() !== ":{") && (input.trim() !== ":}")) {
-                setPrevInputs([...prevInputs, `${input}`]);
+                // replaces weird curvy quotations with normal
+                if (/[“”]/.test(input)) {
+                    // Replace curved double quotes with straight double quotes
+                    let str = input.replace(/[\u201C\u201D]/g, '"');
+                    setPrevInputs([...prevInputs, `${str}`]);
+                } else if (/[‘’]/.test(input)) {
+                    // Replace curved single quotes with straight single quotes
+                    let str = input.replace(/[\u2018\u2019]/g, "'");
+                    setPrevInputs([...prevInputs, `${str}`]);
+                } else {
+                    setPrevInputs([...prevInputs, `${input}`]);
+                }
             }
         }
         // if multiLine is enabled
@@ -323,7 +341,9 @@ const REPL = () => {
                     for (let i = 0; i < skipConditions.length; i++) {
                         const skipMe = skipConditions[i];
                         if (inputCopy.includes(skipMe)) {
-                            inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
+                            // Count the number of tabs at the beginning of the string
+                            let tabCount = (skipMe.match(/^\t*/)[0] || "").length;
+                            inputCopy[inputCopy.indexOf(skipMe)] = "\t".repeat(tabCount) + `pass`;
                         }
                     }
                     payload['code'] = inputCopy.join('\n') + '\n';
@@ -337,11 +357,6 @@ const REPL = () => {
                     const compiledResult = resp.data.output;
                     const functionNameStart = input.indexOf("(");
 
-                    for (const prev of prevInputs) {
-                        if (prev.includes("print")) {
-                            setSkipConditions([...skipConditions, prev]);
-                        }
-                    }
                     // if there is an error returned
                     if (compiledError) {
                         setErr([...err, compiledError]);
@@ -403,6 +418,11 @@ const REPL = () => {
                                 } else {
                                     // removes the .html or .csv from being added to compiledOutput
                                     keepThese.push(str)
+                                    for (const line of blockCode) {
+                                        if (line.includes("print")) {
+                                            setSkipConditions([...skipConditions, line]);
+                                        }
+                                    }
                                 }
                             }
                             setOutput([...output, input, ...keepThese]);
@@ -419,7 +439,7 @@ const REPL = () => {
                 setBlockCode([...blockCode, input]);
             }
         } else {
-            if (input === ":{") {
+            if (input.trim() === ":{") {
                 setMultiLine(true);
                 setSkipConditions([...skipConditions, input]);
                 setBlockCode([]);
@@ -427,19 +447,36 @@ const REPL = () => {
                 setSkipConditions([...skipConditions, input]);
                 setOutput([]);
             } else {
+                
+                // replaces weird curvy quotations with normal
+                let str = "";
+                if (/[“”]/.test(input)) {
+                    // Replace curved double quotes with straight double quotes
+                    str = input.replace(/[\u201C\u201D]/g, '"');
+                } else if (/[‘’]/.test(input)) {
+                    // Replace curved single quotes with straight single quotes
+                    str = input.replace(/[\u2018\u2019]/g, "'");
+                } else {
+                    str = input;
+                }
+                
                 const payload = {};
+                
                 // checks if previous code has generated an output and comments it out in the payload if so
                 if (skipConditions) {
                     const inputCopy = deepCopyStateArray(prevInputs);
                     for (let i = 0; i < skipConditions.length; i++) {
                         const skipMe = skipConditions[i];
                         if (inputCopy.includes(skipMe)) {
-                            inputCopy[inputCopy.indexOf(skipMe)] = `#${skipMe}`;
+                            // Count the number of tabs at the beginning of the string
+                            let tabCount = (skipMe.match(/^\t*/)[0] || "").length;
+                            inputCopy[inputCopy.indexOf(skipMe)] = "\t".repeat(tabCount) + `pass`;
                         }
                     }
-                    payload['code'] = inputCopy.join('\n') + '\n' + input;
+
+                    payload['code'] = inputCopy.join('\n') + '\n' + str;
                 } else {
-                    payload['code'] = prevInputs.join('\n') + '\n' + input;
+                    payload['code'] = prevInputs.join('\n') + '\n' + str;
                 }
                 /* contacting API for code compilation */
                 console.log(payload);
@@ -603,58 +640,63 @@ const REPL = () => {
                             </form>
                         </div>
                     </div>
-                    <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh' }}>
-                        <thead>
-                            {(() => {
-                                if (format == 1) {
-                                    return (
-                                        <tr>
-                                            <th>Person 1</th>
-                                            <th>Person 2</th>
-                                            <th>Relationship</th>
-                                            <th>Relationship Value</th>
-                                        </tr>
-                                    );
-                                } else if (format == 2) {
-                                    return (
-                                        <tr>
-                                            <th>Person</th>
-                                            <th>Relationship</th>
-                                            <th>Relationship Value</th>
-                                        </tr>
-                                    );
-                                } else {
-                                    return null; // or return an appropriate default header
-                                }
-                            })()}
-                        </thead>
-                        <tbody>
-                            {
-                                tableData.map((obj) => {
-                                    if (Object.keys(obj).length == 4) {
-                                        return (
-                                            <tr >
-                                                <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.personb}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
-                                            </tr>
-                                        );
-                                    } else if (Object.keys(obj).length == 3) {
+                    <div>
+                        <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh' }}>
+                            <p id='blankinput' style={{ margin: 'auto', fontSize: '30px' }}>Files you input will appear here</p>
+                            <thead>
+                                {(() => {
+                                    if (format == 1) {
                                         return (
                                             <tr>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
-                                                <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                                <th>Person 1</th>
+                                                <th>Person 2</th>
+                                                <th>Relationship</th>
+                                                <th>Relationship Value</th>
                                             </tr>
                                         );
+                                    } else if (format == 2) {
+                                        return (
+                                            <tr>
+                                                <th>Person</th>
+                                                <th>Relationship</th>
+                                                <th>Relationship Value</th>
+                                            </tr>
+                                        );
+                                    } else {
+                                        return null; // or return an appropriate default header
                                     }
-                                })
-                            }
-                        </tbody>
-                    </table>
-                    <div id='outputviewer' dangerouslySetInnerHTML={{ __html: outputhtml }}>
+                                })()}
+                            </thead>
+                            <tbody>
+                                {
+                                    tableData.map((obj) => {
+                                        if (Object.keys(obj).length == 4) {
+                                            return (
+                                                <tr >
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.personb}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                                </tr>
+                                            );
+                                        } else if (Object.keys(obj).length == 3) {
+                                            return (
+                                                <tr>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.persona}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relat}</td>
+                                                    <td style={{ border: ' 1px solid black' }}>{obj.relatv}</td>
+                                                </tr>
+                                            );
+                                        }
+                                    })
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden' }}>
+                        <iframe id='outputviewer' style={{ position: 'relative', width: '1164px', height: '646px', overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
 
+                        </iframe>
                     </div>
                 </div>
             </div>
@@ -669,11 +711,11 @@ const REPL = () => {
                     <br />
                     <h4>Files (click to view):</h4>
                     {uploadedFiles.map((line, index) => (
-                        <div id={index} key={index}><p onClick={() => viewFile({ line })}>{line}</p></div>
+                        <div id={index} key={index}><p className='file' onClick={() => viewFile({ line })}>{line}</p></div>
                     ))}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
