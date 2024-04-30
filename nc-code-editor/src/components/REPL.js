@@ -668,7 +668,7 @@ const REPL = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
+                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden' }}>
                         <iframe id='outputviewer' style={{ position: 'relative', width: '1164px', height: '646px', overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
 
                         </iframe>
