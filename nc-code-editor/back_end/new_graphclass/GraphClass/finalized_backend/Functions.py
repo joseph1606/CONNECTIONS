@@ -24,9 +24,29 @@ def CreateGraph(csv: str = None):
         (names1, names2, attributes) = parseData(csv)
 
         if names2 is None:
+
+            directed_to_do = []
+
             # iterates through each row of inputs from csv
             for name, attribute in zip(names1, attributes):
-                create_graph_helper(graph, name, attribute)
+
+                if DIRECTED in attribute:
+                    # stores the tuple of relationship values (like Mentor,Mentee)
+                    directed_list = attribute.pop(DIRECTED)
+
+                    # Stores all directed relationships to be done after all nodes have been set up
+                    for k in directed_list:
+                        directed_to_do.append((name, k, directed_list[k]))
+
+                if attribute != {}:
+                    create_graph_helper(graph, name, attribute)
+
+            # Sets up all directed relationships
+            for name1, name2, directed_dict in directed_to_do:
+                node1 = create_graph_helper(graph, name1, {})
+                node2 = create_graph_helper(graph, name2, {})
+                create_graph_directed_helper(graph, directed_dict, node1, node2)
+
 
         else:
             for name1, name2, attribute in zip(names1, names2, attributes):
@@ -40,38 +60,10 @@ def CreateGraph(csv: str = None):
                 node1 = create_graph_helper(graph, name1, attribute)
                 node2 = create_graph_helper(graph, name2, attribute)
 
-                # popping out directed will cause an issue if there is at least one new node (from the csv file) that only has a directed relationship with another node
-                # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
-                # as such we will need to create an edge between two said nodes
+                create_graph_directed_helper(graph, directed_dict, node1, node2)
 
-                if directed_dict:  # and (node1 != node2):
-                    edge_list = graph.search_edge(node1, node2)
-
-                    if not edge_list:
-                        edge = graph.add_edge(node1, node2, {})
-
-                    else:
-                        edge = edge_list[0]
-
-                    for tuple_rel in directed_dict:
-                        # update node1.directed
-                        node1.addDirected(node2, tuple_rel[1])
-
-                        # update node2.directed
-                        node2.addDirected(node1, tuple_rel[0])
-
-                        # need to consider the case when the edge has already been created and the nodes were switched
-                        if edge.node1 == node1:
-                            edge.addDirected(tuple_rel)
-                            graph.add_directed(node1, node2, tuple_rel)
-
-                        else:
-                            tuple_list_rev = (tuple_rel[1], tuple_rel[0])
-                            edge.addDirected(tuple_list_rev)
-                            graph.add_directed(node2, node1, tuple_list_rev)
     graph.generateColors()
     return graph
-
 
 def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
     """
@@ -574,18 +566,67 @@ def common_ids(list_of_lists):
 def create_graph_helper(graph: Graph, name: str, attribute: dict):
 
     named_nodes = graph.search_named_nodes(name)
-    node = None
+
     # if empty -> no node with the name was found
     if not named_nodes:
-        node = graph.add_node(name, attribute)
+
+        # Sets up author nodes
+        if "AUTHORINFO" in attribute:
+            info = attribute.pop("AUTHORINFO")
+            papers = []
+            for p in info["PAPERS"]:
+                papers.append(PaperNode(title=p[0], year=p[1], authors=p[2], authorIds=p[3]))
+            
+            attribute[COAUTHOR] = papers
+
+        
+            node = graph.add_ssnode(name, attribute, info["AUTHORALIASES"], info["AUTHORID"], info["AUTHORURL"], papers)
+            link_nodes(graph, node, attribute)
+        else:
+            node = graph.add_node(name, attribute)
+            link_nodes(graph, node, attribute)
+
 
     # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
     else:
         node = graph.update_node(named_nodes[0], attribute)
-
-    link_nodes(graph, node, attribute)
+        link_nodes(graph, node, attribute)
 
     return node
+
+
+def create_graph_directed_helper(graph, directed_dict, node1, node2):
+    # popping out directed will cause an issue if there is at least one new node (from the csv file) that only has a directed relationship with another node
+    # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
+    # as such we will need to create an edge between two said nodes
+
+    if directed_dict:  # and (node1 != node2):
+        edge_list = graph.search_edge(node1, node2)
+
+
+        if not edge_list:
+            edge = graph.add_edge(node1, node2, {})
+
+        else:
+            edge = edge_list[0]
+
+        for tuple_rel in directed_dict:
+            # update node1.directed
+            node1.addDirected(node2, tuple_rel[1])
+
+            # update node2.directed
+            node2.addDirected(node1, tuple_rel[0])
+
+            # need to consider the case when the edge has already been created and the nodes were switched
+            if edge.node1 == node1:
+                edge.addDirected(tuple_rel)
+                graph.add_directed(node1, node2, tuple_rel)
+
+            else:
+                tuple_list_rev = (tuple_rel[1], tuple_rel[0])
+                edge.addDirected(tuple_list_rev)
+                graph.add_directed(node2, node1, tuple_list_rev)
+
 
 
 # essentially updates relationships dict and edge information
@@ -876,7 +917,7 @@ def paper_string(papers) -> str:
     return title
 
 
-def saveData(nodes, filePath):
+def saveData(nodes, directed, filePath):
     names = list()
     attributes = list()
     authors = list()
@@ -886,8 +927,10 @@ def saveData(nodes, filePath):
         if type(node) is AuthorNode:
             authors.append(node)
         else:
-            names.append(node.getName())
-            attributes.append(node.getAttributes())
+            if(node.getAttributes() != {}):
+                names.append(node.getName())
+                attributes.append(node.getAttributes())
+
 
     # Formats non author data in the correct way
     data = dict()
@@ -906,26 +949,75 @@ def saveData(nodes, filePath):
                 keys_to_save.append(keyslist[y])
                 values_to_save.append(valuelist[y][z])
 
-        ks.append(",".join(keys_to_save))
-        vs.append(",".join(values_to_save))
+        ks.append(','.join(keys_to_save))
+        vs.append(','.join(values_to_save))
+        
 
+    # Saves author nodes
     for x in authors:
         keys_to_save = list()
         values_to_save = list()
         keys_to_save.append("AUTHORID")
         values_to_save.append(x.authorId)
+        keys_to_save.append("AUTHORURL")
+        values_to_save.append(x.url)
+        keys_to_save.append("AUTHORALIASES")
+        if x.aliases == []:
+            values_to_save.append("None")
+        else:            
+            values_to_save.append('/'.join(x.aliases))         
+
+        # Saves paper nodes
         for i in range(len(x.papers)):
             keys_to_save.append("PAPER")
-            values_to_save.append(x.papers[i].title)
+            paper_authors = "None" 
+            paper_IDs = "None" 
+
+            if x.papers[i].authors != []:
+                paperlist = x.papers[i].authors
+                cleansedlist = list()
+                for q in paperlist:
+                    cleansedlist.append(q[0])
+                paper_authors = '#'.join(cleansedlist)
+
+            if x.papers[i].authorIds != []:
+                paper_IDs = '#'.join(x.papers[i].authorIds)
+
+            paper_value = x.papers[i].title + "/" + str(x.papers[i].year) + "/" + paper_authors + "/" + paper_IDs
+            values_to_save.append(paper_value)
+
+        # Saves any non-author data in an author node
+        keyslist = list(x.getAttributes().keys())
+        valuelist = list(x.getAttributes().values())
+        for y in range(len(valuelist)):
+            for z in range(len(valuelist[y])):
+                if(keyslist[y] != "Coauthor"):
+                    keys_to_save.append(keyslist[y])
+                    values_to_save.append(valuelist[y][z])
+
 
         names.append(x.getName())
-        ks.append(",".join(keys_to_save))
-        vs.append(",".join(values_to_save))
+        ks.append(','.join(keys_to_save))
+        vs.append(','.join(values_to_save))
+
+
+    # Saves all directed relationships
+    for (node1, node2) in directed:
+        rel = directed[(node1,node2)]
+        names.append(node1.name)
+        keys_to_save = []
+        values_to_save = []
+        for rel1,rel2 in rel:
+            values_to_save.append(node2.name + "/" + rel1 + "/" + rel2)
+            keys_to_save.append("DIRECTED")
+
+        ks.append(','.join(keys_to_save))
+        vs.append(','.join(values_to_save))
 
     # Puts all data into a dictionary
     data["Person 1"] = names
-    data["Relationship"] = ks
-    data["Relationship Value"] = vs
+    data['Relationship'] = ks
+    data['Relationship Value'] = vs
 
     # Saves dictionary to csv
     pandas_df = pandas.DataFrame(data)
