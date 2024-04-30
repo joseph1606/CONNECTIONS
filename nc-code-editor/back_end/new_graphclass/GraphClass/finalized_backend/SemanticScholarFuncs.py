@@ -48,6 +48,7 @@ def display_author_options(aliases):
 
     return list_of_aliases
 
+
 # Function to retrieve all author options
 def get_author_options(author_name):
     list_of_aliases = []
@@ -57,6 +58,7 @@ def get_author_options(author_name):
             url = author.get("url")
             list_of_aliases.append((name, url))
     return list_of_aliases
+
 
 # Function to print author options
 def print_author_options(list_of_aliases):
@@ -111,10 +113,12 @@ def parse_author_data(author_data, numpapers):
             author_nodes.append(author_node)
     return author_nodes
 
+
 def searchAuthor(name):
     disamb = fetch_author(name)
     list_of_aliases = get_author_options(disamb)
     print_author_options(list_of_aliases)
+
 
 # Function to make an AuthorNode object based on user input
 def makeAuthor(name, choice, numpapers):
@@ -141,10 +145,11 @@ def makeAuthor(name, choice, numpapers):
         raise IndexError(f"No data found for author: {name}")
         # print("No data found. Try again")
 
+
 # Function to create coauthor nodes for a given author node
 def create_coauthor_nodes(author_node):
     coauthors_dict = {}  # Dictionary to store coauthor nodes for each paper
-    #coauthor_mapping = {}  # Dictionary to map coauthor authorIds to nodes
+    # coauthor_mapping = {}  # Dictionary to map coauthor authorIds to nodes
     coauthor_mapping = {author_node.authorId: author_node}
     # Iterate through each paper of the author
     for paper in author_node.papers:
@@ -175,7 +180,7 @@ def create_coauthor_nodes(author_node):
                     coauthor_node
                 )  # Add coauthor node to paper's coauthor list
         coauthors_dict.setdefault(paper, []).append(author_node)
-    if not coauthors_dict: # Handling empty coauthors data
+    if not coauthors_dict:  # Handling empty coauthors data
         raise KeyError(f"No coauthors found for the given author.")
         # print("No coauthors found for the given author.")
     return (coauthors_dict, coauthor_mapping)
@@ -194,12 +199,12 @@ def create_coauthor_nodes(author_node):
 
 
 # Function to generate a dictionary containing coauthors for a given author
-def generate_author_dict(author_name:str, choice:int, numpapers:int):
+def generate_author_dict(author_name: str, choice: int, numpapers: int):
     author = makeAuthor(author_name, choice, numpapers)
     if author:
-        coauthors_dict,coauthors_map = create_coauthor_nodes(author)
-        #print_coauthor_info(coauthors_dict)  # printing each author for checking
-        return (coauthors_dict,coauthors_map)
+        coauthors_dict, coauthors_map = create_coauthor_nodes(author)
+        # print_coauthor_info(coauthors_dict)  # printing each author for checking
+        return (coauthors_dict, coauthors_map)
     else:
         raise KeyError(f"Author not found: {author_name}")
         # print("Author not found. Please try again:") #->   CHANGE TO ERROR MESSAGE
@@ -246,8 +251,3 @@ def print_author_details(auth):
             print()
     else:
         print("No papers found")
-
-
-# Both methods of execution:
-searchAuthor("E Cohen")
-x = generate_author_dict("E Cohen", 1, 5)
