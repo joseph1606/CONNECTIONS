@@ -19,11 +19,11 @@ col_list = Collision(demo_g, merged, True)
 
 merged = MergeGraph(demo_g, merged, col_list)
 
-Vis(merged)
+#Vis(merged)
 ed = NodeFromGraph(merged, "Edward D. Lazowska")
 fbi = NodeFromGraph(merged, "FBI")
 
 sp = ShortestPath(ed, fbi, merged)
 
 sp_g = AddNodes(CreateGraph(), sp)
-# Vis(sp_g)
+Vis(sp_g)
