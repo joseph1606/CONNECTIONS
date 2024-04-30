@@ -327,9 +327,12 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
     for node in nodes1:
         if isinstance(node, AuthorNode):
             names = [node.name] + node.aliases
+            if "Sarah Stone" in names:
+                print(node.paper_list(), 2)
             for name in names:
                 if name in collision_dict:
-                    collision_dict[name].append(node)
+                    if node not in collision_dict[name]:
+                        collision_dict[name].append(node)
                 else:
                     collision_dict[name] = [node]
         else:
@@ -343,9 +346,12 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
     for node in nodes2:
         if isinstance(node, AuthorNode):
             names = [node.name] + node.aliases
+            if "Sarah Stone" in names:
+                print(node.paper_list(), 1)
             for name in names:
                 if name in collision_dict:
-                    collision_dict[name].append(node)
+                    if node not in collision_dict[name]:
+                        collision_dict[name].append(node)
                 else:
                     collision_dict[name] = [node]
         else:
@@ -379,7 +385,6 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
                             break
 
                 if len(replace_k) != 0:
-                    "THIS IS WHERE DELETING HAPPENS"
                     if replace_k != "ALREADY EXISTS":
                         del final_dict[replace_k]
                         final_dict[key] = value
@@ -662,7 +667,7 @@ def Vis(graph: Graph):
     ntx = Networkx(graph)
     pos = nx.kamada_kawai_layout(ntx, scale=1000)
 
-    nt = Network("500px", "500px", select_menu=True)
+    nt = Network("750px", "750px", select_menu=True)
 
     for node_id in ntx.nodes():
         if isinstance(graph.nodes[node_id], AuthorNode):
@@ -672,7 +677,7 @@ def Vis(graph: Graph):
                 title=ntx.nodes[node_id]["title"],
                 x=pos[node_id][0],
                 y=pos[node_id][1],
-                physics=False,
+                physics=True,
                 font="55px arial black",
             )
         elif len(graph.nodes[node_id].directed) > 0:
@@ -682,7 +687,7 @@ def Vis(graph: Graph):
                 title=ntx.nodes[node_id]["title"],
                 x=pos[node_id][0],
                 y=pos[node_id][1],
-                physics=False,
+                physics=True,
                 font="55px arial red",
             )
         else:
@@ -692,7 +697,7 @@ def Vis(graph: Graph):
                 title=ntx.nodes[node_id]["title"],
                 x=pos[node_id][0],
                 y=pos[node_id][1],
-                physics=False,
+                physics=True,
                 font="55px arial blue",
             )
 
@@ -703,7 +708,7 @@ def Vis(graph: Graph):
 
     nt.barnes_hut(
         gravity=-1500,
-        central_gravity=0.3,
+        central_gravity=0,
         spring_length=250,
         spring_strength=0.001,
         damping=0.09,
