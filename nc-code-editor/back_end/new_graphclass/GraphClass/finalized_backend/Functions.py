@@ -701,6 +701,14 @@ def Vis(graph: Graph):
             u, v, title=data["title"], color="rgb{}".format(data["color"]), width=3.6
         )
 
+    nt.barnes_hut(
+        gravity=-1500,
+        central_gravity=0.3,
+        spring_length=250,
+        spring_strength=0.001,
+        damping=0.09,
+        overlap=0.5,
+    )
     nt.show(
         "ntx.html", notebook=False
     )  # something between frontend/backend happens here for rendering, but this is the basics
