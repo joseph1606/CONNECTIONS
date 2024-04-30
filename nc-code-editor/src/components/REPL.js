@@ -200,7 +200,6 @@ const REPL = () => {
         const htmlContent = `
         <!DOCTYPE html>
         ${htmlData}`;
-        console.log(htmlContent);
 
         setOutputhtml(htmlContent);
         document.getElementById('outholder').scrollTop = '322';
@@ -313,7 +312,18 @@ const REPL = () => {
         // if the input is a string and is not the block code toggler, add it to prevInputs
         if ((input)) {
             if ((input.trim() !== ":{") && (input.trim() !== ":}")) {
-                setPrevInputs([...prevInputs, `${input}`]);
+                // replaces weird curvy quotations with normal
+                if (/[“”]/.test(input)) {
+                    // Replace curved double quotes with straight double quotes
+                    let str = input.replace(/[\u201C\u201D]/g, '"');
+                    setPrevInputs([...prevInputs, `${str}`]);
+                } else if (/[‘’]/.test(input)) {
+                    // Replace curved single quotes with straight single quotes
+                    let str = input.replace(/[\u2018\u2019]/g, "'");
+                    setPrevInputs([...prevInputs, `${str}`]);
+                } else {
+                    setPrevInputs([...prevInputs, `${input}`]);
+                }
             }
         }
         // if multiLine is enabled
@@ -437,7 +447,21 @@ const REPL = () => {
                 setSkipConditions([...skipConditions, input]);
                 setOutput([]);
             } else {
+                
+                // replaces weird curvy quotations with normal
+                let str = "";
+                if (/[“”]/.test(input)) {
+                    // Replace curved double quotes with straight double quotes
+                    str = input.replace(/[\u201C\u201D]/g, '"');
+                } else if (/[‘’]/.test(input)) {
+                    // Replace curved single quotes with straight single quotes
+                    str = input.replace(/[\u2018\u2019]/g, "'");
+                } else {
+                    str = input;
+                }
+                
                 const payload = {};
+                
                 // checks if previous code has generated an output and comments it out in the payload if so
                 if (skipConditions) {
                     const inputCopy = deepCopyStateArray(prevInputs);
@@ -449,9 +473,10 @@ const REPL = () => {
                             inputCopy[inputCopy.indexOf(skipMe)] = "\t".repeat(tabCount) + `pass`;
                         }
                     }
-                    payload['code'] = inputCopy.join('\n') + '\n' + input;
+
+                    payload['code'] = inputCopy.join('\n') + '\n' + str;
                 } else {
-                    payload['code'] = prevInputs.join('\n') + '\n' + input;
+                    payload['code'] = prevInputs.join('\n') + '\n' + str;
                 }
                 /* contacting API for code compilation */
                 console.log(payload);

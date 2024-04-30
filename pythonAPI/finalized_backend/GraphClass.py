@@ -68,9 +68,13 @@ class Graph:
     def add_ssnode(
         self, name: str, attributes: dict, aliases, authorId, url, papers=None
     ):
-        attributes = copy.deepcopy(attributes)
-        ssnode = AuthorNode(name, attributes, aliases, authorId, url, papers)
-        self.nodes[ssnode.getID()] = ssnode
+        papers = attributes[COAUTHOR]
+        new_attributes = copy.deepcopy(attributes)
+        new_attributes[COAUTHOR] = (
+            papers  # so original memory address of PaperNode doesn't change
+        )
+        ssnode = AuthorNode(name, new_attributes, aliases, authorId, url, papers)
+        self.nodes[ssnode.id] = ssnode
         return ssnode
 
     # adds a new edge
