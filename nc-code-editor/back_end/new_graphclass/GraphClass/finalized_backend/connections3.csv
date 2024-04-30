@@ -1,10 +1,8 @@
-Person1, Relationship, Relationship Value
-Ely,hair color,brown
-Stephanie,profession,singer
-John,profession,handyman
-John,college,umd
-Stephanie,sex,female
-Lisa,age,28
-Lisa,profession,nurse
-Ely,college,umd
-
+Person1, Person2, Relationship, Relationship Value
+pjr, Purtilo, DIRECTED, Mentee/Mentor
+pjr, Purtilo, DIRECTED, son/father
+pjr, Purtilo, DIRECTED, Mentee/Mentor
+joel, jessy, DIRECTED, son/mother
+joel, ely, class, CMSC435
+ElY, Rev, age,21
+pjr, paul,age,22
