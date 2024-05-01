@@ -19,6 +19,10 @@ const REPL = () => {
     const [format, setFormat] = useState(0);
     const [outputhtml, setOutputhtml] = useState("<p>Your output will appear here</p>");
     const [files, setfiles] = useState({});
+    const [windowSize, setWindowSize] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight
+    });
     var filecollapsed = false;
     var fileinput = false;
 
@@ -162,6 +166,18 @@ const REPL = () => {
                 console.error('Error initiating session:', error);
             });
     }, []); // Only run once on component mount
+
+    // adds eventListener for resizing
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        };
+
+        window.addEventListener('resize', handleResize);
+    }, []);
 
     /**/
 
@@ -334,7 +350,7 @@ const REPL = () => {
                 setSkipConditions([...skipConditions, input]);
                 setInFunc(0);
 
-                const payload = {};
+                const payload = { "height": windowSize.height, "width": windowSize.width };
                 // checks if previous code has generated an output and comments it out in the payload if so
                 if (skipConditions) {
                     const inputCopy = deepCopyStateArray(prevInputs);
@@ -447,7 +463,7 @@ const REPL = () => {
                 setSkipConditions([...skipConditions, input]);
                 setOutput([]);
             } else {
-                
+
                 // replaces weird curvy quotations with normal
                 let str = "";
                 if (/[“”]/.test(input)) {
@@ -459,9 +475,9 @@ const REPL = () => {
                 } else {
                     str = input;
                 }
-                
-                const payload = {};
-                
+
+                const payload = { "height": windowSize.height, "width": windowSize.width };
+
                 // checks if previous code has generated an output and comments it out in the payload if so
                 if (skipConditions) {
                     const inputCopy = deepCopyStateArray(prevInputs);
@@ -694,7 +710,7 @@ const REPL = () => {
                         </table>
                     </div>
                     <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
-                        <iframe id='outputviewer' style={{ position: 'relative', width: '1164px', height: '646px', overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
+                        <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
 
                         </iframe>
                     </div>
