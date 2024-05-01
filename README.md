@@ -9,7 +9,7 @@ http://vegetable.cs.umd.edu:3000/
 ## Setting Up Environment
 
 ### Prerequisites
-npm, python3, and pip installed on your local machine.
+npm, python3, and pip (or pip3) installed on your local machine.
 
 ### Step 1
 Clone the repository to your local machine and open a terminal starting at the repository root (new_connections). From there, cd into nc-code-editor.
@@ -34,7 +34,7 @@ Activate the environment (note the period at the begining):
 ```console
 $ . venv/bin/activate
 ```
-You should notice a difference in your prompt. Then install required packages with the python package installer:
+You should notice a difference in your prompt. Then install required packages with pip (or pip3):
 ```console
 $ pip install -r requirements.txt
 ```
