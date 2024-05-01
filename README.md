@@ -9,9 +9,7 @@ http://vegetable.cs.umd.edu:3000/
 ## Setting Up Environment
 
 ### Prerequisites
-npm installed on your local machine.
-python3 installed on your local machine.
-pip installed on your local machine.
+npm, python3, and pip installed on your local machine.
 
 ### Step 1
 Clone the repository to your local machine and open a terminal starting at the repository root (new_connections). From there, cd into nc-code-editor and run npm start.
