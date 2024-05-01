@@ -1,7 +1,8 @@
 DIRECTED_COLOR = (238, 75, 43)
 COAUTHOR_COLOR = (0, 0, 0)
-DIRECTED = "DIRECTED"
+DIRECTED = "Directed"
 COAUTHOR = "Coauthor"
+DIRECTED_CSV = "DIRECTED"
 
 ERR_DIRECTED_FORMAT = "Error: Incorrect directed relationship format"
 ERR_UNEVEN_VALUES = "Error: All relationships must have corresponding value"

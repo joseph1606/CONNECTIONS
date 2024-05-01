@@ -142,7 +142,7 @@ def parseData(csv):
 
             # If the current key marks a directed graph, adjusts value to the correct format
             # Correct format is 'example1/example2'
-            elif key == DIRECTED:
+            elif key == DIRECTED_CSV:
                 rel = value.split("/")
 
                 # name1,name2,DIRECTED,mentor/mentee

@@ -30,9 +30,9 @@ def CreateGraph(csv: str = None):
             # iterates through each row of inputs from csv
             for name, attribute in zip(names1, attributes):
 
-                if DIRECTED in attribute:
+                if DIRECTED_CSV in attribute:
                     # stores the tuple of relationship values (like Mentor,Mentee)
-                    directed_list = attribute.pop(DIRECTED)
+                    directed_list = attribute.pop(DIRECTED_CSV)
 
                     # Stores all directed relationships to be done after all nodes have been set up
                     for k in directed_list:
@@ -53,9 +53,9 @@ def CreateGraph(csv: str = None):
 
                 directed_dict = []
 
-                if DIRECTED in attribute:
+                if DIRECTED_CSV in attribute:
                     # stores the tuple of relationship values (like Mentor,Mentee)
-                    directed_dict = attribute.pop(DIRECTED)
+                    directed_dict = attribute.pop(DIRECTED_CSV)
 
                 node1 = create_graph_helper(graph, name1, attribute)
                 node2 = create_graph_helper(graph, name2, attribute)
@@ -1009,7 +1009,7 @@ def saveData(nodes, directed, filePath):
         values_to_save = []
         for rel1,rel2 in rel:
             values_to_save.append(node2.name + "/" + rel1 + "/" + rel2)
-            keys_to_save.append(DIRECTED)
+            keys_to_save.append(DIRECTED_CSV)
 
         ks.append(','.join(keys_to_save))
         vs.append(','.join(values_to_save))
