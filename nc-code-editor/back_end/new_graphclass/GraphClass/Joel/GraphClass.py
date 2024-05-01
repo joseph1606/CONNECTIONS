@@ -10,7 +10,7 @@ class Graph:
     def __init__(self):
         self.nodes = {}  # {node.id: node object}
         self.edges = {}  # {edge.id:edge object}
-        self.connections = {}  # {(node1.id, node2.id) : edge_id}
+        self.connections = {}  # {(node1.id, node2.id) : edge.id}
         self.relationships = {}
         self.directed = {}
         self.colors = {}
@@ -28,23 +28,22 @@ class Graph:
                "34": [...]
            }
            
-           "COAUTHOR": {
+           "Paper": {
                "PaperNode": [.....] #ALL AUTHOR NODES 
                "PaperNode2": [...]
            }
            
+           "directed":{
+               "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
+           }
      
         }
         
-             self.directed = {
-                       
-               currently stored as :-                              
-               (Purtilo,Ely): [(mentor,mentee)]               
-               (Purtilo,Joel): [(mentor,mentee)]
-               
-            }
-  
+        self.directed = {
         
+               "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
+
+        }
         """
 
     def return_nxGraph(self):
@@ -85,35 +84,29 @@ class Graph:
         attributes = copy.deepcopy(attributes)
         edge.updateRelationships(attributes)
         return edge
-    
-    
-    def add_directed(self,node1:Node,node2:Node,directed_rel:tuple):
+
+    def add_directed(self, node1: Node, node2: Node, directed_rel: tuple):
         """
           self.directed = {
-                       
-               currently stored as :-                              
-               (Purtilo_node,Ely_node): [(mentor,mentee)]               
+
+               currently stored as :-
+               (Purtilo_node,Ely_node): [(mentor,mentee)]
                (Purtilo_node,Joel_node): [(mentor,mentee)]
-               
-               could be stored as :-               
+
+               could be stored as :-
                "(mentor,mentee)": [(Purtilo,Ely),(Purtilo,Joel)]
 
         }
         """
 
-        directed_rel_rev = (directed_rel[1], directed_rel[0]) 
-        directed_tuple = (node1,node2)
-        directed_tuple_rev = (node2,node1)
-            
-        if directed_tuple in self.directed and directed_rel not in self.directed[directed_tuple]:
-            self.directed[directed_tuple].append(directed_rel)
-            
-        elif directed_tuple_rev in self.directed and directed_rel not in self.directed[directed_tuple_rev]:
-            self.directed[directed_tuple_rev].append(directed_rel_rev)
-        
+        directed_tuple = (node1, node2)
+
+        if directed_tuple in self.directed:
+            if directed_rel not in self.directed[directed_tuple]:
+                self.directed[directed_tuple].append(directed_rel)
         else:
             self.directed[directed_tuple] = [directed_rel]
-        
+
     # returns list of nodes ids that have the same attribute type and corresponding value -> which is use to create/update edges
     # also updates relationships dict
     def relationship_nodes(self, node: Node, attribute_type: str, attribute_value: str):
@@ -139,7 +132,9 @@ class Graph:
                 if node not in self.relationships[attribute_type][attribute_value]:
 
                     # return list of other nodes with same attribute type and value; to be use to create/update edges
-                    relationship_nodes = self.relationships[attribute_type][attribute_value]
+                    relationship_nodes = self.relationships[attribute_type][
+                        attribute_value
+                    ]
                     # update relationships
                     self.relationships[attribute_type][attribute_value].append(node)
 
@@ -178,17 +173,15 @@ class Graph:
             for (n1_id, n2_id), edge_id in self.connections.items():
                 if node1.getID() in (n1_id, n2_id):
                     edge_objects.append(self.edges[edge_id])
-                    
         else:
             # If two nodes are provided, search for the edge between those nodes
-            if (node1.getID(),node2.getID()) in self.connections:
-                edge_id = self.connections[(node1.getID(),node2.getID())]
+            if (node1.id, node2.id) in self.connections:
+                edge_id = self.connections[(node1.id, node2.id)]
                 edge_objects.append(self.edges[edge_id])
-                
-            elif (node2.getID(),node1.getID()) in self.connections:
-                edge_id = self.connections[(node2.getID(),node1.getID())]
+
+            elif (node2.id, node1.id) in self.connections:
+                edge_id = self.connections[(node2.id, node1.id)]
                 edge_objects.append(self.edges[edge_id])
-                
 
         return edge_objects
 
@@ -244,11 +237,10 @@ class Graph:
                     # print(f"{node_id}")
                     print(f"{node.getName()}")
                 print()
-                
-                
+
     def print_directed(self):
-        
-        for key,value in self.directed.items():
+
+        for key, value in self.directed.items():
             print("node names are: ")
             print(key[0].name)
             print(key[1].name)
@@ -270,6 +262,25 @@ class Graph:
             b_int = int(b * 255)
 
             self.colors[k] = (r_int, g_int, b_int)
+
+    def setColors(self, color_dict: dict):
+        for key, color in color_dict.items():
+            key = key.title()
+            if (
+                isinstance(color, tuple)
+                and len(color) == 3
+                and all(isinstance(c, int) for c in color)
+            ):
+                if key in self.colors:
+                    self.colors[key] = color
+                else:
+                    raise ValueError(str(key) + " relationship is not in graph.")
+            else:
+                raise ValueError(
+                    "Desired color for "
+                    + str(key)
+                    + "  is not in (int, int, int) format."
+                )
 
 
 """
