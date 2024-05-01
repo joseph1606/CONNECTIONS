@@ -12,7 +12,7 @@ http://vegetable.cs.umd.edu:3000/
 npm, python3, and pip installed on your local machine.
 
 ### Step 1
-Clone the repository to your local machine and open a terminal starting at the repository root (new_connections). From there, cd into nc-code-editor and run npm start.
+Clone the repository to your local machine and open a terminal starting at the repository root (new_connections). From there, cd into nc-code-editor.
 ```console
 $ cd nc-code-editor
 ```
