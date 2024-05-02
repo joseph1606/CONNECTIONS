@@ -56,11 +56,11 @@ def parseData(csv):
         # Loops through all relationships given in current cell
         x = 0
         while x < len(currkey):
-            key = currkey[x].strip()
+            key = currkey[x].strip().replace("$comma$", ',')
             if key.isspace() or not key: #if the key is empty or whitespace an error occurs
                 raise ValueError(ERR_UNEVEN_VALUES)
             
-            value = currvalue[x].strip()
+            value = currvalue[x].strip().replace("$comma$", ',')
             if value.isspace() or not value: #if the value is empty or whitespace an error occurs
                 raise ValueError(ERR_UNEVEN_VALUES)
             
@@ -69,12 +69,12 @@ def parseData(csv):
                    
                 author_info = dict()
 
-                author_info[key] = value
+                author_info[key] = value.replace("$comma$", ',')
 
                 # Gets author url
                 x = x + 1
                 key = currkey[x]
-                value = currvalue[x]
+                value = currvalue[x].replace("$comma$", ',')
                 if key != 'AUTHORURL':
                     raise ValueError(ERR_AUTHOR_FORMAT)
                 author_info[key] = value
@@ -82,7 +82,7 @@ def parseData(csv):
                 # Gets author aliases
                 x = x + 1
                 key = currkey[x]
-                value = currvalue[x]
+                value = currvalue[x].replace("$comma$", ',')
                 if key != 'AUTHORALIASES':
                     raise ValueError(ERR_AUTHOR_FORMAT)
                 if value == 'None':
@@ -96,7 +96,7 @@ def parseData(csv):
                 x = x + 1
                 if x < len(currkey):
                     key = currkey[x]
-                    value = currvalue[x]
+                    value = currvalue[x].replace("$comma$", ',')
                 else:
                     key = ''
                     value = ''
@@ -132,7 +132,7 @@ def parseData(csv):
                     x = x + 1
                     if x < len(currkey):
                         key = currkey[x]
-                        value = currvalue[x]
+                        value = currvalue[x].replace("$comma$", ',')
                     else:
                         key = ''
                         value = ''
