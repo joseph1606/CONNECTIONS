@@ -22,6 +22,7 @@ def CreateGraph(csv: str = None):
     # case when we need to create nodes from a csv file
     if csv:
         (names1, names2, attributes) = parseData(csv)
+        papers = dict()
 
         if names2 is None:
 
@@ -39,12 +40,12 @@ def CreateGraph(csv: str = None):
                         directed_to_do.append((name, k, directed_list[k]))
 
                 if attribute != {}:
-                    create_graph_helper(graph, name, attribute)
+                    (node, papers) = create_graph_helper(graph, name, attribute, papers)
 
             # Sets up all directed relationships
             for name1, name2, directed_dict in directed_to_do:
-                node1 = create_graph_helper(graph, name1, {})
-                node2 = create_graph_helper(graph, name2, {})
+                (node1, papers) = create_graph_helper(graph, name1, {}, papers)
+                (node2, papers) = create_graph_helper(graph, name2, {}, papers)
                 create_graph_directed_helper(graph, directed_dict, node1, node2)
 
         else:
@@ -56,8 +57,8 @@ def CreateGraph(csv: str = None):
                     # stores the tuple of relationship values (like Mentor,Mentee)
                     directed_dict = attribute.pop(DIRECTED_CSV)
 
-                node1 = create_graph_helper(graph, name1, attribute)
-                node2 = create_graph_helper(graph, name2, attribute)
+                (node1, papers) = create_graph_helper(graph, name1, attribute, papers)
+                (node2, papers) = create_graph_helper(graph, name2, attribute, papers)
 
                 create_graph_directed_helper(graph, directed_dict, node1, node2)
 
@@ -560,7 +561,7 @@ def common_ids(list_of_lists):
 
 
 # helper function to create graphs -> uses link_nodes which is needed
-def create_graph_helper(graph: Graph, name: str, attribute: dict):
+def create_graph_helper(graph: Graph, name: str, attribute: dict, all_papers: dict):
 
     named_nodes = graph.search_named_nodes(name)
 
@@ -571,10 +572,16 @@ def create_graph_helper(graph: Graph, name: str, attribute: dict):
         if "AUTHORINFO" in attribute:
             info = attribute.pop("AUTHORINFO")
             papers = []
+
             for p in info["PAPERS"]:
-                papers.append(
-                    PaperNode(title=p[0], year=p[1], authors=p[2], authorIds=p[3])
-                )
+                if p[0] in list(all_papers.keys()):
+                    papers.append(all_papers[p[0]])
+                else:
+                    new_paper = PaperNode(
+                        title=p[0], year=p[1], authors=p[2], authorIds=p[3]
+                    )
+                    papers.append(new_paper)
+                    all_papers[p[0]] = new_paper
 
             attribute[COAUTHOR] = papers
 
@@ -596,7 +603,7 @@ def create_graph_helper(graph: Graph, name: str, attribute: dict):
         node = graph.update_node(named_nodes[0], attribute)
         link_nodes(graph, node, attribute)
 
-    return node
+    return (node, all_papers)
 
 
 def create_graph_directed_helper(graph, directed_dict, node1, node2):
@@ -919,8 +926,8 @@ def paper_string(papers) -> str:
     return title + "\n"
 
 
-def Save(graph, filePath):
-    nodes = list(graph.nodes.values())
+def saveData(graph, filePath):
+    nodes = graph.get_nodes()
     directed = graph.directed
     names = list()
     attributes = list()
@@ -932,7 +939,7 @@ def Save(graph, filePath):
             authors.append(node)
         else:
             if node.getAttributes() != {}:
-                names.append(node.getName())
+                names.append(node.getName().replace(",", "$comma$"))
                 attributes.append(node.getAttributes())
 
     # Formats non author data in the correct way
@@ -952,8 +959,8 @@ def Save(graph, filePath):
                 keys_to_save.append(keyslist[y])
                 values_to_save.append(valuelist[y][z])
 
-        ks.append(",".join(keys_to_save))
-        vs.append(",".join(values_to_save))
+        ks.append(keys_to_save)
+        vs.append(values_to_save)
 
     # Saves author nodes
     for x in authors:
@@ -1006,8 +1013,8 @@ def Save(graph, filePath):
                     values_to_save.append(valuelist[y][z])
 
         names.append(x.getName())
-        ks.append(",".join(keys_to_save))
-        vs.append(",".join(values_to_save))
+        ks.append(keys_to_save)
+        vs.append(values_to_save)
 
     # Saves all directed relationships
     for node1, node2 in directed:
@@ -1019,8 +1026,19 @@ def Save(graph, filePath):
             values_to_save.append(node2.name + "/" + rel1 + "/" + rel2)
             keys_to_save.append(DIRECTED_CSV)
 
-        ks.append(",".join(keys_to_save))
-        vs.append(",".join(values_to_save))
+        ks.append(keys_to_save)
+        vs.append(values_to_save)
+
+    # Cleanses strings such that commas dont break loading
+    for k in range(len(ks)):
+        for cell in range(len(ks[k])):
+            ks[k][cell] = ks[k][cell].replace(",", "$comma$")
+        ks[k] = ",".join(ks[k])
+
+    for v in range(len(vs)):
+        for cell in range(len(vs[v])):
+            vs[v][cell] = vs[v][cell].replace(",", "$comma$")
+        vs[v] = ",".join(vs[v])
 
     # Puts all data into a dictionary
     data["Person 1"] = names
