@@ -926,7 +926,7 @@ def paper_string(papers) -> str:
     return title + "\n"
 
 
-def saveData(graph, filePath):
+def Save(graph, filePath):
     nodes = graph.get_nodes()
     directed = graph.directed
     names = list()
