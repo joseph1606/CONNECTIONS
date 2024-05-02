@@ -47,7 +47,6 @@ def CreateGraph(csv: str = None):
                 node2 = create_graph_helper(graph, name2, {})
                 create_graph_directed_helper(graph, directed_dict, node1, node2)
 
-
         else:
             for name1, name2, attribute in zip(names1, names2, attributes):
 
@@ -64,6 +63,7 @@ def CreateGraph(csv: str = None):
 
     graph.generateColors()
     return graph
+
 
 def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
     """
@@ -319,8 +319,6 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
     for node in nodes1:
         if isinstance(node, AuthorNode):
             names = [node.name] + node.aliases
-            if "Sarah Stone" in names:
-                print(node.paper_list(), 2)
             for name in names:
                 if name in collision_dict:
                     if node not in collision_dict[name]:
@@ -338,8 +336,7 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
     for node in nodes2:
         if isinstance(node, AuthorNode):
             names = [node.name] + node.aliases
-            if "Sarah Stone" in names:
-                print(node.paper_list(), 1)
+
             for name in names:
                 if name in collision_dict:
                     if node not in collision_dict[name]:
@@ -575,17 +572,24 @@ def create_graph_helper(graph: Graph, name: str, attribute: dict):
             info = attribute.pop("AUTHORINFO")
             papers = []
             for p in info["PAPERS"]:
-                papers.append(PaperNode(title=p[0], year=p[1], authors=p[2], authorIds=p[3]))
-            
+                papers.append(
+                    PaperNode(title=p[0], year=p[1], authors=p[2], authorIds=p[3])
+                )
+
             attribute[COAUTHOR] = papers
 
-        
-            node = graph.add_ssnode(name, attribute, info["AUTHORALIASES"], info["AUTHORID"], info["AUTHORURL"], papers)
+            node = graph.add_ssnode(
+                name,
+                attribute,
+                info["AUTHORALIASES"],
+                info["AUTHORID"],
+                info["AUTHORURL"],
+                papers,
+            )
             link_nodes(graph, node, attribute)
         else:
             node = graph.add_node(name, attribute)
             link_nodes(graph, node, attribute)
-
 
     # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
     else:
@@ -602,7 +606,6 @@ def create_graph_directed_helper(graph, directed_dict, node1, node2):
 
     if directed_dict:  # and (node1 != node2):
         edge_list = graph.search_edge(node1, node2)
-
 
         if not edge_list:
             edge = graph.add_edge(node1, node2, {})
@@ -626,7 +629,6 @@ def create_graph_directed_helper(graph, directed_dict, node1, node2):
                 tuple_list_rev = (tuple_rel[1], tuple_rel[0])
                 edge.addDirected(tuple_list_rev)
                 graph.add_directed(node2, node1, tuple_list_rev)
-
 
 
 # essentially updates relationships dict and edge information
@@ -855,7 +857,7 @@ def titelize_node(node) -> str:
         directed_title != "--DIRECTED RELATIONSHIPS--\n"
         and attribute_title != "--ATTRIBUTES--\n"
     ):
-        return directed_title + "\n\n" + attribute_title
+        return directed_title + "\n" + attribute_title
     elif directed_title != "--DIRECTED RELATIONSHIPS--\n":
         return directed_title
     else:
@@ -900,8 +902,8 @@ def titelize_edge(edge: Edge) -> str:
                 for paper in v:
                     attribute_title += paper.title + "\n"
 
-    if len(directed_title) != 0 and len(attribute_title) != 0:
-        return directed_title + "\n\n" + attribute_title
+    if len(directed_title) != 0 and attribute_title != "--SHARED ATTRIBUTES--\n":
+        return directed_title + "\n" + attribute_title
     elif len(directed_title) != 0:
         return directed_title
     else:
@@ -909,15 +911,17 @@ def titelize_edge(edge: Edge) -> str:
 
 
 def paper_string(papers) -> str:
-    title = "--PAPERS--\n"
+    title = "\n--PAPERS--\n"
 
     for paper in papers:
         title += paper.title + ": " + str(paper.year) + "\n"
 
-    return title
+    return title + "\n"
 
 
-def saveData(nodes, directed, filePath):
+def Save(graph, filePath):
+    nodes = list(graph.nodes.values())
+    directed = graph.directed
     names = list()
     attributes = list()
     authors = list()
@@ -927,10 +931,9 @@ def saveData(nodes, directed, filePath):
         if type(node) is AuthorNode:
             authors.append(node)
         else:
-            if(node.getAttributes() != {}):
+            if node.getAttributes() != {}:
                 names.append(node.getName())
                 attributes.append(node.getAttributes())
-
 
     # Formats non author data in the correct way
     data = dict()
@@ -949,9 +952,8 @@ def saveData(nodes, directed, filePath):
                 keys_to_save.append(keyslist[y])
                 values_to_save.append(valuelist[y][z])
 
-        ks.append(','.join(keys_to_save))
-        vs.append(','.join(values_to_save))
-        
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
 
     # Saves author nodes
     for x in authors:
@@ -964,26 +966,34 @@ def saveData(nodes, directed, filePath):
         keys_to_save.append("AUTHORALIASES")
         if x.aliases == []:
             values_to_save.append("None")
-        else:            
-            values_to_save.append('/'.join(x.aliases))         
+        else:
+            values_to_save.append("/".join(x.aliases))
 
         # Saves paper nodes
         for i in range(len(x.papers)):
             keys_to_save.append("PAPER")
-            paper_authors = "None" 
-            paper_IDs = "None" 
+            paper_authors = "None"
+            paper_IDs = "None"
 
             if x.papers[i].authors != []:
                 paperlist = x.papers[i].authors
                 cleansedlist = list()
                 for q in paperlist:
                     cleansedlist.append(q[0])
-                paper_authors = '#'.join(cleansedlist)
+                paper_authors = "#".join(cleansedlist)
 
             if x.papers[i].authorIds != []:
-                paper_IDs = '#'.join(x.papers[i].authorIds)
+                paper_IDs = "#".join(x.papers[i].authorIds)
 
-            paper_value = x.papers[i].title + "/" + str(x.papers[i].year) + "/" + paper_authors + "/" + paper_IDs
+            paper_value = (
+                x.papers[i].title
+                + "/"
+                + str(x.papers[i].year)
+                + "/"
+                + paper_authors
+                + "/"
+                + paper_IDs
+            )
             values_to_save.append(paper_value)
 
         # Saves any non-author data in an author node
@@ -991,33 +1001,31 @@ def saveData(nodes, directed, filePath):
         valuelist = list(x.getAttributes().values())
         for y in range(len(valuelist)):
             for z in range(len(valuelist[y])):
-                if(keyslist[y] != COAUTHOR):
+                if keyslist[y] != COAUTHOR:
                     keys_to_save.append(keyslist[y])
                     values_to_save.append(valuelist[y][z])
 
-
         names.append(x.getName())
-        ks.append(','.join(keys_to_save))
-        vs.append(','.join(values_to_save))
-
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
 
     # Saves all directed relationships
-    for (node1, node2) in directed:
-        rel = directed[(node1,node2)]
+    for node1, node2 in directed:
+        rel = directed[(node1, node2)]
         names.append(node1.name)
         keys_to_save = []
         values_to_save = []
-        for rel1,rel2 in rel:
+        for rel1, rel2 in rel:
             values_to_save.append(node2.name + "/" + rel1 + "/" + rel2)
             keys_to_save.append(DIRECTED_CSV)
 
-        ks.append(','.join(keys_to_save))
-        vs.append(','.join(values_to_save))
+        ks.append(",".join(keys_to_save))
+        vs.append(",".join(values_to_save))
 
     # Puts all data into a dictionary
     data["Person 1"] = names
-    data['Relationship'] = ks
-    data['Relationship Value'] = vs
+    data["Relationship"] = ks
+    data["Relationship Value"] = vs
 
     # Saves dictionary to csv
     pandas_df = pandas.DataFrame(data)
