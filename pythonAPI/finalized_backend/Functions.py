@@ -72,7 +72,7 @@ def CreateGraph(csv: str = None):
     return graph
 
 
-def SemanticSearch(author_name: str, choice: int = 1, numpapers: int = 5):
+def SemanticGraph(author_name: str, choice: int = 1, numpapers: int = 5):
     """
     coauthors_dict:
     PaperNode1: [list of AuthorNodes]
@@ -1085,5 +1085,8 @@ def Save(graph: Graph):
     df = dd.from_pandas(pandas_df, npartitions=1)
     caller_frame = inspect.currentframe().f_back
     obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
+    filepath = f"{os.getcwd()}/csv_list/{global_vars.session_id}"
+    if not os.path.exists(filepath):
+        os.makedirs(filepath)
     print(f"{obj_name}.csv")
-    df.compute().to_csv(f"{os.getcwd()}/csv_list/{global_vars.session_id}/{obj_name}.csv", index=False)
+    df.compute().to_csv(f"{filepath}/{obj_name}.csv", index=False)
