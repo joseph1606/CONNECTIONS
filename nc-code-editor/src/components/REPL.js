@@ -495,7 +495,7 @@ const REPL = () => {
                     payload['code'] = prevInputs.join('\n') + '\n' + str;
                 }
                 /* contacting API for code compilation */
-                console.log(payload);
+                //console.log(payload);
                 try {
                     const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
                     const compiledError = resp.data.error;
@@ -604,7 +604,7 @@ const REPL = () => {
                     }}>
                         <button id='editorbtn' onClick={editor} style={{ backgroundColor: 'darkgray', borderRadius: '5%' }}>Editor</button>
                         <button id='databtn' onClick={viewData}>View File Data</button>
-                        <button id='outputbtn' onClick={viewOutput}>Output</button>
+                        <button id='outputbtn' onClick={viewOutput} >Output</button>
                     </div>
                     <div id="terminal-loader">
                         <div className="terminal-header">
@@ -657,7 +657,7 @@ const REPL = () => {
                         </div>
                     </div>
                     <div>
-                        <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh' }}>
+                        <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh', display: 'none', visibility: 'collapse' }}>
                             <p id='blankinput' style={{ margin: 'auto', fontSize: '30px' }}>Files you input will appear here</p>
                             <thead>
                                 {(() => {
@@ -709,7 +709,7 @@ const REPL = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
+                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black', display: 'none', visibility: 'collapse' }}>
                         <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
 
                         </iframe>
