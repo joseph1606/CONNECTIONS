@@ -18,6 +18,7 @@ const REPL = () => {
     const [tableData, setTableData] = useState([]);
     const [format, setFormat] = useState(0);
     const [outputhtml, setOutputhtml] = useState("<p>Your output will appear here</p>");
+    const [outputs, setOutputs] = useState({});
     const [files, setfiles] = useState({});
     const [windowSize, setWindowSize] = useState({
         width: window.innerWidth,
@@ -28,11 +29,22 @@ const REPL = () => {
 
 
     const viewFile = (file) => {
-        if (files[file['line']]) {
+        if (files[file['name']]) {
             setTableData([[], ...files[file['line']]['data']])
             setFormat(files[file['line']]['format'])
         }
         viewData()
+    }
+
+    const viewoldOutput = (name) => {
+        console.log(outputs[name['item']].content)
+        console.log(outputhtml == outputs[name['item']].content)
+        if (outputs[name['item']]) {
+            renderolddata(outputs[name['item']].content, '')
+        }
+
+        document.getElementById('outholder').scrollTop = '322';
+        document.getElementById('outholder').scrollLeft = '100';
     }
 
     const filecollapse = () => {
@@ -58,8 +70,8 @@ const REPL = () => {
     const editor = () => {
         document.getElementById('terminal-loader').style.visibility = 'visible';
         document.getElementById('terminal-loader').style.display = '';
-        document.getElementById('outputviewer').style.visibility = 'collpase';
-        document.getElementById('outputviewer').style.display = 'none';
+        document.getElementById('alloutput').style.visibility = 'collpase';
+        document.getElementById('alloutput').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'collpase';
         document.getElementById('dataviewer').style.display = 'none';
         document.getElementById('outputbtn').style.backgroundColor = '';
@@ -72,8 +84,8 @@ const REPL = () => {
     const viewData = () => {
         document.getElementById('terminal-loader').style.visibility = 'collpase';
         document.getElementById('terminal-loader').style.display = 'none';
-        document.getElementById('outputviewer').style.visibility = 'collpase';
-        document.getElementById('outputviewer').style.display = 'none';
+        document.getElementById('alloutput').style.visibility = 'collpase';
+        document.getElementById('alloutput').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'visible';
         document.getElementById('dataviewer').style.display = '';
         document.getElementById('outputbtn').style.backgroundColor = '';
@@ -88,8 +100,8 @@ const REPL = () => {
         document.getElementById('terminal-loader').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'collpase';
         document.getElementById('dataviewer').style.display = 'none';
-        document.getElementById('outputviewer').style.visibility = 'visible';
-        document.getElementById('outputviewer').style.display = '';
+        document.getElementById('alloutput').style.visibility = 'visible';
+        document.getElementById('alloutput').style.display = '';
         document.getElementById('databtn').style.backgroundColor = '';
         document.getElementById('editorbtn').style.backgroundColor = '';
         document.getElementById('outputbtn').style.backgroundColor = 'darkgrey';
@@ -216,7 +228,37 @@ const REPL = () => {
         const htmlContent = `
         <!DOCTYPE html>
         ${htmlData}`;
+        setOutputhtml(htmlContent);
+        setOutputs({ ...outputs, [graphName]: { content: htmlContent } });
+        document.getElementById('outholder').scrollTop = '322';
+        document.getElementById('outholder').scrollLeft = '100';
 
+    };
+
+    const renderolddata = async (htmlData, graphName) => {
+        // adds a title of the graph name on the window
+
+        const i = htmlData.indexOf("<head>");
+        htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
+
+        // Fetch script content using Axios
+        const utilsScript = await axios.get('http://127.0.0.1:5000/scripts/bindings/utils.js');
+        const tomSelectCSS = await axios.get('http://127.0.0.1:5000/scripts/tom-select/tom-select.css');
+        const tomSelectScript = `<script 
+                                    src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/js/tom-select.complete.min.js" 
+                                    integrity="sha512-/ThRxlSqzRzFRVNByE+IzvT7iZTAtrAr5Xkk9As+xsDRYvsnPBQbYjG5z4vaJFNaWjBEnSRxICQw5t/mUmJ6Kw==" 
+                                    crossorigin="anonymous" 
+                                    referrerpolicy="no-referrer"></script>`;
+
+        htmlData = htmlData.replace('<script src="lib/bindings/utils.js"></script>', `<script>${utilsScript.data}</script>`);
+        htmlData = htmlData.replace('<link href="lib/tom-select/tom-select.css" rel="stylesheet">', `<style>${tomSelectCSS.data}</style>`);
+        htmlData = htmlData.replace('<script src="lib/tom-select/tom-select.complete.min.js"></script>', `${tomSelectScript}`);
+
+        viewOutput();
+
+        const htmlContent = `
+        <!DOCTYPE html>
+        ${htmlData}`;
         setOutputhtml(htmlContent);
         document.getElementById('outholder').scrollTop = '322';
         document.getElementById('outholder').scrollLeft = '100';
@@ -709,10 +751,16 @@ const REPL = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
-                        <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden', display: 'none', visibility: 'collapse' }} srcDoc={outputhtml} title="my-iframe">
-
-                        </iframe>
+                    <div id='alloutput'>
+                        <div id='outputlist' style={{ height: '60px', borderTop: '2px solid black', borderLeft: '2px solid black', borderRight: '2px solid black', width: '90%', paddingLeft: '5px' }}>
+                            <h2>View Outputs: </h2>
+                            {Object.keys(outputs).map((item, index) => (
+                                <button style={{ height: '25px', marginLeft: '5px' }} onClick={() => { viewoldOutput({ item }) }}>{item}</button>
+                            ))}</div>
+                        <div id='outholder' style={{ position: 'relative', width: '90%', height: '87%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
+                            <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
+                            </iframe>
+                        </div>
                     </div>
                 </div>
             </div>

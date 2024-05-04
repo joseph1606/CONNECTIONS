@@ -45,18 +45,11 @@ function Header() {
             <h4 onMouseOver={funcpopup} id='select' style={{ outline: '2px solid grey', marginLeft: '10%', marginRight: '10%', backgroundColor: 'white' }}>Select Function:</h4>
             <div id="funclist" onMouseOver={funcpopup} style={{ visibility: 'hidden', backgroundColor: 'whitesmoke', border: '1px solid grey', padding: '2px', height: '150%', position: 'absolute', width: '98%', left: '1%' }}>
               <div className="funclistitem">
-                <h5 onClick={() => fillinfo(addnodes)}>AddNodes():</h5>
-                <h5 onClick={() => fillinfo(graphdesc)}>CreateGraph():</h5> </div>
-              <h5 onClick={() => fillinfo(collisiondesc)}>Collision():</h5>
-              <h5 onClick={() => fillinfo(mergedesc)}>MergeGraph():</h5>
-              <h5 onClick={() => fillinfo(filterdesc)}>FilterGraph():</h5>
-              <h5 onClick={() => fillinfo(shortestpathdesc)}>ShortestPath():</h5>
-              <h5 onClick={() => fillinfo(getnodesdesc)}>GetNodes():</h5>
-              <h5 onClick={() => fillinfo(visdesc)}>Vis():</h5>
-              <h5 onClick={() => fillinfo(savedesc)}>Save():</h5>
-              <h5 onClick={() => fillinfo(networkx)}>Networkx():</h5>
-              <h5 onClick={() => fillinfo(subgraphdesc)}>SubGraph():</h5>
-              <h5 onClick={() => fillinfo(semanticgraphdesc)}>SemanticGraph():</h5>
+                {functionDescriptions.map((funcdesc, index) => (
+                  <h5 onClick={() => fillinfo(funcdesc)}>{funcdesc[0]}</h5>
+                ))}
+
+              </div>
             </div>
           </div>
           <div id='funcinfo' style={{ borderRadius: '10%', margin: '5px' }}>
@@ -87,9 +80,24 @@ function fillinfo(info) {
   document.getElementById('select').style.backgroundColor = 'white';
 }
 
+/*
+
+                <h5 onClick={() => fillinfo(addnodes)}>AddNodes():</h5>
+                <h5 onClick={() => fillinfo(graphdesc)}>CreateGraph():</h5>
+                <h5 onClick={() => fillinfo(collisiondesc)}>Collision():</h5>
+                <h5 onClick={() => fillinfo(mergedesc)}>MergeGraph():</h5>
+                <h5 onClick={() => fillinfo(filterdesc)}>FilterGraph():</h5>
+                <h5 onClick={() => fillinfo(shortestpathdesc)}>ShortestPath():</h5>
+                <h5 onClick={() => fillinfo(getnodesdesc)}>GetNodes():</h5>
+                <h5 onClick={() => fillinfo(visdesc)}>Vis():</h5>
+                <h5 onClick={() => fillinfo(savedesc)}>Save():</h5>
+                <h5 onClick={() => fillinfo(networkx)}>Networkx():</h5>
+                <h5 onClick={() => fillinfo(subgraphdesc)}>SubGraph():</h5>
+                <h5 onClick={() => fillinfo(semanticgraphdesc)}>SemanticGraph():</h5>
+
 const graphdesc = [
-  'CreateGraph()', ['filename.csv'],
-  "The CreateGraph function constructs a graph object. If a CSV file is provided as input, the function generates nodes based on the CSV data. It first checks if the CSV file exists and then parses the data, creating nodes accordingly. If the CSV contains pairs of names, it creates nodes for each pair. Otherwise, it creates nodes for each entry. After creating the nodes, the function generates colors for the graph before returning it. In case of no input, the function creates an empty graph, allowing users to add nodes using the AddNodes method. If an invalid CSV name is provided, the function raises a ValueError."
+  'CreateGraph()', ['(csv: str = None) -> Graph'],
+  "This function creates a new graph object, optionally populated with nodes and edges from a CSV file. It takes an optional parameter csv (string) representing the path to the CSV file containing node data. If no parameter was passed, an empty graph will be created."
 ]
 const semanticgraphdesc = ['SemanticGraph()', [
   "author name",
@@ -133,4 +141,112 @@ const addnodes = [
 const networkx = [
   'Networkx()', ['graph'],
   "This function accepts a graph and converts it to a networkx object (which can be used for visualization) that it then returns."
+]*/
+const semanticgraphdesc = [
+  'SemanticGraph',
+  '(author_name: str, choice: int = 1, numpapers: int = 5) -> Graph',
+  "This function generates a graph representing the collaboration network of an author based on Semantic Scholar data. It takes an author's name as a string (author_name), an optional integer choice that determines the particular author to select (default is 1), and an optional integer numpapers representing the number of papers to consider (default is 5)."
 ]
+
+const addnodesdesc = [
+  'AddNodes',
+  '(graph: Graph, nodes_list: List[Node]) -> Graph',
+  "This function adds nodes to an existing graph object. It takes a graph object (Graph) representing the target graph and a list of nodes_list (list[Node]) representing the nodes to be added to the target graph."
+]
+
+const subgraphdesc = [
+  'SubGraph',
+  '(graph: Graph, chosen_node: Node) -> Graph',
+  "This function creates a subgraph from an existing graph centered around a chosen node. It takes a graph object (Graph) representing the original graph and a chosen_node (Node) representing the center node of the subgraph."
+]
+
+const filtergraphdesc = [
+  'FilterGraph',
+  '(graph: Graph, attributes: Dict[str: List[str]] = None, lamb = None) -> Graph',
+  "This function filters nodes based on attributes or custom logic. It takes a graph object (graph), an optional dictionary of attributes (attributes), and an optional function (lamb). If attributes are given, it returns a new graph with nodes matching those attributes. If the optional function is provided, it filters nodes based on custom logic."
+]
+
+const collisiondesc = [
+  'Collision',
+  '(graph1: Graph, graph2: Graph, list_return: bool = False) -> Optional[List[List[Node]],  Dict[str: List[Node]]',
+  "This function identifies nodes in two graphs that have the same name. It takes two graph objects (graph1 and graph2) and an optional list_return (boolean) parameter indicating whether to return a list of collisions or a dictionary of collisions."
+]
+
+const collisionlistdesc = [
+  'CollisionList',
+  '(Dict[str: List[Node]) -> Optional[List[Tuple[Node]]]',
+  "This function returns a list of collision pairs identified by the Collision() function. It takes a dictionary of names paired with a list of nodes with that name."
+]
+
+const mergegraphdesc = [
+  'MergeGraph',
+  '(graph1: Graph, graph2: Graph, merge_list: List[Tuple[Node, Node]]) -> Graph',
+  "This function merges nodes from two graphs based on a specified merge list. It takes two graph objects (graph1 and graph2) and an optional merge_list (list) parameter specifying the nodes to be merged and returns the merged graph."
+]
+
+const getnodesdesc = [
+  'GetNodes',
+  '(graph: Graph) -> List[Node]',
+  "This function retrieves a list of nodes from a graph. It takes a graph object (Graph) as input."
+]
+
+const nodefromgraphdesc = [
+  'NodeFromGraph',
+  '(graph: Graph, name: str) -> Optional[Node, List[Node]]',
+  "This function retrieves a node from a graph based on its name. It takes a graph object (Graph) and a name (str) representing the name of the node. If only one node in the graph has that name, it returns that node. Otherwise, it returns a list of nodes with that name."
+]
+
+const namesingraphdesc = [
+  'NamesInGraph',
+  '(graph: Graph) -> List[str]',
+  "This function returns a sorted list of unique node names present in a graph. It takes a graph object (Graph) as input."
+]
+
+const shortestpathdesc = [
+  'ShortestPath',
+  '(source: Node, target: Node, graph: Graph) -> List[Node]',
+  "This function calculates the shortest path between two nodes in a graph. It takes three parameters: a source node (Node), a target node (Node), and a graph object (Graph) and returns a list of the path of the nodes."
+]
+
+const visdesc = [
+  'Vis',
+  '(graph: Graph) -> None',
+  "This function generates a visualization of a graph using the Pyvis library. It takes a graph object (Graph) as input."
+]
+
+const updatenodeattributesdesc = [
+  'UpdateNodeAttributes',
+  '(graph: Graph, node: Node, attributes: Dict[str, List[str]]) -> None',
+  "This function updates the attributes of a node in a graph. It takes three parameters: a graph object (Graph), a node (Node) belonging to the passed graph object whose attributes are to be updated, and an attributes (dict) parameter representing the new attributes."
+]
+
+const nodecentralitydesc = [
+  'NodeCentrality',
+  '(graph: Graph, node: Node) -> float',
+  "This function calculates the centrality of a node in a graph. It takes two parameters: a graph object (Graph) and a node (Node) whose centrality is to be calculated."
+]
+
+const savedatadesc = [
+  'SaveData',
+  '(nodes: List[Node], filePath: str) -> None',
+  "This function saves node and relationship data from a list of nodes to a CSV file. It takes two parameters: a list of nodes and a filePath (str) representing the path to save the CSV file."
+]
+
+
+const functionDescriptions = [
+  semanticgraphdesc,
+  addnodesdesc,
+  subgraphdesc,
+  filtergraphdesc,
+  collisiondesc,
+  collisionlistdesc,
+  mergegraphdesc,
+  getnodesdesc,
+  nodefromgraphdesc,
+  namesingraphdesc,
+  shortestpathdesc,
+  visdesc,
+  updatenodeattributesdesc,
+  nodecentralitydesc,
+  savedatadesc
+];
