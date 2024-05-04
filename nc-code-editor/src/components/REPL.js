@@ -709,8 +709,8 @@ const REPL = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black', display: 'none', visibility: 'collapse' }}>
-                        <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
+                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
+                        <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden', display: 'none', visibility: 'collapse' }} srcDoc={outputhtml} title="my-iframe">
 
                         </iframe>
                     </div>
