@@ -231,6 +231,12 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
         # get all nodes with relationships and relationship values desired in attributes parameter
         for attr, attr_list in attributes.items():  # "age": "21"
+            if attr not in graph.relationships:
+                raise ValueError(
+                    'Desired attribute filter "'
+                    + str(attr)
+                    + "\" is not in graph's stored relationships."
+                )
 
             attr = attr.title()
 
