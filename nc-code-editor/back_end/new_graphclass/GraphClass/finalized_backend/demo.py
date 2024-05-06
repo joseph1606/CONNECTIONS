@@ -9,21 +9,18 @@ ed_g = SemanticSearch("Ed Lazowska", 1)
 pur_g = SemanticSearch("James Purtilo", 1)
 
 col_list = Collision(ed_g, pur_g, True)
-
 merged = MergeGraph(ed_g, pur_g, col_list)
-
+# Vis(merged)
+# for node in c2["R. Fatland"]:
+#    print(node.name, node.aliases)
 # Vis(merged)
 # THIS IS NEW FOR DEMO
+
 demo_g = CreateGraph("demo.csv")
 col_list = Collision(demo_g, merged, True)
-
 merged = MergeGraph(demo_g, merged, col_list)
 
-#Vis(merged)
-ed = NodeFromGraph(merged, "Edward D. Lazowska")
-fbi = NodeFromGraph(merged, "FBI")
+Save(merged, "demo2.csv")
 
-sp = ShortestPath(ed, fbi, merged)
-
-sp_g = AddNodes(CreateGraph(), sp)
-Vis(sp_g)
+demo2 = CreateGraph("demo2.csv")
+Vis(merged)
