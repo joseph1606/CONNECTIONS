@@ -33,7 +33,7 @@ def fetch_author(query):
 
     except requests.exceptions.RequestException as e:
         time.sleep(5)
-        raise ConnectionError(f"HeyyyError fetching data: SemanticScholarAPI could not be reached. Please try again shortly.")
+        raise ConnectionError(f"Error fetching data: SemanticScholarAPI could not be reached. Please try again shortly.")
         # print(f"Error fetching data: {e}")
         # return None
 
