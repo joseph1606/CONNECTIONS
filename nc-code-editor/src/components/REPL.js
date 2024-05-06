@@ -19,6 +19,8 @@ const REPL = () => {
     const [format, setFormat] = useState(0);
     const [outputhtml, setOutputhtml] = useState("<p>Your output will appear here</p>");
     const [outputs, setOutputs] = useState({});
+    const [outputcount, setOutputcount] = useState(1);
+    const [currentoutput, setcurrOutput] = useState('');
     const [files, setfiles] = useState({});
     const [windowSize, setWindowSize] = useState({
         width: window.innerWidth,
@@ -38,14 +40,31 @@ const REPL = () => {
     }
 
     const viewoldOutput = (name) => {
-        console.log(outputs[name['item']].content)
-        console.log(outputhtml == outputs[name['item']].content)
+        //console.log(outputs[name['item']].content)
+        //console.log(outputhtml == outputs[name['item']].content)
         if (outputs[name['item']]) {
             renderolddata(outputs[name['item']].content, '')
         }
-
+        setcurrOutput(name['item'])
         document.getElementById('outholder').scrollTop = '322';
         document.getElementById('outholder').scrollLeft = '100';
+    }
+
+    const removeOutput = (name) => {
+        if (currentoutput == name['item']) {
+            setOutputhtml("<p>Your output will appear here</p>")
+        } /*else {
+            console.log(currentoutput)
+            console.log(name['item'])
+        }*/
+        let newdict = Object.keys(outputs).filter(objKey =>
+            objKey !== name['item']).reduce((newObj, key) => {
+                newObj[key] = outputs[key];
+                return newObj;
+            }, {}
+            );
+
+        setOutputs(newdict)
     }
 
     const filecollapse = () => {
@@ -259,7 +278,10 @@ const REPL = () => {
         <!DOCTYPE html>
         ${htmlData}`;
         setOutputhtml(htmlContent);
-        setOutputs({ ...outputs, [('Output ' + (Object.keys(outputs).length + 1).toString() + ': "' + graphName + '"')]: { content: htmlContent } });
+        setOutputcount(outputcount + 1)
+        let name = ('Output ' + outputcount.toString() + ': "' + graphName + '"');
+        setOutputs({ ...outputs, [name]: { content: htmlContent } });
+        setcurrOutput(name)
         document.getElementById('outholder').scrollTop = '322';
         document.getElementById('outholder').scrollLeft = '100';
 
@@ -782,11 +804,18 @@ const REPL = () => {
                         </table>
                     </div>
                     <div id='alloutput' style={{ fontFamily: 'Poppins' }}>
-                        <div id='outputlist' style={{ marginTop: '5px', height: '65px', borderTop: '2px solid black', borderLeft: '2px solid black', borderRight: '2px solid black', width: '90%', paddingLeft: '5px' }}>
+                        <div id='outputlist' style={{ marginTop: '5px', height: '75px', borderTop: '2px solid black', borderLeft: '2px solid black', borderRight: '2px solid black', width: '90%', paddingLeft: '5px' }}>
                             <h2>View Outputs: </h2>
-                            {Object.keys(outputs).map((item, index) => (
-                                <button style={{ height: '25px', marginLeft: '5px' }} onClick={() => { viewoldOutput({ item }) }}>{item}</button>
-                            ))}</div>
+                            <div style={{ display: 'flex' }}>
+                                {Object.keys(outputs).map((item, index) => (
+                                    <div style={{ border: '2px solid black', width: 'fit-content', marginLeft: '5px', padding: '2px', borderRadius: '10%', backgroundColor: 'lightgray' }}>
+                                        <button style={{ height: '25px' }} onClick={() => { viewoldOutput({ item }) }}>{item}</button>
+                                        <button style={{ height: '25px', marginLeft: '2px', backgroundColor: 'red' }} onClick={() => { removeOutput({ item }) }}>X</button>
+                                    </div>
+
+                                ))}
+                            </div>
+                        </div>
                         <div id='outholder' style={{ position: 'relative', width: '90%', height: '85%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
                             <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
                             </iframe>

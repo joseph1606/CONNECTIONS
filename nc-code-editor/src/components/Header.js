@@ -32,7 +32,7 @@ function funccheerdown() {
 function Header() {
   return <div>
     <div id='mainheader'>
-      <div style={{ display: 'flex', backgroundColor: "white", margin: '5px', border: '2px solid grey', borderRadius: '15px', fontFamily: 'bold', marginLeft: '.5vw', minWidth: '200px', alignItems: 'center', minHeight: '5vh' }}>
+      <div style={{ display: 'flex', backgroundColor: "white", margin: '5px', border: '2px solid grey', borderRadius: '15px', fontFamily: 'bold', marginLeft: '.5vw', minWidth: '300px', alignItems: 'center', minHeight: '5vh' }}>
         <img src={logo} alt="logo" style={{ padding: '5px', height: '6vh' }} />
         <h1 id='title' style={{ color: 'black', width: '9.5vw', fontSize: '2.5vh' }}>Connections</h1>
       </div>
