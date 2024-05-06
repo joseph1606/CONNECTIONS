@@ -55,7 +55,7 @@ class Graph:
     def add_node(self, name: str, attributes: dict):
         attributes = copy.deepcopy(attributes)
         node = Node(name, attributes)
-        self.nodes[node.getID()] = node
+        self.nodes[node.id] = node
         return node
 
     # updates a existing node

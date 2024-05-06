@@ -28,53 +28,46 @@ def CreateGraph(csv: str = None):
             raise ValueError(f"No uploaded csv with the name {csv} exists.")
         
         (names1, names2, attributes) = parseData(file_path)
+        papers = dict()
 
         if names2 is None:
+
+            directed_to_do = []
+
             # iterates through each row of inputs from csv
             for name, attribute in zip(names1, attributes):
-                create_graph_helper(graph, name, attribute)
+
+                if DIRECTED_CSV in attribute:
+                    # stores the tuple of relationship values (like Mentor,Mentee)
+                    directed_list = attribute.pop(DIRECTED_CSV)
+
+                    # Stores all directed relationships to be done after all nodes have been set up
+                    for k in directed_list:
+                        directed_to_do.append((name, k, directed_list[k]))
+
+                if attribute != {}:
+                    (node, papers) = create_graph_helper(graph, name, attribute, papers)
+
+            # Sets up all directed relationships
+            for name1, name2, directed_dict in directed_to_do:
+                (node1, papers) = create_graph_helper(graph, name1, {}, papers)
+                (node2, papers) = create_graph_helper(graph, name2, {}, papers)
+                create_graph_directed_helper(graph, directed_dict, node1, node2)
 
         else:
             for name1, name2, attribute in zip(names1, names2, attributes):
 
                 directed_dict = []
 
-                if DIRECTED in attribute:
+                if DIRECTED_CSV in attribute:
                     # stores the tuple of relationship values (like Mentor,Mentee)
-                    directed_dict = attribute.pop(DIRECTED)
+                    directed_dict = attribute.pop(DIRECTED_CSV)
 
-                node1 = create_graph_helper(graph, name1, attribute)
-                node2 = create_graph_helper(graph, name2, attribute)
+                (node1, papers) = create_graph_helper(graph, name1, attribute, papers)
+                (node2, papers) = create_graph_helper(graph, name2, attribute, papers)
 
-                # popping out directed will cause an issue if there is at least one new node (from the csv file) that only has a directed relationship with another node
-                # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
-                # as such we will need to create an edge between two said nodes
+                create_graph_directed_helper(graph, directed_dict, node1, node2)
 
-                if directed_dict:  # and (node1 != node2):
-                    edge_list = graph.search_edge(node1, node2)
-
-                    if not edge_list:
-                        edge = graph.add_edge(node1, node2, {})
-
-                    else:
-                        edge = edge_list[0]
-
-                    for tuple_rel in directed_dict:
-                        # update node1.directed
-                        node1.addDirected(node2, tuple_rel[1])
-
-                        # update node2.directed
-                        node2.addDirected(node1, tuple_rel[0])
-
-                        # need to consider the case when the edge has already been created and the nodes were switched
-                        if edge.node1 == node1:
-                            edge.addDirected(tuple_rel)
-                            graph.add_directed(node1, node2, tuple_rel)
-
-                        else:
-                            tuple_list_rev = (tuple_rel[1], tuple_rel[0])
-                            edge.addDirected(tuple_list_rev)
-                            graph.add_directed(node2, node1, tuple_list_rev)
     graph.generateColors()
     return graph
 
@@ -104,7 +97,7 @@ def SemanticGraph(author_name: str, choice: int = 1, numpapers: int = 5):
     for author in coauthor_list:
         author.attributes = {}
         author.attributes[COAUTHOR] = author.papers
-        ssgraph.nodes[author.getID()] = author
+        ssgraph.nodes[author.id] = author
 
         link_nodes(ssgraph, author, author.getAttributes())
 
@@ -335,7 +328,8 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
             names = [node.name] + node.aliases
             for name in names:
                 if name in collision_dict:
-                    collision_dict[name].append(node)
+                    if node not in collision_dict[name]:
+                        collision_dict[name].append(node)
                 else:
                     collision_dict[name] = [node]
         else:
@@ -349,9 +343,11 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
     for node in nodes2:
         if isinstance(node, AuthorNode):
             names = [node.name] + node.aliases
+
             for name in names:
                 if name in collision_dict:
-                    collision_dict[name].append(node)
+                    if node not in collision_dict[name]:
+                        collision_dict[name].append(node)
                 else:
                     collision_dict[name] = [node]
         else:
@@ -385,7 +381,6 @@ def Collision(graph1: Graph, graph2: Graph, list_return=False):
                             break
 
                 if len(replace_k) != 0:
-                    "THIS IS WHERE DELETING HAPPENS"
                     if replace_k != "ALREADY EXISTS":
                         del final_dict[replace_k]
                         final_dict[key] = value
@@ -572,21 +567,81 @@ def common_ids(list_of_lists):
 
 
 # helper function to create graphs -> uses link_nodes which is needed
-def create_graph_helper(graph: Graph, name: str, attribute: dict):
+def create_graph_helper(graph: Graph, name: str, attribute: dict, all_papers: dict):
 
     named_nodes = graph.search_named_nodes(name)
-    node = None
+
     # if empty -> no node with the name was found
     if not named_nodes:
-        node = graph.add_node(name, attribute)
+
+        # Sets up author nodes
+        if "AUTHORINFO" in attribute:
+            info = attribute.pop("AUTHORINFO")
+            papers = []
+
+            for p in info["PAPERS"]:
+                if p[0] in list(all_papers.keys()):
+                    papers.append(all_papers[p[0]])
+                else:
+                    new_paper = PaperNode(
+                        title=p[0], year=p[1], authors=p[2], authorIds=p[3]
+                    )
+                    papers.append(new_paper)
+                    all_papers[p[0]] = new_paper
+
+            attribute[COAUTHOR] = papers
+
+            node = graph.add_ssnode(
+                name,
+                attribute,
+                info["AUTHORALIASES"],
+                info["AUTHORID"],
+                info["AUTHORURL"],
+                papers,
+            )
+            link_nodes(graph, node, attribute)
+        else:
+            node = graph.add_node(name, attribute)
+            link_nodes(graph, node, attribute)
 
     # if node with the inputted name was found, it returns a list with one element for which we'll need to update attributes
     else:
         node = graph.update_node(named_nodes[0], attribute)
+        link_nodes(graph, node, attribute)
 
-    link_nodes(graph, node, attribute)
+    return (node, all_papers)
 
-    return node
+
+def create_graph_directed_helper(graph, directed_dict, node1, node2):
+    # popping out directed will cause an issue if there is at least one new node (from the csv file) that only has a directed relationship with another node
+    # this is because each node will have an empty attribute and therefore have no common attributes -> no common attributes means no edge will be created
+    # as such we will need to create an edge between two said nodes
+
+    if directed_dict:  # and (node1 != node2):
+        edge_list = graph.search_edge(node1, node2)
+
+        if not edge_list:
+            edge = graph.add_edge(node1, node2, {})
+
+        else:
+            edge = edge_list[0]
+
+        for tuple_rel in directed_dict:
+            # update node1.directed
+            node1.addDirected(node2, tuple_rel[1])
+
+            # update node2.directed
+            node2.addDirected(node1, tuple_rel[0])
+
+            # need to consider the case when the edge has already been created and the nodes were switched
+            if edge.node1 == node1:
+                edge.addDirected(tuple_rel)
+                graph.add_directed(node1, node2, tuple_rel)
+
+            else:
+                tuple_list_rev = (tuple_rel[1], tuple_rel[0])
+                edge.addDirected(tuple_list_rev)
+                graph.add_directed(node2, node1, tuple_list_rev)
 
 
 # essentially updates relationships dict and edge information
@@ -662,6 +717,31 @@ def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
     return node_sp
 
 
+def NamesInGraph(graph: Graph):
+    name_set = set()
+
+    for node_id, node in graph.nodes.items():
+        name_set.add(node.name)
+
+    return sorted(list(name_set))
+
+
+def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
+    # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    net = Networkx(graph)
+    sp = nx.shortest_path(net, source=source.id, target=target.id)
+
+    node_sp = []
+
+    for id in sp:
+        if id in graph.nodes:
+            node_sp.append(graph.nodes[id])
+        else:
+            raise ValueError("Networkx object and Graph object are not equivalent")
+
+    return node_sp
+
+
 # this takes the Graph Object with the associated ntx object, and just wraps it in pyvis
 def Vis(graph: Graph):
     if type(graph) != Graph:
@@ -670,7 +750,7 @@ def Vis(graph: Graph):
     ntx = Networkx(graph)
     pos = nx.kamada_kawai_layout(ntx, scale=1000)
 
-    nt = Network("557px", "1159px", select_menu=True)
+    nt = Network(f"{global_vars.height - 313}px", f"{global_vars.width - 419}", select_menu=True)
 
     for node_id in ntx.nodes():
         if isinstance(graph.nodes[node_id], AuthorNode):
@@ -680,7 +760,7 @@ def Vis(graph: Graph):
                 title=ntx.nodes[node_id]["title"],
                 x=pos[node_id][0],
                 y=pos[node_id][1],
-                physics=False,
+                physics=True,
                 font="55px arial black",
             )
         elif len(graph.nodes[node_id].directed) > 0:
@@ -690,7 +770,7 @@ def Vis(graph: Graph):
                 title=ntx.nodes[node_id]["title"],
                 x=pos[node_id][0],
                 y=pos[node_id][1],
-                physics=False,
+                physics=True,
                 font="55px arial red",
             )
         else:
@@ -700,7 +780,7 @@ def Vis(graph: Graph):
                 title=ntx.nodes[node_id]["title"],
                 x=pos[node_id][0],
                 y=pos[node_id][1],
-                physics=False,
+                physics=True,
                 font="55px arial blue",
             )
 
@@ -708,6 +788,15 @@ def Vis(graph: Graph):
         nt.add_edge(
             u, v, title=data["title"], color="rgb{}".format(data["color"]), width=3.6
         )
+
+    nt.barnes_hut(
+        gravity=-1500,
+        central_gravity=0,
+        spring_length=250,
+        spring_strength=0.001,
+        damping=0.09,
+        overlap=0.5,
+    )
 
     caller_frame = inspect.currentframe().f_back
     obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
@@ -808,7 +897,7 @@ def titelize_node(node) -> str:
         directed_title != "--DIRECTED RELATIONSHIPS--\n"
         and attribute_title != "--ATTRIBUTES--\n"
     ):
-        return directed_title + "\n\n" + attribute_title
+        return directed_title + "\n" + attribute_title
     elif directed_title != "--DIRECTED RELATIONSHIPS--\n":
         return directed_title
     else:
@@ -853,8 +942,8 @@ def titelize_edge(edge: Edge) -> str:
                 for paper in v:
                     attribute_title += paper.title + "\n"
 
-    if len(directed_title) != 0 and len(attribute_title) != 0:
-        return directed_title + "\n\n" + attribute_title
+    if len(directed_title) != 0 and attribute_title != "--SHARED ATTRIBUTES--\n":
+        return directed_title + "\n" + attribute_title
     elif len(directed_title) != 0:
         return directed_title
     else:
@@ -862,18 +951,19 @@ def titelize_edge(edge: Edge) -> str:
 
 
 def paper_string(papers) -> str:
-    title = "--PAPERS--\n"
+    title = "\n--PAPERS--\n"
 
     for paper in papers:
         title += paper.title + ": " + str(paper.year) + "\n"
 
-    return title
+    return title + "\n"
 
 
 def Save(graph: Graph):
     if type(graph) != Graph:
         raise ValueError("Parameter received is not a valid graph.")
     nodes = graph.get_nodes()
+    directed = graph.directed
     names = list()
     attributes = list()
     authors = list()
@@ -883,8 +973,9 @@ def Save(graph: Graph):
         if type(node) is AuthorNode:
             authors.append(node)
         else:
-            names.append(node.getName())
-            attributes.append(node.getAttributes())
+            if node.getAttributes() != {}:
+                names.append(node.getName().replace(",", "$comma$"))
+                attributes.append(node.getAttributes())
 
     # Formats non author data in the correct way
     data = dict()
@@ -903,21 +994,86 @@ def Save(graph: Graph):
                 keys_to_save.append(keyslist[y])
                 values_to_save.append(valuelist[y][z])
 
-        ks.append(",".join(keys_to_save))
-        vs.append(",".join(values_to_save))
+        ks.append(keys_to_save)
+        vs.append(values_to_save)
 
+    # Saves author nodes
     for x in authors:
         keys_to_save = list()
         values_to_save = list()
         keys_to_save.append("AUTHORID")
         values_to_save.append(x.authorId)
+        keys_to_save.append("AUTHORURL")
+        values_to_save.append(x.url)
+        keys_to_save.append("AUTHORALIASES")
+        if x.aliases == []:
+            values_to_save.append("None")
+        else:
+            values_to_save.append("/".join(x.aliases))
+
+        # Saves paper nodes
         for i in range(len(x.papers)):
             keys_to_save.append("PAPER")
-            values_to_save.append(x.papers[i].title)
+            paper_authors = "None"
+            paper_IDs = "None"
+
+            if x.papers[i].authors != []:
+                paperlist = x.papers[i].authors
+                cleansedlist = list()
+                for q in paperlist:
+                    cleansedlist.append(q[0])
+                paper_authors = "#".join(cleansedlist)
+
+            if x.papers[i].authorIds != []:
+                paper_IDs = "#".join(x.papers[i].authorIds)
+
+            paper_value = (
+                x.papers[i].title
+                + "/"
+                + str(x.papers[i].year)
+                + "/"
+                + paper_authors
+                + "/"
+                + paper_IDs
+            )
+            values_to_save.append(paper_value)
+
+        # Saves any non-author data in an author node
+        keyslist = list(x.getAttributes().keys())
+        valuelist = list(x.getAttributes().values())
+        for y in range(len(valuelist)):
+            for z in range(len(valuelist[y])):
+                if keyslist[y] != COAUTHOR:
+                    keys_to_save.append(keyslist[y])
+                    values_to_save.append(valuelist[y][z])
 
         names.append(x.getName())
-        ks.append(",".join(keys_to_save))
-        vs.append(",".join(values_to_save))
+        ks.append(keys_to_save)
+        vs.append(values_to_save)
+
+    # Saves all directed relationships
+    for node1, node2 in directed:
+        rel = directed[(node1, node2)]
+        names.append(node1.name)
+        keys_to_save = []
+        values_to_save = []
+        for rel1, rel2 in rel:
+            values_to_save.append(node2.name + "/" + rel1 + "/" + rel2)
+            keys_to_save.append(DIRECTED_CSV)
+
+        ks.append(keys_to_save)
+        vs.append(values_to_save)
+
+    # Cleanses strings such that commas dont break loading
+    for k in range(len(ks)):
+        for cell in range(len(ks[k])):
+            ks[k][cell] = ks[k][cell].replace(",", "$comma$")
+        ks[k] = ",".join(ks[k])
+
+    for v in range(len(vs)):
+        for cell in range(len(vs[v])):
+            vs[v][cell] = vs[v][cell].replace(",", "$comma$")
+        vs[v] = ",".join(vs[v])
 
     # Puts all data into a dictionary
     data["Person 1"] = names
@@ -929,5 +1085,8 @@ def Save(graph: Graph):
     df = dd.from_pandas(pandas_df, npartitions=1)
     caller_frame = inspect.currentframe().f_back
     obj_name = [var_name for var_name, var in caller_frame.f_locals.items() if var is graph][0]
+    filepath = f"{os.getcwd()}/csv_list/{global_vars.session_id}"
+    if not os.path.exists(filepath):
+        os.makedirs(filepath)
     print(f"{obj_name}.csv")
-    df.compute().to_csv(f"{os.getcwd()}/csv_list/{global_vars.session_id}/{obj_name}.csv", index=False)
+    df.compute().to_csv(f"{filepath}/{obj_name}.csv", index=False)

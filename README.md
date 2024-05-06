@@ -6,6 +6,43 @@ This guide will walk you through currently active functions to be used in our RE
 
 http://vegetable.cs.umd.edu:3000/
 
+## Setting Up Environment
+
+### Prerequisites
+npm, python3, and pip (or pip3) installed on your local machine.
+
+### Step 1
+Clone the repository to your local machine and open a terminal starting at the repository root (new_connections). From there, cd into nc-code-editor.
+```console
+$ cd nc-code-editor
+```
+Then run the frontend app:
+```console
+$ npm start
+```
+
+### Step 2
+Open another terminal starting at the repository root (new_connections) and cd into the pythonAPI directory.
+```console
+$ cd pythonAPI
+```
+Create a virtual environment:
+```console
+$ python3 -m venv venv
+```
+Activate the environment (note the period at the begining):
+```console
+$ . venv/bin/activate
+```
+You should notice a difference in your prompt. Then install required packages with pip (or pip3):
+```console
+$ pip install -r requirements.txt
+```
+Then run the backend app:
+```console
+$ python3 app.py
+```
+
 ## Functions
 
 1. MergeGraph:
@@ -35,54 +72,7 @@ http://vegetable.cs.umd.edu:3000/
 	    (i) Currently cannot handle Directed Relationships
 	    (ii) Currently does not have any Semantic Scholar implementation
 
-## Setting Up Environment
-
     Usage Prototype/Example:
-### Step 1
-Open a terminal starting at the repository root (new_connections), cd into nc-code-editor and run npm start
-
-### Step 2
-Open another terminal and change into the pythonAPI directory:
-```console
-$ cd pythonAPI
-```
-Create a virtual environment:
-```console
-$ python3 -m venv venv
-```
-Activate the environment (note the period at the begining):
-```console
-$ . venv/bin/activate
-```
-You should notice a difference in your prompt. Then install required packages with the python package installer:
-```console
-$ pip install -r requirements.txt
-```
-Then run the backend app:
-```console
-$ python3 app.py
-```
-
-### Step 3
-To ensure graphs can be rendered run the following:
-#### Windows
-```console
-$ (Get-Content \venv\lib\python3.12\site-packages\pyvis\network.py) -replace 'self\.write_html(name, open_browser=False,notebook=True)','self\.write_html(name, open_browser=False,notebook=False)' | Set-Content \venv\lib\python3.12\site-packages\pyvis\network.py
-```
-#### Linux
-```console
-$ sed -i 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebook=False)/g' /venv/lib/python3.12/site-packages/pyvis/network.py
-```
-#### MacOS
-```console
-$ sed -i '' 's/self\.write_html(name, open_browser=False,notebook=True)/self\.write_html(name, open_browser=False,notebook=False)/g' venv/lib/python3.12/site-packages/pyvis/network.py
-```
-
-### Step 4
-Then run the backend app:
-```console
-$ python3 app.py
-```
 
    ```
    graph = CreateGraph("data.csv")

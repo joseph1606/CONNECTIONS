@@ -18,17 +18,34 @@ const REPL = () => {
     const [tableData, setTableData] = useState([]);
     const [format, setFormat] = useState(0);
     const [outputhtml, setOutputhtml] = useState("<p>Your output will appear here</p>");
+    const [outputs, setOutputs] = useState({});
     const [files, setfiles] = useState({});
+    const [windowSize, setWindowSize] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight
+    });
     var filecollapsed = false;
     var fileinput = false;
 
 
     const viewFile = (file) => {
+        console.log(files)
         if (files[file['line']]) {
             setTableData([[], ...files[file['line']]['data']])
             setFormat(files[file['line']]['format'])
         }
         viewData()
+    }
+
+    const viewoldOutput = (name) => {
+        console.log(outputs[name['item']].content)
+        console.log(outputhtml == outputs[name['item']].content)
+        if (outputs[name['item']]) {
+            renderolddata(outputs[name['item']].content, '')
+        }
+
+        document.getElementById('outholder').scrollTop = '322';
+        document.getElementById('outholder').scrollLeft = '100';
     }
 
     const filecollapse = () => {
@@ -54,8 +71,8 @@ const REPL = () => {
     const editor = () => {
         document.getElementById('terminal-loader').style.visibility = 'visible';
         document.getElementById('terminal-loader').style.display = '';
-        document.getElementById('outputviewer').style.visibility = 'collpase';
-        document.getElementById('outputviewer').style.display = 'none';
+        document.getElementById('alloutput').style.visibility = 'collpase';
+        document.getElementById('alloutput').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'collpase';
         document.getElementById('dataviewer').style.display = 'none';
         document.getElementById('outputbtn').style.backgroundColor = '';
@@ -68,8 +85,8 @@ const REPL = () => {
     const viewData = () => {
         document.getElementById('terminal-loader').style.visibility = 'collpase';
         document.getElementById('terminal-loader').style.display = 'none';
-        document.getElementById('outputviewer').style.visibility = 'collpase';
-        document.getElementById('outputviewer').style.display = 'none';
+        document.getElementById('alloutput').style.visibility = 'collpase';
+        document.getElementById('alloutput').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'visible';
         document.getElementById('dataviewer').style.display = '';
         document.getElementById('outputbtn').style.backgroundColor = '';
@@ -84,8 +101,8 @@ const REPL = () => {
         document.getElementById('terminal-loader').style.display = 'none';
         document.getElementById('dataviewer').style.visibility = 'collpase';
         document.getElementById('dataviewer').style.display = 'none';
-        document.getElementById('outputviewer').style.visibility = 'visible';
-        document.getElementById('outputviewer').style.display = '';
+        document.getElementById('alloutput').style.visibility = 'visible';
+        document.getElementById('alloutput').style.display = '';
         document.getElementById('databtn').style.backgroundColor = '';
         document.getElementById('editorbtn').style.backgroundColor = '';
         document.getElementById('outputbtn').style.backgroundColor = 'darkgrey';
@@ -97,12 +114,45 @@ const REPL = () => {
     const read = (fileName) => {
         var fr = new FileReader();
         fr.onload = function () {
-            let lines = fr.result.split('\n')
-            lines.forEach(myFunction);
 
-            function myFunction(value, index, array) {
-                lines[index] = lines[index].split(',')
+            //Defaults to three comma format
+            let regex = /(\s*.+\s*,\s*.+\s*,(?:\s*.+\s*)\n*)/gm
+            let regex2 = /(\s*[^,]+\s*),(\s*[^,]+\s*),((?:\s*[^",\n]+\s*)|(?:"\s*.+\s*"))/gm
+
+            var newlineIndex = fr.result.indexOf('\n');
+
+            // If newline character exists
+            if (newlineIndex !== -1) {
+                // Extract the substring from the start of the string up to the newline character
+                var substring = fr.result.substring(0, newlineIndex);
+
+                // Count the number of commas in the substring
+                var commaCount = substring.split(',').length;
+
+                if (commaCount == 4) {
+                    regex = /(\s*.+\s*,\s*.+\s*,(?:\s*.+\s*),(?:\s*.+\s*)\n*)/gm
+                    regex2 = /(\s*[^,]+\s*),(\s*[^,]+\s*),((?:\s*[^",]+\s*)|(?:"\s*.+\s*")),((?:\s*[^",\n]+\s*)|(?:"\s*.+\s*"))/gm
+                }
             }
+            let lines = []
+
+            let matches;
+
+            while ((matches = regex.exec(fr.result)) !== null) {
+                lines.push(matches[1]);
+            }
+
+
+            lines.forEach(myFunction)
+            function myFunction(value, index, array) {
+                regex2.lastIndex = 0
+                let groups = regex2.exec(lines[index])
+                lines[index] = groups.slice(1).filter(function (element) {
+                    return element !== undefined;
+                })
+                console.log(lines[index])
+            }
+
             // console.log(lines)
             if (lines[0].length == 3) {
                 const table = []
@@ -134,15 +184,11 @@ const REPL = () => {
                 setTableData([[], ...table])
                 setFormat(1)
             } else {
-                //               document.getElementById('format').textContent = 'Incorrect Format';
-                console.log(lines[0])
-                console.log(lines[0].length)
                 setTableData([[], []])
                 setFormat(0)
             }
         }
         fr.readAsText(document.getElementById('csvreader').files[0]);
-
         document.getElementById('dataviewer').style.border = '1px solid black';
     }
 
@@ -162,6 +208,18 @@ const REPL = () => {
                 console.error('Error initiating session:', error);
             });
     }, []); // Only run once on component mount
+
+    // adds eventListener for resizing
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        };
+
+        window.addEventListener('resize', handleResize);
+    }, []);
 
     /**/
 
@@ -200,7 +258,37 @@ const REPL = () => {
         const htmlContent = `
         <!DOCTYPE html>
         ${htmlData}`;
+        setOutputhtml(htmlContent);
+        setOutputs({ ...outputs, [('Output ' + (Object.keys(outputs).length + 1).toString() + ': "' + graphName + '"')]: { content: htmlContent } });
+        document.getElementById('outholder').scrollTop = '322';
+        document.getElementById('outholder').scrollLeft = '100';
 
+    };
+
+    const renderolddata = async (htmlData, graphName) => {
+        // adds a title of the graph name on the window
+
+        const i = htmlData.indexOf("<head>");
+        htmlData = htmlData.slice(0, i + 6) + `\n\t\t<title>Graph ${graphName}</title>` + htmlData.slice(i + 6);
+
+        // Fetch script content using Axios
+        const utilsScript = await axios.get('http://127.0.0.1:5000/scripts/bindings/utils.js');
+        const tomSelectCSS = await axios.get('http://127.0.0.1:5000/scripts/tom-select/tom-select.css');
+        const tomSelectScript = `<script 
+                                    src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/js/tom-select.complete.min.js" 
+                                    integrity="sha512-/ThRxlSqzRzFRVNByE+IzvT7iZTAtrAr5Xkk9As+xsDRYvsnPBQbYjG5z4vaJFNaWjBEnSRxICQw5t/mUmJ6Kw==" 
+                                    crossorigin="anonymous" 
+                                    referrerpolicy="no-referrer"></script>`;
+
+        htmlData = htmlData.replace('<script src="lib/bindings/utils.js"></script>', `<script>${utilsScript.data}</script>`);
+        htmlData = htmlData.replace('<link href="lib/tom-select/tom-select.css" rel="stylesheet">', `<style>${tomSelectCSS.data}</style>`);
+        htmlData = htmlData.replace('<script src="lib/tom-select/tom-select.complete.min.js"></script>', `${tomSelectScript}`);
+
+        viewOutput();
+
+        const htmlContent = `
+        <!DOCTYPE html>
+        ${htmlData}`;
         setOutputhtml(htmlContent);
         document.getElementById('outholder').scrollTop = '322';
         document.getElementById('outholder').scrollLeft = '100';
@@ -334,7 +422,7 @@ const REPL = () => {
                 setSkipConditions([...skipConditions, input]);
                 setInFunc(0);
 
-                const payload = {};
+                const payload = { "height": windowSize.height, "width": windowSize.width };
                 // checks if previous code has generated an output and comments it out in the payload if so
                 if (skipConditions) {
                     const inputCopy = deepCopyStateArray(prevInputs);
@@ -447,7 +535,7 @@ const REPL = () => {
                 setSkipConditions([...skipConditions, input]);
                 setOutput([]);
             } else {
-                
+
                 // replaces weird curvy quotations with normal
                 let str = "";
                 if (/[“”]/.test(input)) {
@@ -459,9 +547,9 @@ const REPL = () => {
                 } else {
                     str = input;
                 }
-                
-                const payload = {};
-                
+
+                const payload = { "height": windowSize.height, "width": windowSize.width };
+
                 // checks if previous code has generated an output and comments it out in the payload if so
                 if (skipConditions) {
                     const inputCopy = deepCopyStateArray(prevInputs);
@@ -479,7 +567,7 @@ const REPL = () => {
                     payload['code'] = prevInputs.join('\n') + '\n' + str;
                 }
                 /* contacting API for code compilation */
-                console.log(payload);
+                //console.log(payload);
                 try {
                     const resp = await axios.post('http://127.0.0.1:5000/compile', payload);
                     const compiledError = resp.data.error;
@@ -586,9 +674,9 @@ const REPL = () => {
                     <div id='tabselect' style={{
                         marginLeft: '35px'
                     }}>
-                        <button id='editorbtn' onClick={editor} style={{ backgroundColor: 'darkgray', borderRadius: '5%' }}>Editor</button>
-                        <button id='databtn' onClick={viewData}>View File Data</button>
-                        <button id='outputbtn' onClick={viewOutput}>Output</button>
+                        <button id='editorbtn' onClick={editor} style={{ backgroundColor: 'darkgray', borderRadius: '5%', fontFamily: 'Poppins' }}>Editor</button>
+                        <button id='databtn' onClick={viewData} style={{ fontFamily: 'Poppins' }}>View File Data</button>
+                        <button id='outputbtn' onClick={viewOutput} style={{ fontFamily: 'Poppins' }} >Output</button>
                     </div>
                     <div id="terminal-loader">
                         <div className="terminal-header">
@@ -641,8 +729,8 @@ const REPL = () => {
                         </div>
                     </div>
                     <div>
-                        <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh' }}>
-                            <p id='blankinput' style={{ margin: 'auto', fontSize: '30px' }}>Files you input will appear here</p>
+                        <table id='dataviewer' style={{ width: '80%', textAlign: 'center', marginLeft: '10%', overflowY: 'scroll', marginTop: '1vh', maxHeight: '80vh', display: 'none', visibility: 'collapse' }}>
+                            <p id='blankinput' style={{ margin: 'auto', fontSize: '30px', fontFamily: 'Poppins' }}>Files you input will appear here</p>
                             <thead>
                                 {(() => {
                                     if (format == 1) {
@@ -693,16 +781,22 @@ const REPL = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden' }}>
-                        <iframe id='outputviewer' style={{ position: 'relative', width: '1164px', height: '646px', overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
-
-                        </iframe>
+                    <div id='alloutput' style={{ fontFamily: 'Poppins' }}>
+                        <div id='outputlist' style={{ marginTop: '5px', height: '65px', borderTop: '2px solid black', borderLeft: '2px solid black', borderRight: '2px solid black', width: '90%', paddingLeft: '5px' }}>
+                            <h2>View Outputs: </h2>
+                            {Object.keys(outputs).map((item, index) => (
+                                <button style={{ height: '25px', marginLeft: '5px' }} onClick={() => { viewoldOutput({ item }) }}>{item}</button>
+                            ))}</div>
+                        <div id='outholder' style={{ position: 'relative', width: '90%', height: '85%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
+                            <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
+                            </iframe>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div id='inputbox' style={{ width: '15vw', height: '92.5vh', padding: '10px' }}>
+            <div id='inputbox' style={{ width: '15vw', height: '92.5vh', padding: '10px', fontFamily: 'Poppins' }}>
                 <div id='filetogglebtn' onClick={filecollapse} style={{ position: 'absolute', zIndex: 2, marginLeft: '-18px', width: '20px', height: '50px', marginTop: '5vh', backgroundColor: 'white', border: '2px solid grey' }}>
-                    <p id='filetoggle' style={{ position: 'relative', margin: 'auto', height: '25px', marginTop: '12.5px', width: '50%', marginLeft: '5px' }}>&gt;</p>
+                    <p id='filetoggle' style={{ position: 'relative', margin: 'auto', height: '25px', marginTop: '11px', width: '50%', marginLeft: '5px', fontFamily: '' }}>&gt;</p>
                 </div>
                 <div id='fileinputbox' style={{ position: 'relative', width: '100%', zIndex: 2, height: '100%', padding: '10px', backgroundColor: 'white', borderRadius: '15px', padding: '5%', border: '2px solid grey' }}>
                     <h2>File Input:</h2>
@@ -711,7 +805,11 @@ const REPL = () => {
                     <br />
                     <h4>Files (click to view):</h4>
                     {uploadedFiles.map((line, index) => (
-                        <div id={index} key={index}><p className='file' onClick={() => viewFile({ line })}>{line}</p></div>
+                        <div id={index} key={index}><p className='file' onClick={() => {
+                            console.log('here')
+                            viewFile({ line })
+                        }
+                        }>{line}</p></div>
                     ))}
                 </div>
             </div>

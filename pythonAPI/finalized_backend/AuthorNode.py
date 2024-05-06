@@ -11,6 +11,13 @@ class AuthorNode(Node):
         self.url = url
         self.papers = papers if papers else []
 
+    def paper_list(node):
+        p = []
+        for paper in node.papers:
+            p.append(paper.title)
+
+        return sorted(p)
+
 
 class PaperNode:
     def __init__(self, title, year, authors=None, authorIds=None):

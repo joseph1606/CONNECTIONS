@@ -49,6 +49,8 @@ def compile_code():
     
     session_id = request.headers.get('session')
     global_vars.session_id = session_id
+    global_vars.height = request.json['height']
+    global_vars.width = request.json['width']
     start_time = time.time()
     try:
         # Execute code with custom function
