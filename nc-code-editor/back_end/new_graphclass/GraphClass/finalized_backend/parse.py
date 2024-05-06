@@ -161,7 +161,7 @@ def parseData(csv):
                     # Error if either side of the '/' is empty
                     if not rel[0] or not rel[1]:
                         raise ValueError(ERR_DIRECTED_FORMAT)
-                    value = (rel[0].lower(), rel[1].lower())
+                    value = (rel[0].title(), rel[1].title())
 
                     if key in pairing:
                         pairing[key].append(
@@ -182,7 +182,7 @@ def parseData(csv):
 
                     # returns {name2: [(mentor,mentee)]} such that name1 -> name2, mentor/mentee
                     value1 = rel[0].title()
-                    value2 = (rel[1].lower(), rel[2].lower())
+                    value2 = (rel[1].title(), rel[2].title())
 
                     if key in pairing:
                         if rel[0].title() in pairing[key]:
@@ -196,8 +196,8 @@ def parseData(csv):
 
             # Change all non author info to lower case
             else:
-                key = key.lower()
-                value = value.lower()
+                key = key.title()
+                value = value.title()
                 # Saves the key,value pair to the dictionary
                 if key in pairing:
                     pairing[key].append(
