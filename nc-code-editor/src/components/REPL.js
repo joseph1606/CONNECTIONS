@@ -53,6 +53,7 @@ const REPL = () => {
     const removeOutput = (name) => {
         if (currentoutput == name['item']) {
             setOutputhtml("<p>Your output will appear here</p>")
+            setcurrOutput('None')
         } /*else {
             console.log(currentoutput)
             console.log(name['item'])
@@ -804,19 +805,24 @@ const REPL = () => {
                         </table>
                     </div>
                     <div id='alloutput' style={{ fontFamily: 'Poppins' }}>
-                        <div id='outputlist' style={{ marginTop: '5px', height: '75px', borderTop: '2px solid black', borderLeft: '2px solid black', borderRight: '2px solid black', width: '90%', paddingLeft: '5px' }}>
-                            <h2>View Outputs: </h2>
-                            <div style={{ display: 'flex' }}>
-                                {Object.keys(outputs).map((item, index) => (
-                                    <div style={{ border: '2px solid black', width: 'fit-content', marginLeft: '5px', padding: '2px', borderRadius: '10%', backgroundColor: 'lightgray' }}>
-                                        <button style={{ height: '25px' }} onClick={() => { viewoldOutput({ item }) }}>{item}</button>
-                                        <button style={{ height: '25px', marginLeft: '2px', backgroundColor: 'red' }} onClick={() => { removeOutput({ item }) }}>X</button>
-                                    </div>
-
-                                ))}
+                        <div style={{ display: 'flex', marginTop: '5px' }}>
+                            <div style={{ height: '75px', width: '20%', textAlign: 'center', borderLeft: '2px solid black', borderTop: '2px solid black' }}>
+                                <h2>Current Output: </h2>
+                                <h5>{currentoutput}</h5>
+                            </div>
+                            <div id='outputlist' style={{ height: '75px', borderTop: '2px solid black', borderLeft: '2px solid black', borderRight: '2px solid black', width: '70%', paddingLeft: '5px' }}>
+                                <h2>View Outputs: </h2>
+                                <div style={{ display: 'flex' }}>
+                                    {Object.keys(outputs).map((item, index) => (
+                                        <div style={{ border: '2px solid black', width: 'fit-content', marginLeft: '5px', padding: '2px', borderRadius: '10%', backgroundColor: 'lightgray' }}>
+                                            <button style={{ height: '25px' }} onClick={() => { viewoldOutput({ item }) }}>{item}</button>
+                                            <button style={{ height: '25px', marginLeft: '2px', backgroundColor: 'red' }} onClick={() => { removeOutput({ item }) }}>X</button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                        <div id='outholder' style={{ position: 'relative', width: '90%', height: '85%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
+                        <div id='outholder' style={{ position: 'relative', width: '90%', height: '90%', overflow: 'hidden', overflowX: 'hidden', border: '2px solid black' }}>
                             <iframe id='outputviewer' style={{ position: 'relative', width: `${windowSize.width - 460}px`, height: `${windowSize.height - 220}px`, overflowX: 'hidden' }} srcDoc={outputhtml} title="my-iframe">
                             </iframe>
                         </div>
