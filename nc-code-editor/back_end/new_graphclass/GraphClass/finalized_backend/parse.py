@@ -194,7 +194,7 @@ def parseData(csv):
 
                 x = x + 1
 
-            # Change all non author info to lower case
+            # Change all non author info to .title case
             else:
                 key = key.title()
                 value = value.title()
