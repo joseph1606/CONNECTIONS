@@ -165,9 +165,9 @@ const nodecentralitydesc = [
 ]
 
 const savedatadesc = [
-  'SaveData',
-  '(nodes: List[Node], filePath: str) -> None',
-  "This function saves node and relationship data from a list of nodes to a CSV file. It takes two parameters: a list of nodes and a filePath (str) representing the path to save the CSV file."
+  'Save',
+  '(graph: Graph) -> None',
+  "This function saves node and relationship data from a graph to a CSV file. It takes one parameter: a graph object (Graph)."
 ]
 const creategraphdesc = [
   'CreateGraph',

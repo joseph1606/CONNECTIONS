@@ -1,4 +1,5 @@
 import requests
+import time
 from AuthorNode import AuthorNode, PaperNode
 
 """
@@ -31,7 +32,8 @@ def fetch_author(query):
         return data
 
     except requests.exceptions.RequestException as e:
-        raise ConnectionError(f"Error fetching data: SemanticScholarAPI could not be reached. Please try again shortly.")
+        time.sleep(5)
+        raise ConnectionError(f"HeyyyError fetching data: SemanticScholarAPI could not be reached. Please try again shortly.")
         # print(f"Error fetching data: {e}")
         # return None
 
@@ -148,14 +150,19 @@ def create_coauthor_nodes(author_node):
     coauthor_mapping = {author_node.authorId: author_node}
     # Iterate through each paper of the author
     for paper in author_node.papers:
-        r = requests.post(
-            "https://api.semanticscholar.org/graph/v1/author/batch",
-            params={"fields": "name,aliases,authorId,url"},
-            json={"ids": paper.authorIds},
-        )
-        coauthors_data = r.json()
-        if r.status_code != 200:
-            raise ConnectionError(f"Error fetching data: SemanticScholarAPI could not be reached. Please try again shortly.")
+        while True:
+            r = requests.post(
+                "https://api.semanticscholar.org/graph/v1/author/batch",
+                params={"fields": "name,aliases,authorId,url"},
+                json={"ids": paper.authorIds},
+            )
+            coauthors_data = r.json()
+            if r.status_code == 200:
+                break
+            elif r.status_code == 429:
+                time.sleep(30)
+            else:
+                raise ConnectionError(f"Error fetching data: SemanticScholarAPI could not be reached. Please try again shortly.")
         for coauthor_data in coauthors_data:
             coauthor_id = coauthor_data["authorId"]
             if coauthor_id != author_node.authorId:
