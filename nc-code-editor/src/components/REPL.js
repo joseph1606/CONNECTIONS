@@ -20,7 +20,7 @@ const REPL = () => {
     const [outputhtml, setOutputhtml] = useState("<p>Your output will appear here</p>");
     const [outputs, setOutputs] = useState({});
     const [outputcount, setOutputcount] = useState(1);
-    const [currentoutput, setcurrOutput] = useState('');
+    const [currentoutput, setcurrOutput] = useState('None');
     const [files, setfiles] = useState({});
     const [windowSize, setWindowSize] = useState({
         width: window.innerWidth,
