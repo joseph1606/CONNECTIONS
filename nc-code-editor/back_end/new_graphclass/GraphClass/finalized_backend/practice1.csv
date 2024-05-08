@@ -1,9 +1,0 @@
-Person1,Person2,Relationship,RelationshipValue
-Microsoft, M1, DIRECTED, Owner/Subsidiary
-Alphabet, Google, DIRECTED, Owner/Subsidiary
-Amazon, AWS, DIRECTED, Owner/Subsidiary
-Palantir, M1, DIRECTED, Owner/Subsidiary
-Google, AWS, "Shared Product", "Internet"
-Alphabet, Palantir, "Shared Product", "Internet"
-FBI, NSA, "Operation Area", "Online"
-Alphabet, DOJ, "Operation Area", "Online"
