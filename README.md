@@ -6,42 +6,6 @@ This guide will walk you through currently active functions to be used in our RE
 
 http://vegetable.cs.umd.edu:3000/
 
-## Setting Up Environment
-
-### Prerequisites
-npm, python3, and pip (or pip3) installed on your local machine.
-
-### Step 1
-Clone the repository to your local machine and open a terminal starting at the repository root (new_connections). From there, cd into nc-code-editor.
-```console
-$ cd nc-code-editor
-```
-Then run the frontend app:
-```console
-$ npm start
-```
-
-### Step 2
-Open another terminal starting at the repository root (new_connections) and cd into the pythonAPI directory.
-```console
-$ cd pythonAPI
-```
-Create a virtual environment:
-```console
-$ python3 -m venv venv
-```
-Activate the environment (note the period at the begining):
-```console
-$ . venv/bin/activate
-```
-You should notice a difference in your prompt. Then install required packages with pip (or pip3):
-```console
-$ pip install -r requirements.txt
-```
-Then run the backend app:
-```console
-$ python3 app.py
-```
 
 ## Functions
 ### AddNodes
@@ -107,6 +71,42 @@ This function updates the attributes of a node in a graph. It takes three parame
 ### Vis
 #### (graph: Graph) -> None:
 This function generates a visualization of a graph using the Pyvis library. It takes a graph object (Graph) as input.
+
+## Installing Product Locally
+### Prerequisites
+npm, python3, and pip (or pip3) installed on your local machine.
+
+### Step 1
+Clone the repository to your local machine and open a terminal starting at the repository root (new_connections). From there, cd into nc-code-editor.
+```console
+$ cd nc-code-editor
+```
+Then run the frontend app:
+```console
+$ npm start
+```
+
+### Step 2
+Open another terminal starting at the repository root (new_connections) and cd into the pythonAPI directory.
+```console
+$ cd pythonAPI
+```
+Create a virtual environment:
+```console
+$ python3 -m venv venv
+```
+Activate the environment (note the period at the begining):
+```console
+$ . venv/bin/activate
+```
+You should notice a difference in your prompt. Then install required packages with pip (or pip3):
+```console
+$ pip install -r requirements.txt
+```
+Then run the backend app:
+```console
+$ python3 app.py
+```
 
 All images are available under a creative commons license at the following sources:
 
