@@ -44,81 +44,67 @@ $ python3 app.py
 ```
 
 ## Functions
+### AddNodes
+#### (graph: Graph, nodes_list: List[Node]) -> Graph: 
+This function adds nodes to an existing graph object. It takes a graph object (Graph) representing the target graph and a list of nodes_list (list[Node]) representing the nodes to be added to the target graph.
 
-1. MergeGraph:
+### Collision
+#### (graph1: Graph, graph2: Graph, list_return: bool = False) -> Optional[List[List[Node]], Dict[str, List[Node]]]: 
+This function identifies nodes in two graphs that have the same name. It takes two graph objects (graph1 and graph2) and an optional list_return (boolean) parameter indicating whether to return a list of collisions or a dictionary of collisions.
 
-    MergeGraph(graph1: Graph, graph2: Graph, merge_list: list = None)
+### CollisionList
+#### (collisions: Dict[str, List[Node]]) -> Optional[List[Tuple[Node]]]: 
+This function returns a list of collision pairs identified by the Collision() function. It takes a dictionary of names paired with a list of nodes with that name.
 
-    Description: 
-    Merges two input graphs into a single graph. It allows merging specific nodes from each graph based on the provided merge_list. Merge_list is a list that contains tuples of nodes from the two graphs. Nodes in tuples are merged together in the new graph. Any node not in merge_list will not be merged with any other node. If no merge list is provided, it will not merge any nodes and all the nodes from both graphs will be added to the new graph.
+### CreateGraph
+#### (csv: str = None) -> Graph: 
+This function creates a new graph object, optionally populated with nodes and edges from a CSV file. It takes an optional parameter csv (string) representing the path to the CSV file containing node data. If no parameter was passed, an empty graph will be created.
 
-    Usage Prototype/Example:
+### FilterGraph
+#### (graph: Graph, attributes: Dict[str, List[str]] = None, lamb = None) -> Graph: 
+This function filters nodes based on attributes or custom logic. It takes a graph object (graph), an optional dictionary of attributes (attributes), and an optional function (lamb). If attributes are given, it returns a new graph with nodes matching those attributes. If the optional function is provided, it filters nodes based on custom logic. 
 
-   ```
-   merged_graph = MergeGraph(graph1, graph2, [(node1_graph1, node2_graph2), (node3_graph1, node4_graph2)])
-   ```
-   
-2. CreateGraph:
+### GetNodes
+#### (graph: Graph) -> List[Node]: 
+This function retrieves a list of nodes from a graph. It takes a graph object (Graph) as input.
 
-    CreateGraph(csv: str = None)
+### MergeGraph
+#### (graph1: Graph, graph2: Graph, merge_list: List[Tuple[Node, Node]]) -> Graph: 
+This function merges nodes from two graphs based on a specified merge list. It takes two graph objects (graph1 and graph2) and an optional merge_list (list) parameter specifying the nodes to be merged and returns the merged graph.
 
-    Description: 
-    Creates a new graph object, populated with nodes from the CSV file uploaded on the App.
-    The user is expected to upload a file (say with name "data.csv") and pass the name of the file as a string. (e.g. CreateGraph("data.csv")).
-    An error will be generated if no csv file was uploaded if a string was passed.
-    If no parameter is provided, an empty graph is generated. 
+### NamesInGraph
+#### (graph: Graph) -> List[str]: 
+This function returns a sorted list of unique node names present in a graph. It takes a graph object (Graph) as input.
 
-    Note:
-	    (i) Currently cannot handle Directed Relationships
-	    (ii) Currently does not have any Semantic Scholar implementation
+### NodeCentrality
+#### (graph: Graph, node: Node) -> float:
+This function calculates the centrality of a node in a graph. It takes two parameters: a graph object (Graph) and a node (Node) whose centrality is to be calculated.
 
-    Usage Prototype/Example:
+### NodeFromGraph
+#### (graph: Graph, name: str) -> Optional[Node, List[Node]]: 
+This function retrieves a node from a graph based on its name. It takes a graph object (Graph) and a name (str) representing the name of the node. If only one node in the graph has that name, it returns that node. Otherwise, it returns a list of nodes with that name.
 
-   ```
-   graph = CreateGraph("data.csv")
-   ```
-   
-3. FilterGraph:
+### SaveData
+#### (nodes: List[Node], filePath: str) -> None:
+This function saves node and relationship data from a list of nodes to a CSV file. It takes two parameters: a list of nodes and a filePath (str) representing the path to save the CSV file.
 
-    FilterGraph(graph: Graph, attributes: dict = None)
+### SemanticGraph
+#### (author_name: str, choice: int = 1, numpapers: int = 5) -> Graph: 
+This function generates a graph representing the collaboration network of an author based on Semantic Scholar data. It takes an author's name as a string (author_name), an optional integer choice that determines the particular author to select (default is 1), and an optional integer numpapers representing the number of papers to consider (default is 5).
 
-    Description: 
-    Filters the nodes of the input graph based on specified attributes dictionary.
-    Attributes should be a dictionary where the key is a string whose corresponding values is a list of strings. Returns a new graph object containing only the nodes that match the given attributes.
+### ShortestPath
+#### (source: Node, target: Node, graph: Graph) -> List[Node]:
+This function calculates the shortest path between two nodes in a graph. It takes three parameters: a source node (Node), a target node (Node), and a graph object (Graph) and returns a list of the path of the nodes.
 
-    Usage Prototype/Example:
+### SubGraph
+#### (graph: Graph, chosen_node: Node) -> Graph: 
+This function creates a subgraph from an existing graph centered around a chosen node. It takes a graph object (Graph) representing the original graph and a chosen_node (Node) representing the center node of the subgraph.
 
-   ```
-   filtered_graph = FilterGraph(filtered_graph, attributes={"attribute1": ["value1"], "attribute2": [“value2”,”value3”]})
-   ```
-   
-4. Networkx:
-    
-    Networkx(graph)
+### UpdateNodeAttributes
+#### (graph: Graph, node: Node, attributes: Dict[str, List[str]]) -> None: 
+This function updates the attributes of a node in a graph. It takes three parameters: a graph object (Graph), a node (Node) belonging to the passed graph object whose attributes are to be updated, and an attributes (dict) parameter representing the new attributes.
 
-    Description: 
-    Converts the input graph object into a NetworkX graph object.
-    Prepares the graph for further analysis and visualization using the NetworkX library.
-
-
-    Usage Prototype/Example:
-
-   ```
-   ntx_graph = Networkx(graph)
-   ```
-
-5. Vis:
-
-    Vis(ntx_graph)
-
-    Description: 
-    Visualizes the Networkx Object using the Pyvis library.
-    Generates an interactive HTML visualization of the graph.
-
-
-    Usage Prototype/Example:
-
-   ```
-   Vis(ntx_graph)
-   ```
+### Vis
+#### (graph: Graph) -> None:
+This function generates a visualization of a graph using the Pyvis library. It takes a graph object (Graph) as input.
 
