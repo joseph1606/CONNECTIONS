@@ -1,6 +1,7 @@
 import "./Header.css";
 import i from "./media/information-button.png"
 import logo from "./media/download.png"
+import house from "./media/house.png"
 
 function popup() {
   document.getElementById('functions').style.visibility = 'visible'
@@ -58,6 +59,7 @@ function Header() {
           </div>
         </div>
       </div>
+      <a href="http://vegetable.cs.umd.edu:3001/" style={{ position: 'absolute', right: '0', zIndex: 4 }} target="_blank" rel="noreferrer"><img src={house} style={{ height: '7vh', width: '7vh' }} alt="" /></a>
     </div>
 
   </div >
@@ -165,9 +167,9 @@ const nodecentralitydesc = [
 ]
 
 const savedatadesc = [
-  'SaveData',
-  '(nodes: List[Node], filePath: str) -> None',
-  "This function saves node and relationship data from a list of nodes to a CSV file. It takes two parameters: a list of nodes and a filePath (str) representing the path to save the CSV file."
+  'Save',
+  '(graph: Graph) -> None',
+  "This function saves node and relationship data from a graph to a CSV file. It takes one parameter: a graph object (Graph)."
 ]
 const creategraphdesc = [
   'CreateGraph',

@@ -237,6 +237,12 @@ def FilterGraph(graph: Graph, attributes: dict = None, lamb=None):
 
         # get all nodes with relationships and relationship values desired in attributes parameter
         for attr, attr_list in attributes.items():  # "age": "21"
+            if attr not in graph.relationships:
+                raise ValueError(
+                    'Desired attribute filter "'
+                    + str(attr)
+                    + "\" is not in graph's stored relationships."
+                )
 
             attr = attr.title()
 
@@ -728,16 +734,18 @@ def NamesInGraph(graph: Graph):
 
 def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
     # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
+    if source.id not in graph.nodes or target.id not in graph.nodes:
+        raise ValueError("Source node not in graph provided.")
+    elif target.id not in graph.nodes:
+        raise ValueError("Target node not in graph provided.")
+
     net = Networkx(graph)
     sp = nx.shortest_path(net, source=source.id, target=target.id)
 
     node_sp = []
 
     for id in sp:
-        if id in graph.nodes:
-            node_sp.append(graph.nodes[id])
-        else:
-            raise ValueError("Networkx object and Graph object are not equivalent")
+        node_sp.append(graph.nodes[id])
 
     return node_sp
 
