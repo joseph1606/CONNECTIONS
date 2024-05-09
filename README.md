@@ -108,3 +108,10 @@ This function updates the attributes of a node in a graph. It takes three parame
 #### (graph: Graph) -> None:
 This function generates a visualization of a graph using the Pyvis library. It takes a graph object (Graph) as input.
 
+All images are available under a creative commons license at the following sources:
+
+Business Meeting: https://flickr.com/photos/141761303@N08/36135529723/in/photolist-X4b33x-qsGqne-rchwpZ-rtCQZb-q6JFuM-rchus2-pPxjw8-qqqiVG-pa7V51-rrrJiU-pvX2zZ-qsDmZ5-rrrAq9-rtJgrF-rc9UHG-qb8EEN-6HKeuJ-8Qurba-5Lthrb-nDMfZU-5Y7sj5-5wtfYz-88a6Bn-FrHBB-88di9q-FrFyd-9R4AZU-5RenYz-FrFmL-FrHSp-FrHYT-FrFiS-XWW4p4-2ho1w26-2gjMdXx-2oAk4cM-fv2onq-p9ZLR-p9YRs-pa2pb-pa29F-p9ZnQ-p9YZ6-p9Zvf-C6xmd-p9ZXc-pa22p-p9Z8k-p9YJm-p9ZDD
+Logo: https://www.vecteezy.com/vector-art/12802533-global-connection-icon
+Students: https://www.pexels.com/photo/students-inside-a-classroom-in-the-university-8197545/
+House: https://publicdomainvectors.org/en/free-clipart/House-silhouette-image/56521.html
+
