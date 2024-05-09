@@ -1,2 +1,0 @@
-def parseData(csv):
-    pass
