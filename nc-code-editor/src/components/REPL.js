@@ -804,7 +804,7 @@ const REPL = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div id='alloutput' style={{ fontFamily: 'Poppins' }}>
+                    <div id='alloutput' style={{ fontFamily: 'Poppins', visibility: 'collapse', display: 'none' }}>
                         <div style={{ display: 'flex', marginTop: '5px' }}>
                             <div style={{ height: '75px', width: '20%', textAlign: 'center', borderLeft: '2px solid black', borderTop: '2px solid black' }}>
                                 <h2>Current Output: </h2>
