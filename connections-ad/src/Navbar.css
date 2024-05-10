@@ -1,0 +1,54 @@
+#bar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    background-color: rgb(95, 158, 160);
+    z-index: 100;
+}
+
+#logoside {
+    display: flex;
+    width: 50vw;
+    justify-content: center;
+    align-items: center;
+    font-size: 4vh;
+    font-family: 'Arvo', serif;
+    font-family: 'Play', sans-serif;
+    margin-bottom: 1vh;
+}
+
+#homelink {
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+    color: black;
+}
+
+#heading {
+    width: fit-content;
+}
+
+#logoside img {
+    height: 5vh;
+    margin-left: 1vw;
+}
+
+
+@media (max-width:800px) {
+    #logoside {
+        font-size: 2vh;
+        width: 60vw;
+    }
+
+    #logoside img {
+        margin-left: none;
+    }
+
+    #logoside h2 {
+        width: fit-content;
+        margin: auto;
+        text-align: center;
+    }
+
+
+}

@@ -1,0 +1,234 @@
+* {
+  margin: 0;
+  text-decoration: none;
+}
+
+#all {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  perspective: 10px;
+}
+
+
+.names {
+  width: 15vw;
+}
+
+#pg1 {
+  position: relative;
+  display: flex;
+  height: 100%;
+  transform-style: preserve-3d;
+  z-index: -1;
+}
+
+.title {
+  height: fit-content;
+  width: fit-content;
+  color: rgb(95, 158, 160);
+  font-size: 10vh;
+  text-shadow: -3px 2px 0 gainsboro;
+  font-family: 'Arvo', serif;
+}
+
+#hometitles {
+  position: absolute;
+  top: 5vh;
+  left: 75vw;
+  height: 70vh;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transform: translateZ(-5px)scale(1.5);
+}
+
+#bg {
+  height: 100%;
+  width: 100%;
+  background-image: url('./meeting.jpg');
+  background-position: center;
+  background-size: cover;
+  transform: translateZ(-10px)scale(2);
+}
+
+#arrow {
+  left: 60vw;
+  width: 7vw;
+  position: absolute;
+  bottom: 5vh;
+}
+
+#info {
+  position: absolute;
+  top: 100vh;
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+  color: black;
+  text-shadow: -1px 1px 0 black;
+  background-color: rgb(95, 158, 160);
+  margin-bottom: 3vh;
+}
+
+.row {
+  border-radius: 10%;
+  margin: auto;
+  margin-bottom: 5vh;
+  height: fit-content;
+  max-width: 95vw;
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  background-color: white;
+  border: 2px solid black;
+}
+
+.row img {
+  max-width: 40vw;
+  margin: 2vw 2vw;
+}
+
+.text {
+  display: flex;
+  height: fit-content;
+  flex-direction: column;
+  font-size: 4vh;
+  text-decoration: none;
+  justify-content: center;
+  align-items: center;
+  padding: 2vh;
+  background-color: gainsboro;
+  border-radius: 10%;
+  border: 2px solid black;
+  margin: 1.5vw 1vw;
+}
+
+h3 {
+  font-family: 'Arvo', serif;
+  color: rgb(95, 158, 160);
+}
+
+.text h3 {
+  color: black;
+  text-shadow: -1px 1px 0 black;
+}
+
+button {
+  border-radius: 20%;
+  margin-top: 2vh;
+  height: fit-content;
+  width: fit-content;
+  background-color: rgb(95, 158, 160);
+  font-family: 'Arvo', serif;
+  font-size: 5vh;
+  text-shadow: -2px 2px 0 darkgray;
+  cursor: pointer;
+  text-align: center;
+  color: black;
+}
+
+p {
+  /*margin-top: 2vh;*/
+  font-size: smaller;
+  text-shadow: none;
+}
+
+#first {
+  margin-top: 2vh;
+}
+
+@media (max-width:800px) {
+  #all {
+    height: 100vh;
+  }
+
+  .member {
+    width: 70vw;
+  }
+
+  .names {
+    width: 25vw;
+  }
+
+  #hometitles {
+    top: 0;
+    left: 5vw;
+    height: 50vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transform: translateZ(-5px)scale(1.5);
+  }
+
+  #arrow {
+    left: calc(calc(100vw - 20vh) / 2);
+    width: 20vh;
+    position: absolute;
+    bottom: 10vh;
+  }
+
+  .text {
+    width: 80vw;
+    margin: auto;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  h3,
+  p {
+    max-width: 80vw;
+    position: relative;
+    z-index: 2;
+  }
+
+  .row {
+    flex-wrap: wrap;
+    border: 2px solid grey;
+  }
+
+  button {
+    position: relative;
+    height: fit-content;
+    width: 80vw;
+    z-index: 2;
+    font-size: 3.5vh;
+  }
+
+  .row img {
+    margin-top: 4vh;
+    max-width: 90vw;
+    z-index: 1;
+  }
+
+  #sideways {
+    flex-direction: column-reverse;
+  }
+
+  #sideways .text {
+    flex-direction: column;
+  }
+
+  #bigger {
+    max-height: none;
+  }
+
+  .text h3 {
+    width: 100vw;
+  }
+
+  .title {
+    left: 3vw;
+    font-size: 15vw;
+    width: 100%;
+    text-align: center;
+  }
+}
