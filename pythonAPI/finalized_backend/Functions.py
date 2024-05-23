@@ -709,15 +709,15 @@ def NamesInGraph(graph: Graph):
 
 def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
     net = Networkx(graph)
-    sp = nx.shortest_path(net, source=source.id, target=target.id)
 
-    node_sp = []
-
-    for id in sp:
-        if id in graph.nodes:
+    try:
+        sp = nx.shortest_path(net, source=source.id, target=target.id)
+        node_sp = []
+        for id in sp:
             node_sp.append(graph.nodes[id])
-        else:
-            raise ValueError("Networkx object and Graph object are not equivalent")
+
+    except nx.NetworkXNoPath:
+        node_sp = [] 
 
     return node_sp
 
@@ -732,14 +732,32 @@ def MultiShortestPath(source_list, target_list, graph) -> dict:
             if target.id not in graph.nodes:
                 raise ValueError(target.name + " node not in graph.")
             
-            sp = nx.shortest_path(net, source=source.id, target=target.id)
-            sp_nodes = []
-            for id in sp:
-                sp_nodes.append(graph.nodes[id])
-            answers[(source.name, target.name)] = sp_nodes 
+            try: 
+                sp = nx.shortest_path(net, source=source.id, target=target.id)
+                sp_nodes = []
+                for id in sp:
+                    sp_nodes.append(graph.nodes[id])
+                answers[(source.name, target.name)] = sp_nodes 
+                
+            except nx.NetworkXNoPath:
+                answers[(source.name, target.name)] = None
 
     return answers 
 
+def NodeCrossover(center_graph, subset_graph):
+    center_names = NamesInGraph(center_graph)
+    subset_names = NamesInGraph(subset_graph)
+    answer = []
+
+    for sub in subset_names:
+        if sub in center_names:
+            curr = NodeFromGraph(center_graph, sub)
+            if isinstance(curr, list):
+                answer += curr 
+            else:
+                answer.append(curr)
+
+    return answer 
 
 def NamesInGraph(graph: Graph):
     name_set = set()
