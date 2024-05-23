@@ -708,7 +708,6 @@ def NamesInGraph(graph: Graph):
 
 
 def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
-    # if 'graph' is 'None', returns a list of node id's, otherwise returns a list of nodes
     net = Networkx(graph)
     sp = nx.shortest_path(net, source=source.id, target=target.id)
 
@@ -721,6 +720,25 @@ def ShortestPath(source: Node, target: Node, graph: Graph) -> list:
             raise ValueError("Networkx object and Graph object are not equivalent")
 
     return node_sp
+
+def MultiShortestPath(source_list, target_list, graph) -> dict:
+    net = Networkx(graph)
+    answers = {}
+
+    for source in source_list:
+        if source.id not in graph.nodes:
+            raise ValueError(source.name + " node not in graph.")
+        for target in target_list:
+            if target.id not in graph.nodes:
+                raise ValueError(target.name + " node not in graph.")
+            
+            sp = nx.shortest_path(net, source=source.id, target=target.id)
+            sp_nodes = []
+            for id in sp:
+                sp_nodes.append(graph.nodes[id])
+            answers[(source.name, target.name)] = sp_nodes 
+
+    return answers 
 
 
 def NamesInGraph(graph: Graph):
